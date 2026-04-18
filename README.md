@@ -1,4 +1,4 @@
-# YummyDish — Component 06 — Post-Order Feedback & Reporting / UI & UX
+# YummyDish — Component 01 — User & Authentication Management
 
 ## Project: SE1020 Object-Oriented Programming — Online Food Delivery System
 
@@ -6,40 +6,31 @@
 
 ---
 
-## Component 06: Post-Order Feedback & Reporting + UI/UX Design
+## Component 01: User & Authentication Management
 
 ### Files You Own
 | File | Purpose |
 |------|---------|
-| `Feedback.java` | Feedback model — Encapsulation of reviews, admin replies, ratings |
-| `FileStorageUtil.java` | Core file I/O utility — readAll, findById, update, appendLine, CRLF fix |
-| `admin/dashboard.jsp` | Admin Dashboard — Kanban board, live order management, user/food/driver CRUD |
-| `admin/login.jsp` | Admin Login Page |
-| `admin/report.jsp` | Printable Daily Sales Report |
-| `about/index.jsp` | About Us Page — hero, stats, values, Google Maps embed |
-| `contact/index.jsp` | Contact Page — contact cards, message form, FAQ accordion |
-| `yummydish.css` | Complete professional stylesheet — dark mode, animations, glassmorphism |
-| `app.js` | Core JS — Cart, Favs, Sound, Push Notifications, Pollers, Skeleton Loaders |
-| `data/feedback.txt` | Sample reviews/feedback data |
-
-### Backend Endpoints (in Controllers.java — explain these at viva)
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/admin/dashboard` | GET | All orders, users, foods, feedback, revenue stats |
-| `/admin/food/add` | POST | Add food item (Create) |
-| `/admin/food/update` | POST | Edit food item (Update) |
-| `/admin/food/delete` | POST | Remove food item (Delete) |
-| `/admin/feedback/reply` | POST | Admin replies to review (Update) |
-| `/admin/offer/add` | POST | Add promo code (Create) |
-| `/admin/report` | GET | Daily report with top items + payment breakdown |
-| `/api/feedback` | POST | Submit review (Create) |
-| `/api/food/{id}/reviews` | GET | Read reviews for food item |
+| `User.java` | User model — Encapsulation of user data (passwords, card info) with getters/setters. Inheritance base: Customer/Admin/Driver roles. |
+| `UserService.java` | CRUD: register (Create), findByEmail/findById (Read), update (Update), delete (Delete) |
+| `YummyDishApplication.java` | Spring Boot entry point, data file seeder |
+| `auth/login.jsp` | User Login Page with Google Sign-In |
+| `auth/signup.jsp` | User Registration Page |
+| `auth/forgot.jsp` | Forgot Password Page |
+| `account/profile.jsp` | User Profile — view/edit details, loyalty points, saved cards |
+| `layout/header.jsp` | Shared navigation (maintained by this member) |
+| `layout/footer.jsp` | Shared footer (maintained by this member) |
 
 ### OOP Concepts Demonstrated
-- **Encapsulation**: `Feedback` class — private `text`, `rating`, `adminReply` with getters/setters
-- **Inheritance**: `PublicReview` and `AdminReport` logically inherit from `Feedback` (common `text` and `createdAt` fields)
-- **Polymorphism**: `displayFormat()` differs for public reviews (star rating shown) vs admin reports (moderation actions shown)
-- **File Handling**: `FileStorageUtil` demonstrates full file I/O — `readAll()`, `findById()`, `update()`, `appendLine()`, `delete()`
+- **Encapsulation**: `User` class — private fields (`passwordHash`, `cardNumber`, `loyaltyPoints`) with public getters/setters only
+- **Inheritance**: `User` class is the base. Role field (`CUSTOMER`/`ADMIN`/`DRIVER`) enables polymorphic role behaviour. `getDashboardUrl()` demonstrates polymorphism.
+- **Polymorphism**: `socialLogin()` vs standard email/password authentication use different validation paths
+
+### CRUD Operations
+- **Create**: `POST /signup` → `UserService.register()` → writes to `users.txt`
+- **Read**: `POST /login` → `UserService.authenticate()` → reads `users.txt`
+- **Update**: `POST /account/update` → `UserService.update()` → updates `users.txt`
+- **Delete**: `POST /account/delete` → `UserService.delete()` → removes from `users.txt`
 
 
 ---
@@ -63,17 +54,15 @@ Open: http://localhost:8080
 ## My Primary Files (highlighted contribution)
 
 ```
-  src/main/java/com/yummydish/model/Feedback.java
-  src/main/java/com/yummydish/util/FileStorageUtil.java
-  src/main/java/com/yummydish/model/Offer.java
-  src/main/webapp/WEB-INF/views/admin/dashboard.jsp
-  src/main/webapp/WEB-INF/views/admin/login.jsp
-  src/main/webapp/WEB-INF/views/admin/report.jsp
-  src/main/webapp/WEB-INF/views/about/index.jsp
-  src/main/webapp/WEB-INF/views/contact/index.jsp
-  src/main/webapp/css/yummydish.css
-  src/main/webapp/js/app.js
-  data/feedback.txt
+  src/main/java/com/yummydish/model/User.java
+  src/main/java/com/yummydish/service/UserService.java
+  src/main/java/com/yummydish/YummyDishApplication.java
+  src/main/webapp/WEB-INF/views/auth/login.jsp
+  src/main/webapp/WEB-INF/views/auth/signup.jsp
+  src/main/webapp/WEB-INF/views/auth/forgot.jsp
+  src/main/webapp/WEB-INF/views/account/profile.jsp
+  src/main/webapp/WEB-INF/views/layout/header.jsp
+  src/main/webapp/WEB-INF/views/layout/footer.jsp
 ```
 
 ---
