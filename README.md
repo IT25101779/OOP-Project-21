@@ -1,4 +1,4 @@
-# YummyDish — Component 01 — User & Authentication Management
+# YummyDish — Component 05 — Delivery & Driver Tracking
 
 ## Project: SE1020 Object-Oriented Programming — Online Food Delivery System
 
@@ -6,31 +6,39 @@
 
 ---
 
-## Component 01: User & Authentication Management
+## Component 05: Delivery & Driver Tracking
 
 ### Files You Own
 | File | Purpose |
 |------|---------|
-| `User.java` | User model — Encapsulation of user data (passwords, card info) with getters/setters. Inheritance base: Customer/Admin/Driver roles. |
-| `UserService.java` | CRUD: register (Create), findByEmail/findById (Read), update (Update), delete (Delete) |
-| `YummyDishApplication.java` | Spring Boot entry point, data file seeder |
-| `auth/login.jsp` | User Login Page with Google Sign-In |
-| `auth/signup.jsp` | User Registration Page |
-| `auth/forgot.jsp` | Forgot Password Page |
-| `account/profile.jsp` | User Profile — view/edit details, loyalty points, saved cards |
-| `layout/header.jsp` | Shared navigation (maintained by this member) |
-| `layout/footer.jsp` | Shared footer (maintained by this member) |
+| `driver/dashboard.jsp` | Driver Dashboard — live GPS map, order queue (nearest-first), in-app navigation |
+| `driver/login.jsp` | Driver Login Page — separate from customer login |
+| `activity/index.jsp` | User Activity Page — live order tracking, ETA countdown, driver map |
+| `activity/order-detail.jsp` | Digital Receipt — order timeline, print, WhatsApp share |
+| `maps.js` | Google Maps integration — geocoding, routing, live marker animation |
+| `data/driver_locations.txt` | Driver GPS coordinates (updated in real time) |
+
+### Backend Endpoints (in Controllers.java — explain these at viva)
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/driver/dashboard` | GET | Shows READY + HANDOVER + ON_WAY orders |
+| `/driver/pickup/{id}` | POST | Updates order to HANDOVER status |
+| `/driver/delivering/{id}` | POST | Updates order to ON_WAY status |
+| `/driver/delivered/{id}` | POST | Updates order to DELIVERED status |
+| `/api/driver/location` | POST | Driver GPS posts location to driver_locations.txt |
+| `/api/order/{id}/driver-location` | GET | Customer reads driver's real GPS position |
+| `/api/weather` | GET | Real OpenWeatherMap API for weather surcharge |
 
 ### OOP Concepts Demonstrated
-- **Encapsulation**: `User` class — private fields (`passwordHash`, `cardNumber`, `loyaltyPoints`) with public getters/setters only
-- **Inheritance**: `User` class is the base. Role field (`CUSTOMER`/`ADMIN`/`DRIVER`) enables polymorphic role behaviour. `getDashboardUrl()` demonstrates polymorphism.
-- **Polymorphism**: `socialLogin()` vs standard email/password authentication use different validation paths
+- **Encapsulation**: Driver contact info and GPS coordinates stored securely
+- **Abstraction**: `haversine()` distance formula abstracts complex GPS maths into a simple `distanceKm(a, b)` call
+- **Polymorphism**: Order status progression (`READY→HANDOVER→ON_WAY→DELIVERED`) uses polymorphic `statusBadge` and `statusProgress` methods
 
 ### CRUD Operations
-- **Create**: `POST /signup` → `UserService.register()` → writes to `users.txt`
-- **Read**: `POST /login` → `UserService.authenticate()` → reads `users.txt`
-- **Update**: `POST /account/update` → `UserService.update()` → updates `users.txt`
-- **Delete**: `POST /account/delete` → `UserService.delete()` → removes from `users.txt`
+- **Create**: Assign driver to order — writes driver details to order record
+- **Read**: Driver reads READY orders; Customer reads real-time status every 6 seconds
+- **Update**: Driver updates order status through each stage; GPS coordinates updated every 10 seconds
+- **Delete**: Active delivery cleared from driver queue once DELIVERED
 
 
 ---
@@ -54,15 +62,12 @@ Open: http://localhost:8080
 ## My Primary Files (highlighted contribution)
 
 ```
-  src/main/java/com/yummydish/model/User.java
-  src/main/java/com/yummydish/service/UserService.java
-  src/main/java/com/yummydish/YummyDishApplication.java
-  src/main/webapp/WEB-INF/views/auth/login.jsp
-  src/main/webapp/WEB-INF/views/auth/signup.jsp
-  src/main/webapp/WEB-INF/views/auth/forgot.jsp
-  src/main/webapp/WEB-INF/views/account/profile.jsp
-  src/main/webapp/WEB-INF/views/layout/header.jsp
-  src/main/webapp/WEB-INF/views/layout/footer.jsp
+  src/main/webapp/WEB-INF/views/driver/dashboard.jsp
+  src/main/webapp/WEB-INF/views/driver/login.jsp
+  src/main/webapp/WEB-INF/views/activity/index.jsp
+  src/main/webapp/WEB-INF/views/activity/order-detail.jsp
+  src/main/webapp/js/maps.js
+  data/driver_locations.txt
 ```
 
 ---
