@@ -1,4 +1,4 @@
-# YummyDish — Component 01 — User & Authentication Management
+# YummyDish — Component 02 — Food Catalog & Menu Management
 
 ## Project: SE1020 Object-Oriented Programming — Online Food Delivery System
 
@@ -6,31 +6,28 @@
 
 ---
 
-## Component 01: User & Authentication Management
+## Component 02: Food Catalog & Menu Management
 
 ### Files You Own
 | File | Purpose |
 |------|---------|
-| `User.java` | User model — Encapsulation of user data (passwords, card info) with getters/setters. Inheritance base: Customer/Admin/Driver roles. |
-| `UserService.java` | CRUD: register (Create), findByEmail/findById (Read), update (Update), delete (Delete) |
-| `YummyDishApplication.java` | Spring Boot entry point, data file seeder |
-| `auth/login.jsp` | User Login Page with Google Sign-In |
-| `auth/signup.jsp` | User Registration Page |
-| `auth/forgot.jsp` | Forgot Password Page |
-| `account/profile.jsp` | User Profile — view/edit details, loyalty points, saved cards |
-| `layout/header.jsp` | Shared navigation (maintained by this member) |
-| `layout/footer.jsp` | Shared footer (maintained by this member) |
+| `FoodItem.java` | Abstract base class + MainCourse/Beverage/Dessert subclasses. Inheritance & Abstraction. |
+| `FoodItemService.java` | CRUD: add, getAll, search, update, toggleAvailability, delete |
+| `menu/index.jsp` | Main Menu Dashboard — category filter, live AJAX search, food grid |
+| `menu/food-detail.jsp` | Food Item Detail Page — nutrition, reviews, add to cart |
+| `reviews/index.jsp` | Public Reviews Page — rating bars, filter by stars |
+| `data/food_items.txt` | Sample data file for demonstration |
 
 ### OOP Concepts Demonstrated
-- **Encapsulation**: `User` class — private fields (`passwordHash`, `cardNumber`, `loyaltyPoints`) with public getters/setters only
-- **Inheritance**: `User` class is the base. Role field (`CUSTOMER`/`ADMIN`/`DRIVER`) enables polymorphic role behaviour. `getDashboardUrl()` demonstrates polymorphism.
-- **Polymorphism**: `socialLogin()` vs standard email/password authentication use different validation paths
+- **Encapsulation**: `FoodItem` stores `name`, `price`, `ingredients`, `nutritionalInfo` as private fields
+- **Inheritance**: `MainCourse extends FoodItem`, `Beverage extends FoodItem`, `Dessert extends FoodItem`
+- **Abstraction**: Abstract methods `getNutritionalInfo()` and `getFoodType()` — each subclass implements differently
 
 ### CRUD Operations
-- **Create**: `POST /signup` → `UserService.register()` → writes to `users.txt`
-- **Read**: `POST /login` → `UserService.authenticate()` → reads `users.txt`
-- **Update**: `POST /account/update` → `UserService.update()` → updates `users.txt`
-- **Delete**: `POST /account/delete` → `UserService.delete()` → removes from `users.txt`
+- **Create**: Admin adds food item via `POST /admin/food/add`
+- **Read**: `GET /menu` + `GET /api/foods?search=&category=` → `FoodItemService.search()`
+- **Update**: Admin edits via `POST /admin/food/update`, toggle availability `/admin/food/toggle`
+- **Delete**: `POST /admin/food/delete` → removes from `food_items.txt`
 
 
 ---
@@ -54,15 +51,12 @@ Open: http://localhost:8080
 ## My Primary Files (highlighted contribution)
 
 ```
-  src/main/java/com/yummydish/model/User.java
-  src/main/java/com/yummydish/service/UserService.java
-  src/main/java/com/yummydish/YummyDishApplication.java
-  src/main/webapp/WEB-INF/views/auth/login.jsp
-  src/main/webapp/WEB-INF/views/auth/signup.jsp
-  src/main/webapp/WEB-INF/views/auth/forgot.jsp
-  src/main/webapp/WEB-INF/views/account/profile.jsp
-  src/main/webapp/WEB-INF/views/layout/header.jsp
-  src/main/webapp/WEB-INF/views/layout/footer.jsp
+  src/main/java/com/yummydish/model/FoodItem.java
+  src/main/java/com/yummydish/service/FoodItemService.java
+  src/main/webapp/WEB-INF/views/menu/index.jsp
+  src/main/webapp/WEB-INF/views/menu/food-detail.jsp
+  src/main/webapp/WEB-INF/views/reviews/index.jsp
+  data/food_items.txt
 ```
 
 ---
