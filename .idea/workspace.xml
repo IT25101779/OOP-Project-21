@@ -10,7 +10,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="Chalani" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -21,10 +21,27 @@
     &quot;assignee&quot;: &quot;IT25101779&quot;
   }
 }</component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="main" />
+      </list>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/IT25101779/OOP-Project-21.git&quot;,
     &quot;accountId&quot;: &quot;87e0ee7a-0c68-4ed3-9e41-62c80afeb9c7&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;IT25101779&quot;,
+    &quot;repository&quot;: &quot;OOP-Project-21&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -41,18 +58,20 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Chalani&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#5 on Chalani&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Akila/Desktop/Pro others/Chalani&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RunManager">
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+    <configuration default="true" type="JetRunConfigurationType">
       <module name="Chalani" />
-      <option name="filePath" />
-      <method v="2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
   </component>
   <component name="SharedIndexes">
@@ -71,6 +90,7 @@
       <option name="presentableId" value="Default" />
       <updated>1776480834014</updated>
       <workItem from="1776480835234" duration="422000" />
+      <workItem from="1776483303266" duration="381000" />
     </task>
     <task id="LOCAL-00001" summary="Chalani - Advanced Ordering">
       <option name="closed" value="true" />
@@ -80,7 +100,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776480971558</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Chalani - Advanced Ordering">
+      <option name="closed" value="true" />
+      <created>1776483504379</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1776483504379</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
