@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -316,8 +316,13 @@
 </a>
 
 <script>
-// ── THE FIX: use data-* attributes — no quote escaping issues ─────
+// ── Add to cart — safe wrapper that works even before app.js defer loads ─
 function doAddToCart(btn) {
+  // Wait for Cart to be available (app.js loads with defer)
+  if (typeof Cart === 'undefined') {
+    setTimeout(function(){ doAddToCart(btn); }, 100);
+    return;
+  }
   var id    = btn.dataset.foodId;
   var name  = btn.dataset.foodName;
   var price = parseFloat(btn.dataset.foodPrice);
@@ -325,7 +330,6 @@ function doAddToCart(btn) {
   var qEl   = document.getElementById(btn.dataset.foodQty);
   var qty   = qEl ? (parseInt(qEl.textContent) || 1) : 1;
   Cart.add(id, name, price, qty, img);
-  // Visual feedback on button
   btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Added!';
   btn.style.background = 'linear-gradient(135deg,#22C55E,#16a34a)';
   setTimeout(function() {
@@ -398,16 +402,12 @@ function useGPS(){
   showToast('📍 Getting location...');
   if(!navigator.geolocation){showToast('Geolocation not supported');return;}
   navigator.geolocation.getCurrentPosition(function(pos){
-    var key=window.GOOGLE_MAPS_KEY||'';
-    if(!key){setLocation(pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5));return;}
-    fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&key='+key)
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var addr=(d.results&&d.results[0])?d.results[0].formatted_address:(pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5));
-        document.getElementById('locInput').value=addr;
-        setLocation(addr);
-        pinLatLng={lat:pos.coords.latitude,lng:pos.coords.longitude};
-      }).catch(function(){setLocation(pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5));});
+    var lat=pos.coords.latitude, lng=pos.coords.longitude;
+    YDMaps.reverseGeocode(lat,lng,function(addr){
+      document.getElementById('locInput').value=addr;
+      setLocation(addr);
+      pinLatLng={lat:lat,lng:lng};
+    });
   },function(e){showToast('⚠️ '+e.message);},{enableHighAccuracy:true,timeout:8000});
 }
 
@@ -419,12 +419,10 @@ function openPinDrop(){
       if(pinMap)return;
       var r=YDMaps.RESTAURANT;
       pinMap=YDMaps.initMap('pinMap',r.lat,r.lng,14);
-      var kb=new google.maps.LatLngBounds(new google.maps.LatLng(7.22,80.57),new google.maps.LatLng(7.35,80.72));
-      pinMap.setOptions({restriction:{latLngBounds:kb,strictBounds:false}});
-      YDMaps.addMarker(pinMap,r.lat,r.lng,'YummyDish Kitchen','<div style="padding:4px 8px;font-size:13px;">🍽️ Kitchen</div>');
-      pinMap.addListener('click',function(e){
-        var lat=e.latLng.lat(), lng=e.latLng.lng();
-        if(pinMarker)pinMarker.setMap(null);
+      YDMaps._kitchenMarker(pinMap);
+      pinMap.on('click',function(e){
+        var lat=e.latlng.lat, lng=e.latlng.lng;
+        if(pinMarker) pinMap.removeLayer(pinMarker);
         pinMarker=YDMaps.addMarker(pinMap,lat,lng,'Delivery Pin','<div style="padding:4px 8px;">📍 Delivery Here</div>');
         pinLatLng={lat:lat,lng:lng};
         document.getElementById('pinResult').style.display='flex';
