@@ -17,9 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// ═══════════════════════════════════════════════════════════════════
-// DRIVER AUTH — /driver/login (completely separate from customer)
-// ═══════════════════════════════════════════════════════════════════
+// ── Global model attributes injected into every JSP ──────────────
+@org.springframework.web.bind.annotation.ControllerAdvice
 @Controller
 @RequestMapping("/driver")
 class DriverController {
@@ -122,6 +121,9 @@ class DriverController {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// MENU
+// ═══════════════════════════════════════════════════════════════════
 @Controller @RequestMapping("/activity")
 class ActivityController {
     private final FileStorageUtil fsu;
@@ -158,9 +160,39 @@ class ActivityController {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// EXTRA PAGES — about, contact, reviews, group, schedule
+// ═══════════════════════════════════════════════════════════════════
 
+// REST API endpoints for Delivery & Driver Tracking
 @RestController @RequestMapping("/api")
 class ApiDriverController {
+    @PostMapping("/order/{id}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable String id,
+                                          @RequestParam String status,
+                                          HttpSession s) throws IOException {
+        // Allow driver or admin session
+        boolean allowed = s.getAttribute("driver") != null || s.getAttribute("admin") != null;
+        if (!allowed) return ResponseEntity.status(401).build();
+        String line = fsu.findById(fsu.getOrdersFile(), id);
+        if (line == null) return ResponseEntity.notFound().build();
+        Order o = Order.fromLine(line);
+        o.setStatus(status);
+        o.setUpdatedAt(LocalDateTime.now().format(DTF));
+        fsu.update(fsu.getOrdersFile(), id, o.toFileLine());
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @GetMapping("/orders/new-count")
+    public ResponseEntity<?> newOrdersCount(HttpSession s) {
+        if (s.getAttribute("admin") == null && s.getAttribute("driver") == null)
+            return ResponseEntity.status(401).build();
+        long count = fsu.readAll(fsu.getOrdersFile()).stream()
+            .map(Order::fromLine).filter(o -> o != null && Order.COOKING.equals(o.getStatus()))
+            .count();
+        return ResponseEntity.ok(Map.of("count", count));
+    }
+
     @PostMapping("/driver/location")
     public ResponseEntity<?> updateDriverLocation(@RequestBody Map<String, Object> body,
                                                   HttpSession s) throws IOException {
@@ -205,41 +237,6 @@ class ApiDriverController {
         return ResponseEntity.ok(Map.of("lat", baseLat, "lng", baseLng, "available", true));
     }
 
-    // ── My orders (for account page quick view) ───────────────────
-    @GetMapping("/my-orders")
-    public ResponseEntity<?> myOrders(@RequestParam(defaultValue = "5") int limit, HttpSession s) {
-        User u = (User) s.getAttribute("user");
-        if (u == null) return ResponseEntity.status(401).build();
-        List<Map<String, Object>> result = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(Objects::nonNull)
-            .filter(o -> u.getId().equals(o.getCustomerId()))
-            .sorted(Comparator.comparing(
-                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "",
-                Comparator.reverseOrder()))
-            .limit(limit)
-            .map(o -> {
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("orderId",     o.getOrderId());
-                m.put("status",      o.getStatus());
-                m.put("statusBadge", o.getStatusBadge());
-                m.put("totalAmount", o.getTotalAmount());
-                m.put("createdAt",   o.getCreatedAt());
-                m.put("items",       o.getItems().stream().map(i -> {
-                    Map<String,Object> im = new LinkedHashMap<>();
-                    im.put("foodId",   i.getFoodId());
-                    im.put("foodName", i.getFoodName());
-                    im.put("price",    i.getPrice());
-                    im.put("quantity", i.getQuantity());
-                    im.put("imageUrl", i.getImageUrl() != null ? i.getImageUrl() : "");
-                    return im;
-                }).collect(Collectors.toList()));
-                return m;
-            })
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(result);
-    }
-
-    // ── Poll for new orders (admin/driver use for auto-refresh) ─────
     @GetMapping("/orders/poll")
     public ResponseEntity<?> pollOrders(@RequestParam(defaultValue = "0") long since, HttpSession s) {
         boolean isAdmin  = s.getAttribute("admin")  instanceof User;
@@ -275,5 +272,35 @@ class ApiDriverController {
         return ResponseEntity.ok(Map.of("orders", orders, "timestamp", System.currentTimeMillis()));
     }
 
-    // ── Cancel order within 2 minutes of placing ────────────────
+    @GetMapping("/order/{id}/driver-location")
+    public ResponseEntity<?> orderDriverLocation(@PathVariable String id, HttpSession s) {
+        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
+        String line = fsu.findById(fsu.getOrdersFile(), id);
+        if (line == null) return ResponseEntity.notFound().build();
+        Order o = Order.fromLine(line);
+        String status = o.getStatus() != null ? o.getStatus() : "";
+        double lat = 7.2906, lng = 80.6337; // restaurant default
+        boolean realLocation = false;
+        // Read actual driver GPS location from file
+        if (o.getDriverId() != null && !o.getDriverId().isBlank()) {
+            String locLine = fsu.findById(fsu.getDriverLocationsFile(), o.getDriverId());
+            if (locLine != null) {
+                String[] p = locLine.split("\\|", -1);
+                if (p.length >= 3) {
+                    try { lat = Double.parseDouble(p[1]); lng = Double.parseDouble(p[2]); realLocation = true; }
+                    catch (Exception ignored) {}
+                }
+            }
+        }
+        // Check if driver is within 1km of delivery address (simplified: check status)
+        boolean nearby = Order.ONWAY.equals(status) && realLocation;
+        return ResponseEntity.ok(Map.of(
+            "lat", lat, "lng", lng,
+            "nearby", nearby,
+            "status", status,
+            "realLocation", realLocation
+        ));
+    }
+
+    // ── Admin stats snapshot ──────────────────────────────────────
 }

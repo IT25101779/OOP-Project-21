@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -278,64 +278,37 @@ function startEta(orderId, initialMins) {
   }, 1000);
 }
 
-// ── Live driver map (polls every 8s) ──────────────────────────────
-var trackMaps    = {};
-var driverMkrs   = {};
-var destMkrs     = {};
+// ── Live driver tracking map (Leaflet + OSM) ──────────────────────
+var trackMaps  = {};
+var driverMkrs = {};
+var destMkrs   = {};
 
 function initTrackMap(orderId, destAddress) {
   var el = document.getElementById('liveMap_' + orderId);
-  if (!el || !window.google) return;
+  if (!el) return;
 
-  var m = new google.maps.Map(el, {
-    center: { lat: 7.2937, lng: 80.6340 },
-    zoom: 13,
-    mapTypeControl: false, streetViewControl: false, fullscreenControl: false,
-    gestureHandling: 'cooperative',
-    styles: [
-      { featureType:'poi', stylers:[{visibility:'off'}] },
-      { featureType:'road', elementType:'geometry', stylers:[{color:'#f5f5f5'}] },
-      { featureType:'water', elementType:'geometry', stylers:[{color:'#c9e8f0'}] }
-    ]
-  });
+  var m = YDMaps.initMap('liveMap_' + orderId, 7.2937, 80.6340, 13);
   trackMaps[orderId] = m;
 
-  // Driver marker
-  driverMkrs[orderId] = new google.maps.Marker({
-    map: m,
-    position: { lat: 7.2937, lng: 80.6340 },
-    title: 'Driver',
-    icon: {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">'
-        +'<circle cx="22" cy="22" r="20" fill="#1565C0" stroke="white" stroke-width="3"/>'
-        +'<text x="22" y="30" text-anchor="middle" font-size="22">🛵</text></svg>'
-      ),
-      scaledSize: new google.maps.Size(44,44), anchor: new google.maps.Point(22,22)
-    }
-  });
+  // Kitchen / start marker
+  YDMaps._kitchenMarker(m);
 
-  // Destination from geocoding
-  new google.maps.Geocoder().geocode({ address: destAddress + ', Kandy, Sri Lanka' }, function(results, status) {
-    if (status==='OK' && results[0]) {
-      var loc = results[0].geometry.location;
-      destMkrs[orderId] = new google.maps.Marker({
-        map: m, position: loc, title: 'Your Location',
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">'
-            +'<path d="M18 0C8 0 0 8 0 18c0 12 18 28 18 28S36 30 36 18C36 8 28 0 18 0z" fill="#FF6B35"/>'
-            +'<circle cx="18" cy="18" r="9" fill="white"/></svg>'
-          ),
-          scaledSize: new google.maps.Size(36,46), anchor: new google.maps.Point(18,46)
-        }
-      });
-      // Fit bounds
-      var bounds = new google.maps.LatLngBounds();
-      bounds.extend({ lat: 7.2937, lng: 80.6340 });
-      bounds.extend(loc);
-      m.fitBounds(bounds, { padding: 40 });
-    }
+  // Driver marker
+  driverMkrs[orderId] = YDMaps.createDriverMarker(m, 7.2937, 80.6340);
+
+  // Geocode destination with Nominatim
+  YDMaps.geocode(destAddress, function(loc) {
+    var destIcon = L.divIcon({ className:'',
+      html:'<div style="width:36px;height:46px;">'
+          +'<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">'
+          +'<path d="M18 0C8 0 0 8 0 18c0 12 18 28 18 28S36 30 36 18C36 8 28 0 18 0z" fill="#FF6B35"/>'
+          +'<circle cx="18" cy="18" r="9" fill="white"/></svg></div>',
+      iconSize:[36,46], iconAnchor:[18,46] });
+    destMkrs[orderId] = L.marker([loc.lat, loc.lng], { icon: destIcon })
+      .addTo(m)
+      .bindPopup('<div style="padding:8px 12px;font-family:Inter,sans-serif;">📍 <strong>Delivery Address</strong></div>');
+    // Fit both markers
+    m.fitBounds([[7.2937,80.6340],[loc.lat,loc.lng]], { padding:[40,40] });
   });
 
   // Start polling
@@ -350,27 +323,15 @@ function pollDriverLocation(orderId) {
       var newLat = parseFloat(d.lat), newLng = parseFloat(d.lng);
       var mkr = driverMkrs[orderId];
       if (mkr) {
-        // Smooth animation
-        var from = mkr.getPosition();
-        var steps = 20; var i = 0;
-        var dLat = (newLat - from.lat()) / steps;
-        var dLng = (newLng - from.lng()) / steps;
-        var iv = setInterval(function() {
-          i++;
-          mkr.setPosition({ lat: from.lat()+dLat*i, lng: from.lng()+dLng*i });
-          if (i >= steps) clearInterval(iv);
-        }, 40);
-        // Pan map
-        if (trackMaps[orderId]) {
-          var bounds = new google.maps.LatLngBounds();
-          bounds.extend({ lat: newLat, lng: newLng });
-          if (destMkrs[orderId]) bounds.extend(destMkrs[orderId].getPosition());
-          trackMaps[orderId].fitBounds(bounds, { padding: 40 });
+        YDMaps.animateMarkerTo(mkr, newLat, newLng, 20);
+        // Fit driver + destination
+        var m = trackMaps[orderId];
+        if (m && destMkrs[orderId]) {
+          var dest = destMkrs[orderId].getLatLng();
+          m.fitBounds([[newLat,newLng],[dest.lat,dest.lng]], { padding:[40,40] });
         }
-        // Nearby notification
         if (d.nearby) {
           showNotif('🛵','Driver Nearby!','Your order is less than 1 km away!','rgba(21,101,192,.1)');
-          YDSound && YDSound.driverNearby && YDSound.driverNearby();
         }
       }
       if (d.status !== 'DELIVERED' && d.status !== 'CANCELLED') {
