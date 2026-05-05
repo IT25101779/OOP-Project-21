@@ -10,7 +10,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="/css/yummydish.css" rel="stylesheet">
 <script>(function(){var t=localStorage.getItem('ydTheme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
-<script src="/js/app.js"></script>
+<script src="/js/app.js" defer></script>
 </head>
 <body>
 <div id="yd-cursor"></div><div id="yd-cursor-ring"></div><div id="yd-toast"></div>
