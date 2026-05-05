@@ -1,4 +1,1 @@
-ADMIN001|Admin User|admin@yummydish.com|$2a$10$pPgrLtPaPwuV3Urkp/G.guAxzXYdBdTLSOl7gi8H/qjmOm7R7mp2u|0771234567|Colombo 03|ADMIN|2024-01-01||||
-DRIVER001|Kasun Perera|driver@yummydish.com|$2a$10$hMBvbZGxV9yPVc6wdNSOheyCCvuIrd8yM8LIUlgfl3xG1rAr6.Zlu|0714567890|Colombo 05|DRIVER|2024-01-01||||
-USR8334EE63|Akila Weerasekara|akilaweerasekara89@gmail.com|$2a$10$8UMSZ7r4zm7zX9OcWTWpUOzyjT29SqW8Mrmqbe.PVxrtN.2uhLrzi|0778809325|6.93180,79.88630|CUSTOMER|2026-04-17 17:34|4512 5456 1325 4132|vgabsjda|12/27||98
-USR7DE3641F|Saman Weerasekara|akilaweerasekara8@gmail.com|$2a$10$.3X.lakLXk7viiwTEx25tu35zYHraPBTlsL5uwkDF1NCyY6RVAkru|0778809325|NO. 174/4, Deegala. Rathukohodeegala.|CUSTOMER|2026-04-17 18:34|5353 4545 5555 5275|ufuuuu t|12/28||0
+ADMIN001|Admin User|admin@yummydish.lk|$2a$10$/Dcrj9h4vfNnAOZwsn7KL.hWB2GA9Wpa9Zj1QKLxr3k3bNADFrJI.|+94812345678|YummyDish HQ Kandy|ADMIN|2026-05-04 08:55:14||||.|0

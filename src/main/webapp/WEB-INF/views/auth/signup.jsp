@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Create Account"/>
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
@@ -113,31 +113,42 @@ var GOOGLE_CLIENT_ID = '${googleOAuthClientId}';
 function handleGoogleSignIn(response) {
   if (!response || !response.credential) return;
   try {
-    var payload = JSON.parse(atob(response.credential.split('.')[1]));
+    var parts = response.credential.split('.');
+    var payload = JSON.parse(atob(parts[1] + '=='.slice((parts[1].length * 3) & 3)));
     document.getElementById('sl_name').value  = payload.name    || '';
     document.getElementById('sl_email').value = payload.email   || '';
     document.getElementById('sl_pic').value   = payload.picture || '';
     document.getElementById('socialForm').submit();
-  } catch(e) { showToast('Google error. Use email signup.'); }
+  } catch(e) { showToast('Google error. Please use email signup.'); }
 }
 
 function startGoogleSignUp() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === '') {
-    showToast('Google sign-in not configured. Please use email signup.');
+  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
+  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) {
+    // Demo mode - simulate Google signup
+    var email = prompt('Demo Mode: Enter your email to simulate Google Sign-Up');
+    if (!email || email.indexOf('@') < 0) return;
+    var name = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+    document.getElementById('sl_name').value  = name;
+    document.getElementById('sl_email').value = email;
+    document.getElementById('sl_pic').value   = '';
+    document.getElementById('socialForm').submit();
     return;
   }
   if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
     google.accounts.id.prompt();
   } else {
-    showToast('Loading Google Sign-In...'); setTimeout(startGoogleSignUp, 1000);
+    showToast('Loading Google Sign-In...');
+    setTimeout(startGoogleSignUp, 1000);
   }
 }
 
 function initGoogleSignIn() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === '') return;
+  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
+  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) return;
   if (typeof google === 'undefined' || !google.accounts) return;
   google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID, callback: handleGoogleSignIn,
+    client_id: clientId, callback: handleGoogleSignIn,
     auto_select: false, ux_mode: 'popup'
   });
 }
