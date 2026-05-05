@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="pageTitle" value="Cart"/>
@@ -105,11 +105,20 @@
             <h5 class="fw-bold mb-4">Order Summary</h5>
             <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Subtotal</span><span id="sumSub">LKR 0</span></div>
             <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Delivery Fee</span><span id="sumDelivery">LKR 250</span></div>
-            <div id="weatherFeeRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:#E65100;"><span>Weather Surcharge</span><span id="sumWeatherFee">LKR 0</span></div>
+            <div id="weatherFeeRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:#E65100;"><span>&#x1F327;&#xFE0F; Weather Surcharge</span><span id="sumWeatherFee">LKR 0</span></div>
             <div id="tipRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Driver Tip</span><span id="sumTip">LKR 0</span></div>
             <div id="discRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-success);"><span>Offer (<span id="offerLbl"></span>)</span><span id="sumDisc">- LKR 0</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;border-top:1px solid var(--c-border);margin-top:8px;padding-top:12px;">
               <span>Total</span><span style="color:var(--c-orange);" id="sumTotal">LKR 0</span>
+            </div>
+            <!-- ETA row -->
+            <div id="etaRow" style="margin-top:10px;padding:10px 14px;background:#E3F2FD;border-radius:10px;border:1px solid #BBDEFB;font-size:.82rem;display:none;">
+              <div style="font-weight:700;color:#1565C0;margin-bottom:2px;">&#x23F1;&#xFE0F; Estimated Delivery</div>
+              <div id="etaText" style="color:#1565C0;"></div>
+            </div>
+            <!-- Delivery zone warning -->
+            <div id="zoneWarn" style="display:none;margin-top:10px;padding:10px 14px;background:#FFF3E0;border-radius:10px;border:1px solid #FFE082;font-size:.82rem;color:#E65100;">
+              &#x26A0;&#xFE0F; We currently deliver within <strong>Kandy District</strong> only. Please check your address.
             </div>
 
             <!-- Promo -->
@@ -222,13 +231,13 @@ function updSum() {
   var sub   = Cart.total();
   var disc  = offer ? Math.round(sub * offer.discount) : 0;
   var total = sub + 250 + weatherExtraFee + tipAmount - disc;
-  document.getElementById('sumSub').textContent = 'LKR ' + Math.round(sub).toLocaleString();
+  document.getElementById('sumSub').textContent      = 'LKR ' + Math.round(sub).toLocaleString();
   document.getElementById('sumDelivery').textContent = 'LKR 250';
-  document.getElementById('sumTotal').textContent = 'LKR ' + Math.round(total).toLocaleString();
+  document.getElementById('sumTotal').textContent    = 'LKR ' + Math.round(total).toLocaleString();
   if (disc > 0) {
-    document.getElementById('discRow').style.display = 'flex';
-    document.getElementById('offerLbl').textContent  = offer.code;
-    document.getElementById('sumDisc').textContent   = '- LKR ' + disc.toLocaleString();
+    document.getElementById('discRow').style.display  = 'flex';
+    document.getElementById('offerLbl').textContent   = offer.code;
+    document.getElementById('sumDisc').textContent    = '- LKR ' + disc.toLocaleString();
   } else document.getElementById('discRow').style.display = 'none';
   if (weatherExtraFee > 0) {
     document.getElementById('weatherFeeRow').style.display = 'flex';
@@ -238,6 +247,10 @@ function updSum() {
     document.getElementById('tipRow').style.display = 'flex';
     document.getElementById('sumTip').textContent   = 'LKR ' + tipAmount;
   } else document.getElementById('tipRow').style.display = 'none';
+  // Smart ETA
+  calcETA();
+  // Delivery zone check
+  checkDeliveryZone();
 }
 
 function selPay(m) {
@@ -272,8 +285,11 @@ function initDeliveryMap() {
     YDMaps.RESTAURANT.lat, YDMaps.RESTAURANT.lng, 14,
     function(addr, lat, lng) {
       currentCenter = { lat: lat, lng: lng };
+      _deliveryLat = lat; _deliveryLng = lng;
       document.getElementById('mapAddrText').textContent = addr;
       document.getElementById('mapAddressResult').style.display = 'block';
+      checkDeliveryZone();
+      calcETA();
     }
   );
 
@@ -304,21 +320,15 @@ function useGPSCart() {
   showToast('📍 Getting your location...');
   navigator.geolocation.getCurrentPosition(function(pos) {
     var lat = pos.coords.latitude, lng = pos.coords.longitude;
-    if (deliveryMap) {
-      deliveryMap.setCenter({ lat: lat, lng: lng });
-      deliveryMap.setZoom(16);
-    }
-    var key = window.GOOGLE_MAPS_KEY || '';
-    if (key) {
-      fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng + '&key=' + key)
-        .then(function(r){ return r.json(); })
-        .then(function(d) {
-          var addr = (d.results && d.results[0]) ? d.results[0].formatted_address : lat.toFixed(5)+', '+lng.toFixed(5);
-          document.getElementById('deliveryAddress').value = addr;
-          localStorage.setItem('ydLocation', addr);
-          showToast('📍 Location set!');
-        }).catch(function(){});
-    }
+    _deliveryLat = lat; _deliveryLng = lng;
+    if (deliveryMap) deliveryMap.setView([lat, lng], 16);
+    YDMaps.reverseGeocode(lat, lng, function(addr) {
+      document.getElementById('deliveryAddress').value = addr;
+      localStorage.setItem('ydLocation', addr);
+      showToast('📍 Location set!');
+      checkDeliveryZone();
+      calcETA();
+    });
   }, function(e){ showToast('⚠️ ' + e.message); }, { enableHighAccuracy: true, timeout: 8000 });
 }
 
@@ -343,11 +353,10 @@ function useSavedChip(i) {
   if (!loc) return;
   document.getElementById('deliveryAddress').value = loc.address;
   if (deliveryMap && loc.lat && loc.lng) {
-    deliveryMap.setCenter({ lat: loc.lat, lng: loc.lng });
-    deliveryMap.setZoom(16);
+    deliveryMap.setView([loc.lat, loc.lng], 16);
   } else if (deliveryMap) {
     YDMaps.geocode(loc.address + ', Kandy, Sri Lanka', function(pos) {
-      if (pos) deliveryMap.setCenter(pos);
+      if (pos) deliveryMap.setView([pos.lat, pos.lng], 16);
     });
   }
   document.querySelectorAll('.saved-loc-chip').forEach(function(b){ b.classList.remove('sel'); });
@@ -356,17 +365,100 @@ function useSavedChip(i) {
 }
 
 // ── Weather ───────────────────────────────────────────────────────
+// ── Smart ETA ─────────────────────────────────────────────────────
+// Factors: prep time (item count), traffic (hour), weather, shop busy hours
+function calcETA() {
+  var etaRow  = document.getElementById('etaRow');
+  var etaText = document.getElementById('etaText');
+  if (!etaRow || !etaText) return;
+  if (!Cart.count()) { etaRow.style.display = 'none'; return; }
+
+  var itemCount  = Cart.count();
+  var now        = new Date();
+  var hour       = now.getHours();
+  var mins       = now.getMinutes();
+
+  // Base prep time by number of items (kitchen gets slower with more items)
+  var prepMins = 10 + Math.min(itemCount * 3, 25);
+
+  // Peak hours: lunch 12-14, dinner 18-21 — add traffic + kitchen load
+  var peakDelay = 0;
+  if ((hour >= 12 && hour < 14) || (hour >= 18 && hour < 21)) peakDelay = 10;
+  else if (hour >= 11 && hour < 15) peakDelay = 5;
+
+  // Weather delay
+  var weatherDelay = 0;
+  if (weatherExtraFee >= 100) weatherDelay = 15;  // heavy rain
+  else if (weatherExtraFee >= 50) weatherDelay = 7; // light rain
+
+  // Base delivery ride — ~15 min for Kandy District
+  var rideMins = 15;
+  if (weatherExtraFee >= 50) rideMins += weatherDelay; // rain slows rider
+
+  var totalMins = prepMins + peakDelay + rideMins;
+  var earliest  = totalMins - 5;
+  var latest    = totalMins + 10;
+
+  // Arrival time window
+  var arriveEarly = new Date(now.getTime() + earliest * 60000);
+  var arriveLate  = new Date(now.getTime() + latest   * 60000);
+  function fmt(d) {
+    return d.toLocaleTimeString('en-LK', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  var breakdown = earliest + '–' + latest + ' min';
+  var notes = [];
+  if (peakDelay > 0)    notes.push('peak hour +' + peakDelay + 'min');
+  if (weatherDelay > 0) notes.push('rain delay +' + weatherDelay + 'min');
+  if (itemCount > 3)    notes.push('larger order +prep time');
+
+  etaRow.style.display = 'block';
+  etaText.innerHTML = '<strong>' + breakdown + '</strong>'
+    + ' · Arrive ' + fmt(arriveEarly) + '–' + fmt(arriveLate)
+    + (notes.length ? '<br><span style="font-size:.75rem;opacity:.75;">' + notes.join(', ') + '</span>' : '');
+}
+
+// ── Delivery zone check (Kandy District bounds) ───────────────────
+// Kandy District rough bounding box
+var KANDY_BOUNDS = { swLat:7.050, swLng:80.350, neLat:7.500, neLng:81.000 };
+var _deliveryLat = null, _deliveryLng = null;
+
+function checkDeliveryZone() {
+  var warn = document.getElementById('zoneWarn');
+  if (!warn) return;
+  if (_deliveryLat === null) { warn.style.display = 'none'; return; }
+  var inZone = (_deliveryLat >= KANDY_BOUNDS.swLat && _deliveryLat <= KANDY_BOUNDS.neLat
+             && _deliveryLng >= KANDY_BOUNDS.swLng && _deliveryLng <= KANDY_BOUNDS.neLng);
+  warn.style.display = inZone ? 'none' : 'block';
+}
+
 async function loadWeather() {
+  var icon = document.getElementById('weatherIcon');
+  var text = document.getElementById('weatherText');
+  var fee  = document.getElementById('weatherFee');
+  var temp = document.getElementById('weatherTemp');
   try {
     var r = await fetch('/api/weather');
+    if (!r.ok) throw new Error('bad response');
     var w = await r.json();
     weatherExtraFee = w.extraFee || 0;
-    document.getElementById('weatherIcon').textContent = w.condition.split(' ')[0];
-    document.getElementById('weatherTemp').textContent = w.temp;
-    document.getElementById('weatherText').textContent = w.condition + ' — Kandy';
-    document.getElementById('weatherFee').textContent  = weatherExtraFee > 0 ? 'Weather surcharge: LKR ' + weatherExtraFee : 'Normal delivery fee applies';
+    var condParts = (w.condition || '').split(' ');
+    if (icon) icon.textContent = condParts[0] || '⛅';
+    if (temp) temp.textContent = w.temp || '';
+    if (text) text.textContent = (condParts.slice(1).join(' ') || 'Kandy') + ' · Kandy';
+    if (fee)  fee.textContent  = weatherExtraFee > 0
+      ? 'Weather surcharge: LKR ' + weatherExtraFee
+      : 'Normal delivery conditions';
     updSum();
-  } catch(e) {}
+  } catch(e) {
+    // Never stay stuck on "Loading weather..."
+    if (icon) icon.textContent = '⛅';
+    if (text) text.textContent = 'Partly Cloudy · Kandy';
+    if (temp) temp.textContent = '29°C';
+    if (fee)  fee.textContent  = 'Normal delivery conditions';
+    weatherExtraFee = 0;
+    updSum();
+  }
 }
 
 // ── Pay flow ──────────────────────────────────────────────────────
@@ -414,7 +506,9 @@ async function placeOrder() {
     var data = await res.json();
     if (data.success) {
       Cart.clear(); localStorage.removeItem('ydOffer');
+      data.deliveryAddress = addr;
       localStorage.setItem('ydLastOrder', JSON.stringify(data));
+      localStorage.setItem('ydLocation', addr);
       location.href = '/thank-you?orderId=' + data.orderId;
     } else {
       showToast('Order failed: ' + (data.error || 'Try again'));
@@ -432,9 +526,19 @@ function fmtCard(i) { var v=i.value.replace(/\s+/g,'').replace(/\D/g,'');var p=[
 onMapsReady(initDeliveryMap);
 renderCart();
 renderSavedChips();
-loadWeather();
-if (offer) updSum();
-// Refresh weather every 5 minutes
+updSum();      // Show bill immediately — don't wait for weather
+loadWeather(); // Update bill again once weather data arrives
 setInterval(loadWeather, 300000);
+
+// Auto-fill address from home page location picker
+(function() {
+  var addrInp = document.getElementById('deliveryAddress');
+  if (!addrInp) return;
+  var saved = localStorage.getItem('ydLocation');
+  if (saved && !addrInp.value.trim()) addrInp.value = saved;
+  addrInp.addEventListener('change', function() {
+    if (addrInp.value.trim()) localStorage.setItem('ydLocation', addrInp.value.trim());
+  });
+})();
 </script>
 <%@ include file="/WEB-INF/views/layout/footer.jsp" %>

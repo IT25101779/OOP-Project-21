@@ -17,9 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// ═══════════════════════════════════════════════════════════════════
-// CHECKOUT
-// ═══════════════════════════════════════════════════════════════════
+// ── Global model attributes injected into every JSP ──────────────
+@org.springframework.web.bind.annotation.ControllerAdvice
 @Controller
 class CheckoutController {
     @GetMapping("/cart") public String cart(HttpSession s, Model m) {
@@ -32,9 +31,13 @@ class CheckoutController {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// ACCOUNT — customer profile (no driver section)
+// ═══════════════════════════════════════════════════════════════════
 
+// REST API endpoints for Cart & Orders
 @RestController @RequestMapping("/api")
-class ApiOrderController {
+class ApiCartController {
     @PostMapping("/order")
     public ResponseEntity<?> placeOrder(@RequestBody Map<String, Object> body, HttpSession s) {
         User u = (User) s.getAttribute("user");
@@ -42,6 +45,10 @@ class ApiOrderController {
         try {
             Order o = buildOrder(body, u);
             fsu.appendLine(fsu.getOrdersFile(), o.toFileLine());
+            // For scheduled orders, also write to scheduled_orders.txt
+            if ("SCHEDULED".equals(o.getOrderType()) && o.getScheduledFor() != null && !o.getScheduledFor().isEmpty()) {
+                fsu.appendLine(fsu.getScheduledOrdersFile(), o.toFileLine());
+            }
             // Award loyalty points to user
             try {
                 User usr = userService.findById(u.getId());
@@ -94,26 +101,39 @@ class ApiOrderController {
     }
 
     // Driver updates order status via AJAX (from driver dashboard map)
-    @PostMapping("/order/{id}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable String id,
-                                          @RequestParam String status,
-                                          HttpSession s) throws IOException {
-        // Allow driver or admin session
-        boolean allowed = s.getAttribute("driver") != null || s.getAttribute("admin") != null;
-        if (!allowed) return ResponseEntity.status(401).build();
-        String line = fsu.findById(fsu.getOrdersFile(), id);
-        if (line == null) return ResponseEntity.notFound().build();
-        Order o = Order.fromLine(line);
-        o.setStatus(status);
-        o.setUpdatedAt(LocalDateTime.now().format(DTF));
-        fsu.update(fsu.getOrdersFile(), id, o.toFileLine());
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    @PostMapping("/feedback")
-    public ResponseEntity<?> feedback(@RequestBody Map<String, Object> body, HttpSession s) throws IOException {
+    @GetMapping("/my-orders")
+    public ResponseEntity<?> myOrders(@RequestParam(defaultValue = "5") int limit, HttpSession s) {
         User u = (User) s.getAttribute("user");
         if (u == null) return ResponseEntity.status(401).build();
+        List<Map<String, Object>> result = fsu.readAll(fsu.getOrdersFile()).stream()
+            .map(Order::fromLine).filter(Objects::nonNull)
+            .filter(o -> u.getId().equals(o.getCustomerId()))
+            .sorted(Comparator.comparing(
+                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "",
+                Comparator.reverseOrder()))
+            .limit(limit)
+            .map(o -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("orderId",     o.getOrderId());
+                m.put("status",      o.getStatus());
+                m.put("statusBadge", o.getStatusBadge());
+                m.put("totalAmount", o.getTotalAmount());
+                m.put("createdAt",   o.getCreatedAt());
+                m.put("items",       o.getItems().stream().map(i -> {
+                    Map<String,Object> im = new LinkedHashMap<>();
+                    im.put("foodId",   i.getFoodId());
+                    im.put("foodName", i.getFoodName());
+                    im.put("price",    i.getPrice());
+                    im.put("quantity", i.getQuantity());
+                    im.put("imageUrl", i.getImageUrl() != null ? i.getImageUrl() : "");
+                    return im;
+                }).collect(Collectors.toList()));
+                return m;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/order/{id}/cancel")
     public ResponseEntity<?> cancelOrder(@PathVariable String id, HttpSession s) throws IOException {
         User u = (User) s.getAttribute("user");
@@ -151,12 +171,4 @@ class ApiOrderController {
         return ResponseEntity.ok(Map.of("points", points, "discount", points >= 100 ? (points / 100) * 50 : 0, "nextReward", Math.max(0, 100 - (points % 100))));
     }
 
-    // ── Real driver location + nearby check ──────────────────────
-    @GetMapping("/order/{id}/driver-location")
-    public ResponseEntity<?> orderDriverLocation(@PathVariable String id, HttpSession s) {
-        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
-        String line = fsu.findById(fsu.getOrdersFile(), id);
-        if (line == null) return ResponseEntity.notFound().build();
-        Order o = Order.fromLine(line);
-        String status = o.getStatus() != null ? o.getStatus() : "";
 }

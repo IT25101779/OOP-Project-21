@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Order Placed!"/>
 <c:set var="pageId"    value="thankyou"/>
@@ -94,6 +94,8 @@ if (order.orderId) {
   document.getElementById('tyOrderId').textContent = '#' + order.orderId;
   document.getElementById('tyTotal').textContent   = 'LKR ' + Math.round(order.total || 0).toLocaleString();
   document.getElementById('tyPayment').textContent = order.paymentMethod || 'COD';
+  var addrEl = document.getElementById('tyAddress');
+  if (addrEl) addrEl.textContent = order.deliveryAddress || localStorage.getItem('ydLocation') || 'Kandy, Sri Lanka';
   document.getElementById('tyPoints').textContent  = '⭐ +' + (order.loyaltyPoints || 0) + ' pts';
 }
 
