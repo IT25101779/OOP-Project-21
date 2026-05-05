@@ -532,32 +532,30 @@ var YDNotifPrompt = (function() {
 
 // ── Image blur-up lazy loading ────────────────────────────────────
 (function() {
-    if (!('IntersectionObserver' in window)) return;
-    var imgObs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (!entry.isIntersecting) return;
-            var img = entry.target;
-            var src = img.getAttribute('data-src');
-            if (!src) return;
-            var loader = new Image();
-            loader.onload = function() {
-                img.src = src;
-                img.classList.add('loaded');
-                img.removeAttribute('data-src');
-            };
-            loader.onerror = function() {
-                img.src = img.getAttribute('data-fallback') || src;
-                img.classList.add('loaded');
-            };
-            loader.src = src;
-            imgObs.unobserve(img);
-        });
-    }, { threshold: 0.05, rootMargin: '100px' });
+    function loadImg(img) {
+        var src = img.getAttribute('data-src');
+        if (!src) return;
+        var tmp = new Image();
+        tmp.onload  = function() { img.src = src; img.classList.add('loaded'); img.removeAttribute('data-src'); };
+        tmp.onerror = function() { var fb = img.getAttribute('data-fallback'); img.src = fb || src; img.classList.add('loaded'); img.removeAttribute('data-src'); };
+        tmp.src = src;
+    }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    var io = ('IntersectionObserver' in window)
+        ? new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) { if (e.isIntersecting) { loadImg(e.target); io.unobserve(e.target); } });
+          }, { rootMargin: '400px', threshold: 0 })
+        : null;
+
+    function observeAll() {
         document.querySelectorAll('img[data-src]').forEach(function(img) {
             img.classList.add('yd-img-lazy');
-            imgObs.observe(img);
+            if (io) io.observe(img); else loadImg(img);
         });
-    });
+    }
+
+    // Run immediately (for images already in DOM) and after DOM ready
+    observeAll();
+    document.addEventListener('DOMContentLoaded', observeAll);
+    setTimeout(observeAll, 600);
 })();
