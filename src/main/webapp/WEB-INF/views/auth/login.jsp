@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Sign In"/>
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
@@ -83,12 +83,7 @@
         </div>
       </c:if>
 
-      <!-- Google Sign-In Button (real GSI) -->
-      <div id="g_id_onload"
-           data-client_id="${googleOAuthClientId}"
-           data-callback="handleGoogleSignIn"
-           data-auto_prompt="false">
-      </div>
+      <!-- Google Sign-In Button -->
       <button class="social-btn google-btn mb-2" onclick="startGoogleSignIn()">
         <svg width="20" height="20" viewBox="0 0 48 48">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -144,58 +139,57 @@
 // ── Google Sign-In via Identity Services ─────────────────────────
 var GOOGLE_CLIENT_ID = '${googleOAuthClientId}';
 
+// Called by Google Identity Services after user selects account
 function handleGoogleSignIn(response) {
   if (!response || !response.credential) return;
   try {
-    var payload = JSON.parse(atob(response.credential.split('.')[1]));
+    var parts = response.credential.split('.');
+    var payload = JSON.parse(atob(parts[1] + '=='.slice((parts[1].length * 3) & 3)));
     document.getElementById('sl_name').value  = payload.name    || '';
     document.getElementById('sl_email').value = payload.email   || '';
     document.getElementById('sl_pic').value   = payload.picture || '';
     document.getElementById('socialForm').submit();
-  } catch(e) { showToast('Google sign-in error. Try email login.'); }
+  } catch(e) {
+    showToast('Google sign-in error. Please use email login.');
+  }
 }
 
 function startGoogleSignIn() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === '') {
-    // No client ID configured - show helpful message
-    showToast('Google sign-in not configured. Please use email login or contact admin.');
+  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
+  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) {
+    // Show a demo modal to simulate Google login for presentation
+    var email = prompt('Demo Mode: Enter your email to simulate Google Sign-In');
+    if (!email || email.indexOf('@') < 0) return;
+    var name  = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+    document.getElementById('sl_name').value  = name;
+    document.getElementById('sl_email').value = email;
+    document.getElementById('sl_pic').value   = '';
+    document.getElementById('socialForm').submit();
     return;
   }
+  // Real Google Sign-In with configured client ID
   if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-    google.accounts.id.prompt(function(notification) {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        // One Tap not shown - trigger popup flow
-        google.accounts.id.renderButton(
-          document.getElementById('googleBtnContainer'),
-          { theme: 'outline', size: 'large', width: 360 }
-        );
-        document.getElementById('googleBtnContainer').click();
-      }
-    });
+    google.accounts.id.prompt();
   } else {
-    showToast('Loading Google Sign-In...'); 
-    setTimeout(startGoogleSignIn, 1000);
+    showToast('Loading Google Sign-In...');
+    setTimeout(startGoogleSignIn, 1200);
   }
 }
 
-// Init GSI when script loads
 function initGoogleSignIn() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.trim() === '') return;
+  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
+  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) return;
   if (typeof google === 'undefined' || !google.accounts) return;
   google.accounts.id.initialize({
-    client_id:           GOOGLE_CLIENT_ID,
-    callback:            handleGoogleSignIn,
-    auto_select:         false,
-    cancel_on_tap_outside: true,
-    ux_mode:             'popup'
+    client_id: clientId,
+    callback:  handleGoogleSignIn,
+    auto_select: false,
+    ux_mode: 'popup'
   });
 }
-
-// Try to init when GSI loads
 document.addEventListener('DOMContentLoaded', function() {
-  if (typeof google !== 'undefined' && google.accounts) initGoogleSignIn();
+  if (typeof google !== 'undefined') initGoogleSignIn();
 });
-// GSI async callback
 window.onGsiLoad = function() { initGoogleSignIn(); };
 
 // ── Particles ─────────────────────────────────────────────────────

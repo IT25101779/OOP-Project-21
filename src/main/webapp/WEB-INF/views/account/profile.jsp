@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
@@ -278,16 +278,11 @@ function fillGPS() {
   msg.textContent = 'Getting location...';
   if (!navigator.geolocation) { msg.textContent = 'Not supported'; return; }
   navigator.geolocation.getCurrentPosition(function(pos) {
-    var key = window.GOOGLE_MAPS_KEY || '';
-    if (!key) { document.getElementById('addrInput').value = pos.coords.latitude.toFixed(5)+','+pos.coords.longitude.toFixed(5); msg.textContent='Done'; return; }
-    fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&key='+key)
-      .then(function(r){ return r.json(); })
-      .then(function(d) {
-        var addr = (d.results&&d.results[0]) ? d.results[0].formatted_address : pos.coords.latitude.toFixed(5)+','+pos.coords.longitude.toFixed(5);
-        document.getElementById('addrInput').value = addr;
-        msg.textContent = 'Location filled!';
-        msg.style.color = 'var(--c-success)';
-      }).catch(function(){ msg.textContent = 'Could not geocode'; });
+    YDMaps.reverseGeocode(pos.coords.latitude, pos.coords.longitude, function(addr) {
+      document.getElementById('addrInput').value = addr;
+      msg.textContent = 'Location filled!';
+      msg.style.color = 'var(--c-success)';
+    });
   }, function(e){ msg.textContent = 'Error: '+e.message; }, { enableHighAccuracy:true, timeout:8000 });
 }
 

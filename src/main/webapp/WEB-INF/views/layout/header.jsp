@@ -1,4 +1,3 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c"  uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
@@ -21,14 +20,18 @@
   var t=localStorage.getItem('ydTheme');
   if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
 })();
-window.GOOGLE_MAPS_KEY='${googleMapsApiKey}';
 window.FB_API_KEY='${firebaseApiKey}';
-window.googleMapsReady=function(){window.mapsLoaded=true;document.dispatchEvent(new Event('mapsready'));};
-function onMapsReady(fn){if(window.mapsLoaded)fn();else document.addEventListener('mapsready',fn,{once:true});}
+// Leaflet is synchronous — always ready
+window.mapsLoaded=true;
+function onMapsReady(fn){ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fn);}else{fn();} }
 </script>
-<script src="/js/app.js"></script>
+<!-- Leaflet — free maps, no API key needed -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script src="/js/maps.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&amp;libraries=places,geometry&amp;callback=googleMapsReady&amp;loading=async" async defer></script>
+<script src="/js/app.js"></script>
 </head>
 <body>
 
@@ -37,7 +40,11 @@ function onMapsReady(fn){if(window.mapsLoaded)fn();else document.addEventListene
     <nav class="yd-nav navbar navbar-expand-lg">
       <div class="container-xl">
         <a class="yd-brand navbar-brand" href="/menu">
-          <span class="yd-brand-icon">🍽️</span> YummyDish
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="14" fill="#FF6B35"/>
+            <text x="14" y="19" text-anchor="middle" font-size="15" fill="white" font-family="serif">&#x1F374;</text>
+          </svg>
+          <span style="font-family:var(--font-display,Georgia,serif);color:var(--c-orange);">YummyDish</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
           <i class="bi bi-list fs-4" style="color:var(--c-text)"></i>
@@ -80,7 +87,11 @@ function onMapsReady(fn){if(window.mapsLoaded)fn();else document.addEventListene
     <nav class="yd-nav navbar navbar-expand-lg">
       <div class="container-xl">
         <a class="yd-brand navbar-brand" href="/">
-          <span class="yd-brand-icon">🍽️</span> YummyDish
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="14" fill="#FF6B35"/>
+            <text x="14" y="19" text-anchor="middle" font-size="15" fill="white" font-family="serif">&#x1F374;</text>
+          </svg>
+          <span style="font-family:var(--font-display,Georgia,serif);color:var(--c-orange);">YummyDish</span>
         </a>
         <div class="ms-auto d-flex align-items-center gap-2">
           <button class="yd-theme-btn" id="themeToggle" title="Toggle dark mode">🌙</button>

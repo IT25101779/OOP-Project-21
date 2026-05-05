@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="256kb" autoFlush="true" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -14,7 +14,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="/css/yummydish.css" rel="stylesheet">
 <script>(function(){var t=localStorage.getItem('ydTheme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
-<script src="/js/app.js"></script>
+<script src="/js/app.js" defer></script>
 </head>
 <body>
 <div id="yd-toast"></div>
@@ -296,7 +296,7 @@
               <div style="font-size:.78rem;color:var(--c-muted);">${o.description}</div>
               <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
                 <span style="font-size:.78rem;background:var(--c-orange-l);color:var(--c-orange);padding:3px 10px;border-radius:20px;font-weight:700;">${o.discountPercent}% OFF</span>
-                <form action="/admin/offer/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete offer ${o.code}?')"><input type="hidden" name="id" value="${o.id}"><button type="submit" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:.85rem;">✕ Delete</button></form>
+                <form action="/admin/offer/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete offer ${o.code}?')"><input type="hidden" name="code" value="${o.code}"><button type="submit" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:.85rem;">✕ Delete</button></form>
               </div>
             </div>
           </div>
@@ -439,76 +439,71 @@
 </div>
 
 <script>
-// Tab switching
+// Tab switching — safe, runs immediately (no DOM dependency on tab logic)
 function admTab(name) {
-  document.querySelectorAll('.adm-pane').forEach(p => p.style.display='none');
-  document.querySelectorAll('.yd-admin-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('pane' + name).style.display = 'block';
-  document.getElementById('at' + name).classList.add('active');
+  document.querySelectorAll('.adm-pane').forEach(function(p){ p.style.display='none'; });
+  document.querySelectorAll('.yd-admin-tab').forEach(function(t){ t.classList.remove('active'); });
+  var pane = document.getElementById('pane' + name);
+  var tab  = document.getElementById('at' + name);
+  if (pane) pane.style.display = 'block';
+  if (tab)  tab.classList.add('active');
 }
-const urlTab = new URLSearchParams(location.search).get('tab');
-if (urlTab) { const m={food:'Food',orders:'Orders',users:'Users',drivers:'Drivers',offers:'Offers',feedback:'Feedback',kanban:'Kanban'}; if(m[urlTab]) admTab(m[urlTab]); }
 
-// Edit food
+// Edit food modal
 async function editFood(id) {
-  var r = await fetch('/admin/food/get/' + id);
-  var f = await r.json();
-  document.getElementById('ef_id').value          = f.id;
-  document.getElementById('ef_name').value        = f.name;
-  document.getElementById('ef_desc').value        = f.description;
-  document.getElementById('ef_price').value       = f.price;
-  document.getElementById('ef_cat').value         = f.category;
-  document.getElementById('ef_ingredients').value = f.ingredients || '';
-  document.getElementById('ef_portion').value     = f.portionSize || '';
-  document.getElementById('ef_calories').value    = f.calories;
-  document.getElementById('ef_img').value         = f.imageUrl || '';
-  document.getElementById('ef_avail').checked     = f.available;
-  document.getElementById('editFoodModal').style.display = 'flex';
+  try {
+    var r = await fetch('/admin/food/get/' + id);
+    if (!r.ok) return;
+    var f = await r.json();
+    document.getElementById('ef_id').value          = f.id          || '';
+    document.getElementById('ef_name').value        = f.name        || '';
+    document.getElementById('ef_desc').value        = f.description || '';
+    document.getElementById('ef_price').value       = f.price       || 0;
+    document.getElementById('ef_cat').value         = f.category    || '';
+    document.getElementById('ef_ingredients').value = f.ingredients || '';
+    document.getElementById('ef_portion').value     = f.portionSize || '';
+    document.getElementById('ef_calories').value    = f.calories    || 0;
+    document.getElementById('ef_img').value         = f.imageUrl    || '';
+    document.getElementById('ef_avail').checked     = !!f.available;
+    document.getElementById('editFoodModal').style.display = 'flex';
+  } catch(e) { console.error('editFood error:', e); }
 }
 
 function editUser(id, name, phone, address, pic) {
-  document.getElementById('eu_id').value    = id;
-  document.getElementById('eu_name').value  = name;
-  document.getElementById('eu_phone').value = phone;
-  document.getElementById('eu_addr').value  = address;
-  document.getElementById('eu_pic').value   = pic || '';
+  document.getElementById('eu_id').value    = id      || '';
+  document.getElementById('eu_name').value  = name    || '';
+  document.getElementById('eu_phone').value = phone   || '';
+  document.getElementById('eu_addr').value  = address || '';
+  document.getElementById('eu_pic').value   = pic     || '';
   document.getElementById('editUserModal').style.display = 'flex';
 }
 
-// Start admin poller — plays sound + shows alert on new orders
-YDAdminPoller.start();
-YDPush.request();
-
-// ── Live Kanban refresh every 15s without page reload ────────────
-var kanbanLastHash = '';
-async function refreshKanban() {
+// ── Init after DOM is fully ready ────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Apply tab from URL query param
   try {
-    var r = await fetch('/api/admin/stats');
-    if (!r.ok) return;
-    var d = await r.json();
-    // Update stat counters
-    var hash = JSON.stringify(d);
-    if (hash === kanbanLastHash) return; // no change
-    kanbanLastHash = hash;
-    // Update order count badge in nav
-    var badge = document.getElementById('adminNewBadge');
-    if (badge && d.activeOrders !== undefined) {
-      badge.textContent = d.activeOrders > 0 ? d.activeOrders : '';
-    }
-    // If on kanban tab, reload it silently
-    if (document.getElementById('paneKanban').style.display !== 'none') {
-      // Reload just kanban section via fetch
-      var rk = await fetch('/admin/dashboard?tab=kanban&ajax=1');
-      // Full reload is simplest - only do it if data changed
-      location.reload();
+    var urlTab = new URLSearchParams(location.search).get('tab');
+    if (urlTab) {
+      var m = {food:'Food',orders:'Orders',users:'Users',drivers:'Drivers',offers:'Offers',feedback:'Feedback',kanban:'Kanban'};
+      if (m[urlTab]) admTab(m[urlTab]);
     }
   } catch(e) {}
-}
-// Refresh kanban every 15 seconds (only if on kanban tab)
-setInterval(function() {
-  if (document.getElementById('paneKanban').style.display !== 'none') {
-    location.reload();
-  }
-}, 20000);
+
+  // Start admin poller & push (safely, after DOM+scripts ready)
+  try { if (typeof YDAdminPoller !== 'undefined') YDAdminPoller.start(); } catch(e) {}
+  try { if (typeof YDPush !== 'undefined') YDPush.request(); } catch(e) {}
+
+  // Live badge update every 10s
+  setInterval(function() {
+    fetch('/api/orders/new-count')
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if (!d) return;
+        var badge = document.getElementById('adminNewBadge');
+        if (badge) badge.textContent = (d.count > 0) ? d.count : '';
+      })
+      .catch(function(){});
+  }, 10000);
+});
 </script>
 <%@ include file="/WEB-INF/views/layout/footer.jsp" %>

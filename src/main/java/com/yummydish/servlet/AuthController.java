@@ -413,6 +413,9 @@ class AdminAuthController {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// DRIVER AUTH — /driver/login (completely separate from customer)
+// ═══════════════════════════════════════════════════════════════════
 @Controller @RequestMapping("/account")
 class AccountController {
     private final UserService userService;
@@ -483,3 +486,23 @@ class AccountController {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// ACTIVITY
+// ═══════════════════════════════════════════════════════════════════
+class YummyDishErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+    @org.springframework.web.bind.annotation.GetMapping
+    public String handleError(jakarta.servlet.http.HttpServletRequest req, org.springframework.ui.Model m) {
+        Object code = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
+        Object msg  = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_MESSAGE_ATTRIBUTE);
+        Object ex   = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
+        // Log the real exception to console for debugging
+        if (ex instanceof Throwable t) {
+            System.err.println("[YummyDish ERROR] " + t.getClass().getName() + ": " + t.getMessage());
+            t.printStackTrace();
+        }
+        String displayMsg = (msg != null && !msg.toString().isBlank()) ? msg.toString() : "An unexpected error occurred";
+        m.addAttribute("errorCode",    code != null ? code.toString() : "500");
+        m.addAttribute("errorMessage", displayMsg);
+        return "error";
+    }
+}
