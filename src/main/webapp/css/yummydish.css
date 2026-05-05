@@ -413,11 +413,15 @@ img{display:block;} a{text-decoration:none;}
 
 /* ── Image blur-up lazy loading ──────────────────────── */
 .yd-img-lazy {
-  filter: blur(8px);
+  filter: blur(4px);
   transform: scale(1.02);
-  transition: filter .5s ease, transform .5s ease;
+  transition: filter .4s ease, transform .4s ease;
 }
 .yd-img-lazy.loaded {
-  filter: blur(0);
+  filter: blur(0) !important;
   transform: scale(1);
+}
+/* Food card images never blur by default */
+.yd-food-img {
+  filter: none !important;
 }
