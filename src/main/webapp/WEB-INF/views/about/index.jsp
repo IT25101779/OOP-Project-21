@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="About Us"/>
 <c:set var="pageId"    value="about"/>
@@ -148,6 +148,7 @@
 onMapsReady(function() {
   var r = YDMaps.RESTAURANT;
   var map = YDMaps.initMap('aboutMap', r.lat, r.lng, 15);
+  YDMaps._kitchenMarker(map);
   YDMaps.addMarker(map, r.lat, r.lng, r.name,
     '<div style="font-family:sans-serif;padding:10px 14px;"><strong style="font-size:14px;">🍽️ YummyDish Kitchen</strong><br><span style="font-size:12px;color:#888;">Open 7am–11pm · +94 81 234 5678</span><br><a href="/menu" style="color:#FF6B35;font-size:12px;font-weight:600;">Order Now →</a></div>');
 });

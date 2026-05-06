@@ -17,6 +17,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// ── Global model attributes injected into every JSP ──────────────
+@org.springframework.web.bind.annotation.ControllerAdvice
+
+// Reviews, Contact, About page routes
+@Controller
+class FeedbackPageController {
 @Controller
 class ExtraController {
     private final FoodItemService foodService;
@@ -50,19 +56,9 @@ class ExtraController {
         return "contact/index";
     }
 
-    @GetMapping("/group")    public String group(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        m.addAttribute("user", s.getAttribute("user")); m.addAttribute("foods", foodService.getAvailable());
-        return "group/index";
-    }
-    @GetMapping("/schedule") public String schedule(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        m.addAttribute("user", s.getAttribute("user")); m.addAttribute("foods", foodService.getAvailable());
-        return "schedule/index";
-    }
 }
 
-
+// REST API endpoints for Feedback & Reporting
 @RestController @RequestMapping("/api")
 class ApiFeedbackController {
     @PostMapping("/feedback")
@@ -103,5 +99,4 @@ class ApiFeedbackController {
         return ResponseEntity.ok(reviews);
     }
 
-    @GetMapping("/weather")
 }
