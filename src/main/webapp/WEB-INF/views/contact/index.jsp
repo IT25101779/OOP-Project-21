@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Contact Us"/>
 <c:set var="pageId"    value="contact"/>
@@ -137,7 +137,7 @@
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)"><span>Do you deliver outside Kandy?</span><i class="bi bi-plus"></i></div>
-          <div class="faq-a">Currently we deliver within Kandy city limits only. We're expanding soon — stay tuned!</div>
+          <div class="faq-a">Currently we deliver within Kandy city limits only. We're expanding soon &mdash; stay tuned!</div>
         </div>
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)"><span>What are group orders?</span><i class="bi bi-plus"></i></div>

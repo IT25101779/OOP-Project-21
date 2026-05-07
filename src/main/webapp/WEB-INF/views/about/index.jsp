@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="About Us"/>
 <c:set var="pageId"    value="about"/>
@@ -77,7 +77,7 @@
     <!-- Values -->
     <div class="text-center mb-5 yd-fade">
       <h2 style="font-family:var(--font-display);font-size:2.2rem;margin-bottom:8px;">Why Choose Us?</h2>
-      <p style="color:var(--c-muted);">We don't just deliver food — we deliver happiness.</p>
+      <p style="color:var(--c-muted);">We don't just deliver food &mdash; we deliver happiness.</p>
     </div>
     <div class="row g-4 mb-5 yd-stagger">
       <div class="col-md-4 yd-fade">
@@ -105,7 +105,7 @@
         <div class="val-card">
           <div class="val-icon">📱</div>
           <h5 class="fw-bold mb-2">Smart Ordering</h5>
-          <p style="color:var(--c-muted);font-size:.9rem;line-height:1.7;">Group orders, scheduled deliveries, loyalty rewards, live tracking, push notifications — all in one app.</p>
+          <p style="color:var(--c-muted);font-size:.9rem;line-height:1.7;">Group orders, scheduled deliveries, loyalty rewards, live tracking, push notifications &mdash; all in one app.</p>
         </div>
       </div>
       <div class="col-md-4 yd-fade">

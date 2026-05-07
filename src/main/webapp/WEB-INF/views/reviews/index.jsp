@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
 <c:set var="pageTitle" value="Reviews"/>
@@ -26,7 +26,7 @@
       <div class="row align-items-center g-4">
         <div class="col-auto">
           <div class="avg-circle">
-            <div style="font-size:2rem;font-weight:800;color:white;line-height:1;" id="avgNum">—</div>
+            <div style="font-size:2rem;font-weight:800;color:white;line-height:1;" id="avgNum">&mdash;</div>
             <div style="font-size:.72rem;color:rgba(255,255,255,.75);">out of 5</div>
           </div>
         </div>
