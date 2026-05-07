@@ -153,12 +153,15 @@ class AdminAuthController {
     private final FoodItemService foodService;
     private final FileStorageUtil fsu;
     private final OfferService offerService;
+    private final com.yummydish.util.OrderQueue orderQueue;
 
     @Autowired
     AdminAuthController(UserService us, FoodItemService fs,
-                        FileStorageUtil fsu, OfferService os) {
+                        FileStorageUtil fsu, OfferService os,
+                        com.yummydish.util.OrderQueue oq) {
         this.userService = us; this.foodService = fs;
         this.fsu = fsu;       this.offerService = os;
+        this.orderQueue = oq;
     }
 
     private boolean isAdmin(HttpSession s) {
@@ -319,6 +322,16 @@ class AdminAuthController {
             Order o = Order.fromLine(line);
             o.setStatus(status);
             o.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+
+            // ── OrderQueue: dequeue when kitchen starts cooking ────────────
+            // When admin moves order to COOKING it leaves the waiting queue
+            // and enters active kitchen processing — FIFO order preserved.
+            if (Order.COOKING.equals(status)) {
+                orderQueue.removeById(orderId);
+                System.out.println("[OrderQueue] Dequeued " + orderId
+                    + " → COOKING | Remaining in queue: " + orderQueue.size());
+            }
+
             // Auto-assign least-loaded driver when moving to READY/HANDOVER
             if ((Order.READY.equals(status) || Order.HANDOVER.equals(status))
                     && (o.getDriverId() == null || o.getDriverId().isBlank())) {

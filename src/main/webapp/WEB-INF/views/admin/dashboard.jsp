@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="256kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" buffer="256kb" autoFlush="true" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -7,7 +7,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Dashboard — YummyDish</title>
+<title>Admin Dashboard &mdash; YummyDish</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -439,7 +439,7 @@
 </div>
 
 <script>
-// Tab switching — safe, runs immediately (no DOM dependency on tab logic)
+// Tab switching &mdash; safe, runs immediately (no DOM dependency on tab logic)
 function admTab(name) {
   document.querySelectorAll('.adm-pane').forEach(function(p){ p.style.display='none'; });
   document.querySelectorAll('.yd-admin-tab').forEach(function(t){ t.classList.remove('active'); });

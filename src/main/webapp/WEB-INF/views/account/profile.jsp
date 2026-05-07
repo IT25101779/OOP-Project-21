@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
@@ -67,10 +67,10 @@
     </div>
     <!-- Stats row -->
     <div style="display:flex;gap:10px;position:relative;z-index:1;">
-      <div class="stat-mini"><div class="stat-mini-num" id="heroOrders">—</div><div class="stat-mini-lbl">Orders</div></div>
-      <div class="stat-mini"><div class="stat-mini-num" id="heroSpend" style="font-size:1rem;">—</div><div class="stat-mini-lbl">Spent</div></div>
+      <div class="stat-mini"><div class="stat-mini-num" id="heroOrders">&mdash;</div><div class="stat-mini-lbl">Orders</div></div>
+      <div class="stat-mini"><div class="stat-mini-num" id="heroSpend" style="font-size:1rem;">&mdash;</div><div class="stat-mini-lbl">Spent</div></div>
       <div class="stat-mini"><div class="stat-mini-num" id="heroPoints">⭐ <c:out value="${user.loyaltyPoints}"/></div><div class="stat-mini-lbl">Points</div></div>
-      <div class="stat-mini"><div class="stat-mini-num" id="heroFavs">—</div><div class="stat-mini-lbl">Favourites</div></div>
+      <div class="stat-mini"><div class="stat-mini-num" id="heroFavs">&mdash;</div><div class="stat-mini-lbl">Favourites</div></div>
     </div>
   </div>
 
@@ -107,7 +107,7 @@
           <div id="profileView">
             <div class="info-row"><span style="color:var(--c-muted);font-size:.82rem;">Full Name</span><span style="font-weight:600;"><c:out value="${user.name}"/></span></div>
             <div class="info-row"><span style="color:var(--c-muted);font-size:.82rem;">Email</span><span style="font-weight:600;font-size:.875rem;"><c:out value="${user.email}"/></span></div>
-            <div class="info-row"><span style="color:var(--c-muted);font-size:.82rem;">Phone</span><span style="font-weight:600;"><c:choose><c:when test="${fn:length(user.phone)>0}"><c:out value="${user.phone}"/></c:when><c:otherwise><span style="color:var(--c-muted);">—</span></c:otherwise></c:choose></span></div>
+            <div class="info-row"><span style="color:var(--c-muted);font-size:.82rem;">Phone</span><span style="font-weight:600;"><c:choose><c:when test="${fn:length(user.phone)>0}"><c:out value="${user.phone}"/></c:when><c:otherwise><span style="color:var(--c-muted);">&mdash;</span></c:otherwise></c:choose></span></div>
             <div class="info-row"><span style="color:var(--c-muted);font-size:.82rem;">Address</span><span style="font-weight:600;text-align:right;max-width:60%;font-size:.875rem;"><c:choose><c:when test="${fn:length(user.address)>0}"><c:out value="${user.address}"/></c:when><c:otherwise><span style="color:var(--c-muted);">Not set</span></c:otherwise></c:choose></span></div>
             <div class="d-flex gap-2 mt-4">
               <button onclick="toggleEdit(true)" class="yd-btn yd-btn-primary" style="flex:1;"><i class="bi bi-pencil-fill me-2"></i>Edit Profile</button>
@@ -179,9 +179,9 @@
       <div class="yd-card mb-3">
         <div class="yd-card-body">
           <div class="row g-2 mb-4" id="orderStatsRow">
-            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1.6rem;font-weight:800;color:var(--c-orange);" id="stOrders">—</div><div style="font-size:.72rem;color:var(--c-muted);">Orders</div></div></div>
-            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1rem;font-weight:800;color:var(--c-orange);" id="stSpend">—</div><div style="font-size:.72rem;color:var(--c-muted);">Total Spent</div></div></div>
-            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1.6rem;font-weight:800;color:var(--c-success);" id="stDone">—</div><div style="font-size:.72rem;color:var(--c-muted);">Delivered</div></div></div>
+            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1.6rem;font-weight:800;color:var(--c-orange);" id="stOrders">&mdash;</div><div style="font-size:.72rem;color:var(--c-muted);">Orders</div></div></div>
+            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1rem;font-weight:800;color:var(--c-orange);" id="stSpend">&mdash;</div><div style="font-size:.72rem;color:var(--c-muted);">Total Spent</div></div></div>
+            <div class="col-4"><div style="background:var(--c-bg);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--c-border);"><div style="font-size:1.6rem;font-weight:800;color:var(--c-success);" id="stDone">&mdash;</div><div style="font-size:.72rem;color:var(--c-muted);">Delivered</div></div></div>
           </div>
           <!-- Smart reorder suggestions -->
           <div id="reorderSuggestions" style="display:none;margin-bottom:18px;">

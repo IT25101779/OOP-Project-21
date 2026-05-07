@@ -1,0 +1,4 @@
+FIRST20|New User Deal|20% off your first order|20.0|0.0|true|2024-01-01
+LUNCH15|Lunch Special|15% off all lunch items|15.0|0.0|true|2024-01-01
+FAMILY30|Family Feast|30% off orders above LKR 4000|30.0|4000.0|true|2024-01-01
+SAVE10|Save 10|10% off any order|10.0|0.0|true|2024-01-01
