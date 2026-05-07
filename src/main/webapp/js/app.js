@@ -56,11 +56,13 @@ const Cart = (() => {
         if (ex) ex.qty += qty; else items.push({ id, name, price: Number(price), qty: Number(qty), img: img || '' });
         save(items);
         showToast('🛒 ' + name + ' added!');
-        // Bump cart button
-        document.querySelectorAll('.yd-cart-btn').forEach(btn => {
-            btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump');
-            setTimeout(() => btn.classList.remove('bump'), 400);
-        });
+        // Bump cart button — only if DOM is ready
+        if (document.body) {
+            document.querySelectorAll('.yd-cart-btn').forEach(btn => {
+                btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump');
+                setTimeout(() => btn.classList.remove('bump'), 400);
+            });
+        }
     }
     function remove(id) { save(load().filter(i => i.id !== id)); }
     function updateQty(id, newQty) {
@@ -73,6 +75,7 @@ const Cart = (() => {
     function clear()  { save([]); }
     function get()    { return load(); }
     function updateUI() {
+        if (!document.body) return;
         const cnt = count(), tot = total();
         document.querySelectorAll('#cartCount').forEach(el => el.textContent = cnt);
         const floatCount = document.getElementById('floatCount');
@@ -108,12 +111,21 @@ const Favs = (() => {
 
 // ── Toast ─────────────────────────────────────────────────────────
 function showToast(msg, duration) {
-    let t = document.getElementById('yd-toast');
-    if (!t) { t = document.createElement('div'); t.id = 'yd-toast'; document.body.appendChild(t); }
-    t.innerHTML = msg;
-    t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), duration || 2800);
+    function _show() {
+        let t = document.getElementById('yd-toast');
+        if (!t) {
+            t = document.createElement('div');
+            t.id = 'yd-toast';
+            if (document.body) document.body.appendChild(t);
+            else return;
+        }
+        t.innerHTML = msg;
+        t.classList.add('show');
+        clearTimeout(t._timer);
+        t._timer = setTimeout(() => t.classList.remove('show'), duration || 2800);
+    }
+    if (document.body) _show();
+    else document.addEventListener('DOMContentLoaded', _show, { once: true });
 }
 
 // ── Sound Alerts ──────────────────────────────────────────────────
@@ -532,32 +544,33 @@ var YDNotifPrompt = (function() {
 
 // ── Image blur-up lazy loading ────────────────────────────────────
 (function() {
-    if (!('IntersectionObserver' in window)) return;
-    var imgObs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (!entry.isIntersecting) return;
-            var img = entry.target;
-            var src = img.getAttribute('data-src');
-            if (!src) return;
-            var loader = new Image();
-            loader.onload = function() {
-                img.src = src;
-                img.classList.add('loaded');
-                img.removeAttribute('data-src');
-            };
-            loader.onerror = function() {
-                img.src = img.getAttribute('data-fallback') || src;
-                img.classList.add('loaded');
-            };
-            loader.src = src;
-            imgObs.unobserve(img);
-        });
-    }, { threshold: 0.05, rootMargin: '100px' });
+    function loadImg(img) {
+        var src = img.getAttribute('data-src');
+        if (!src) return;
+        var tmp = new Image();
+        tmp.onload  = function() { img.src = src; img.classList.add('loaded'); img.removeAttribute('data-src'); };
+        tmp.onerror = function() { var fb = img.getAttribute('data-fallback'); img.src = fb || src; img.classList.add('loaded'); img.removeAttribute('data-src'); };
+        tmp.src = src;
+    }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    var io = ('IntersectionObserver' in window)
+        ? new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) { if (e.isIntersecting) { loadImg(e.target); io.unobserve(e.target); } });
+          }, { rootMargin: '400px', threshold: 0 })
+        : null;
+
+    function observeAll() {
         document.querySelectorAll('img[data-src]').forEach(function(img) {
-            img.classList.add('yd-img-lazy');
-            imgObs.observe(img);
+            // Never blur food card images
+            if (!img.classList.contains('yd-food-img')) {
+                img.classList.add('yd-img-lazy');
+            }
+            if (io) io.observe(img); else loadImg(img);
         });
-    });
+    }
+
+    // Run immediately (for images already in DOM) and after DOM ready
+    observeAll();
+    document.addEventListener('DOMContentLoaded', observeAll);
+    setTimeout(observeAll, 600);
 })();

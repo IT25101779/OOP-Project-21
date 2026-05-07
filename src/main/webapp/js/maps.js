@@ -1,321 +1,281 @@
 /*
- * YummyDish — maps.js  v3
- * Real Google Maps integration for Kandy, Sri Lanka
- * Handles: geocoding, reverse geocoding, routing, live tracking, static-pin map
+ * YummyDish — maps.js  (Leaflet + OpenStreetMap edition)
+ * 100% free — no API key, no billing, works on localhost
+ * Drop-in replacement: same YDMaps.* public API as before
  */
-const YDMaps = (function() {
+var YDMaps = (function () {
 
-    // Kitchen location in Kandy
-    const RESTAURANT = {
-        lat:  7.2937,
-        lng:  80.6340,
-        name: 'YummyDish Kitchen — Queens Hotel Area, Kandy'
-    };
+  var RESTAURANT = { lat: 7.2937, lng: 80.6340, name: 'YummyDish Kitchen — Kandy Town' };
+  var KANDY_SW   = { lat: 7.200,  lng: 80.550 };
+  var KANDY_NE   = { lat: 7.380,  lng: 80.750 };
 
-    const KANDY_BOUNDS = new (function() {
-        this.sw = { lat: 7.200, lng: 80.550 };
-        this.ne = { lat: 7.380, lng: 80.750 };
-        this.asLatLngBounds = function() {
-            return new google.maps.LatLngBounds(
-                new google.maps.LatLng(this.sw.lat, this.sw.lng),
-                new google.maps.LatLng(this.ne.lat, this.ne.lng)
-            );
-        };
-    })();
+  // Geocode cache
+  var geocodeCache = {};
 
-    // Minimal map style - clean, food-delivery look
-    const MAP_STYLE = [
-        { featureType: 'poi.business',       stylers: [{ visibility: 'off' }] },
-        { featureType: 'poi.government',     stylers: [{ visibility: 'off' }] },
-        { featureType: 'transit',            stylers: [{ visibility: 'simplified' }] },
-        { featureType: 'road',               elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
-        { featureType: 'road.highway',       elementType: 'geometry', stylers: [{ color: '#ffe0b2' }] },
-        { featureType: 'road.arterial',      elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
-        { featureType: 'water',              elementType: 'geometry', stylers: [{ color: '#c9e8f0' }] },
-        { featureType: 'landscape.natural',  elementType: 'geometry', stylers: [{ color: '#e8f5e9' }] },
-        { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#f0ece4' }] }
-    ];
+  // Nominatim rate-limit queue (1 req / 1.2s)
+  var _geoQueue = [], _geoRunning = false;
+  function _enqueue(fn) {
+    _geoQueue.push(fn);
+    if (!_geoRunning) _drain();
+  }
+  function _drain() {
+    if (!_geoQueue.length) { _geoRunning = false; return; }
+    _geoRunning = true;
+    _geoQueue.shift()();
+    setTimeout(_drain, 1200);
+  }
 
-    // Cache for geocode results to reduce API calls
-    const geocodeCache = {};
-    const geocoder = function() {
-        return typeof google !== 'undefined' ? new google.maps.Geocoder() : null;
-    };
+  function _haversine(lat1,lng1,lat2,lng2) {
+    var R=6371, r=Math.PI/180;
+    var a=Math.sin((lat2-lat1)*r/2)*Math.sin((lat2-lat1)*r/2)
+        +Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lng2-lng1)*r/2)*Math.sin((lng2-lng1)*r/2);
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
 
-    function initMap(elementId, lat, lng, zoom, options) {
-        if (typeof google === 'undefined') { console.warn('Google Maps not loaded'); return null; }
-        var el = document.getElementById(elementId);
-        if (!el) { console.warn('Map element not found:', elementId); return null; }
-        var opts = Object.assign({
-            center:            { lat: parseFloat(lat), lng: parseFloat(lng) },
-            zoom:              zoom || 14,
-            mapTypeControl:    false,
-            streetViewControl: false,
-            fullscreenControl: true,
-            zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER },
-            styles:            MAP_STYLE,
-            gestureHandling:   'greedy'
-        }, options || {});
-        return new google.maps.Map(el, opts);
+  function _tiles(map) {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
+    }).addTo(map);
+  }
+
+  // ── initMap ──────────────────────────────────────────────────────
+  function initMap(elementId, lat, lng, zoom) {
+    var el = document.getElementById(elementId);
+    if (!el) return null;
+    if (el._ydmap) { try { el._ydmap.remove(); } catch(e){} }
+    var m = L.map(el, { center:[+lat,+lng], zoom:zoom||14, zoomControl:true });
+    _tiles(m);
+    el._ydmap = m;
+    return m;
+  }
+
+  // ── addMarker ────────────────────────────────────────────────────
+  function addMarker(map, lat, lng, title, popupHtml) {
+    if (!map) return null;
+    var icon = L.divIcon({ className:'',
+      html:'<div style="width:34px;height:34px;background:#FF6B35;border-radius:50% 50% 50% 0;'
+          +'transform:rotate(-45deg);border:3px solid white;box-shadow:0 3px 10px rgba(255,107,53,.4);">'
+          +'</div>', iconSize:[34,34], iconAnchor:[11,34] });
+    var mkr = L.marker([+lat,+lng],{icon:icon,title:title||''}).addTo(map);
+    if (popupHtml) mkr.bindPopup(popupHtml,{maxWidth:260});
+    return mkr;
+  }
+
+  // ── kitchen marker ───────────────────────────────────────────────
+  function _kitchenMarker(map) {
+    var icon = L.divIcon({ className:'',
+      html:'<div style="width:44px;height:44px;background:#FF6B35;border-radius:50% 50% 50% 0;'
+          +'transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(255,107,53,.5);">'
+          +'<span style="transform:rotate(45deg);display:block;text-align:center;font-size:20px;line-height:38px;">🍽️</span>'
+          +'</div>', iconSize:[44,44], iconAnchor:[22,44] });
+    return L.marker([RESTAURANT.lat,RESTAURANT.lng],{icon:icon}).addTo(map)
+      .bindPopup('<div style="padding:10px 14px;font-family:Inter,sans-serif;">'
+        +'<strong style="color:#FF6B35;">🍽️ YummyDish Kitchen</strong><br>'
+        +'<span style="font-size:12px;color:#666;">Queens Hotel Area, Kandy</span></div>');
+  }
+
+  // ── driver marker (bike) ─────────────────────────────────────────
+  function createDriverMarker(map, lat, lng) {
+    if (!map) return null;
+    var icon = L.divIcon({ className:'',
+      html:'<div style="width:48px;height:48px;background:#1565C0;border-radius:50%;border:3px solid white;'
+          +'box-shadow:0 4px 16px rgba(21,101,192,.5);display:flex;align-items:center;justify-content:center;font-size:22px;">🛵</div>',
+      iconSize:[48,48], iconAnchor:[24,24] });
+    return L.marker([+lat,+lng],{icon:icon,zIndexOffset:1000}).addTo(map);
+  }
+
+  // ── drawRoute (OSRM free routing) ────────────────────────────────
+  function drawRoute(map, oLat, oLng, dLat, dLng, callback) {
+    if (!map) return null;
+    if (typeof L.Routing !== 'undefined') {
+      var ctrl = L.Routing.control({
+        waypoints:[L.latLng(+oLat,+oLng),L.latLng(+dLat,+dLng)],
+        routeWhileDragging:false, addWaypoints:false,
+        fitSelectedRoutes:true, show:false,
+        lineOptions:{styles:[{color:'#FF6B35',weight:6,opacity:.85}]},
+        createMarker:function(){return null;}
+      }).addTo(map);
+      ctrl.on('routesfound',function(e){
+        if(callback){var s=e.routes[0].summary;callback({distance:s.totalDistance,duration:s.totalTime});}
+      });
+      ctrl.on('routingerror',function(){if(callback)callback(null);});
+      return ctrl;
     }
+    // Fallback: straight dashed line
+    var line = L.polyline([[+oLat,+oLng],[+dLat,+dLng]],{color:'#FF6B35',weight:5,opacity:.7,dashArray:'10,8'}).addTo(map);
+    map.fitBounds([[+oLat,+oLng],[+dLat,+dLng]],{padding:[50,50]});
+    if (callback) callback({distance:_haversine(+oLat,+oLng,+dLat,+dLng)*1000,duration:0});
+    return line;
+  }
 
-    function restrictToKandy(map) {
-        if (!map || typeof google === 'undefined') return;
-        map.setOptions({ restriction: { latLngBounds: KANDY_BOUNDS.asLatLngBounds(), strictBounds: false } });
+  // ── geocode (Nominatim) ──────────────────────────────────────────
+  function geocode(address, callback) {
+    var key = (address||'').trim().toLowerCase();
+    if (geocodeCache[key]) { callback(L.latLng(geocodeCache[key].lat,geocodeCache[key].lng)); return; }
+    _enqueue(function(){
+      fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(address+', Kandy, Sri Lanka')
+        +'&format=json&limit=1&countrycodes=lk',{headers:{'Accept-Language':'en'}})
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var lat=d&&d[0]?+d[0].lat:RESTAURANT.lat, lng=d&&d[0]?+d[0].lon:RESTAURANT.lng;
+          geocodeCache[key]={lat:lat,lng:lng};
+          callback(L.latLng(lat,lng));
+        }).catch(function(){callback(L.latLng(RESTAURANT.lat,RESTAURANT.lng));});
+    });
+  }
+
+  // ── reverseGeocode (Nominatim) ───────────────────────────────────
+  function reverseGeocode(lat, lng, callback) {
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&zoom=18',
+      {headers:{'Accept-Language':'en'}})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var addr=(d.display_name||lat.toFixed(5)+', '+lng.toFixed(5))
+          .replace(/, Sri Lanka$/,'').replace(/\d{5},\s*/g,'');
+        callback(addr);
+      }).catch(function(){callback(lat.toFixed(5)+', '+lng.toFixed(5));});
+  }
+
+  // ── initStaticPinMap (Uber-style — map moves under fixed pin) ────
+  function initStaticPinMap(elementId, lat, lng, zoom, onAddressChange) {
+    var map = initMap(elementId, lat, lng, zoom||14);
+    if (!map) return null;
+    _kitchenMarker(map);
+    // Fixed 📍 pin in center
+    var el = document.getElementById(elementId);
+    if (el) {
+      el.style.position='relative';
+      var pin=document.createElement('div');
+      pin.id=elementId+'_pin';
+      pin.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);'
+        +'pointer-events:none;z-index:1000;font-size:36px;'
+        +'filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));transition:transform .12s;';
+      pin.textContent='📍';
+      el.appendChild(pin);
     }
-
-    function addMarker(map, lat, lng, title, infoHtml, iconUrl) {
-        if (!map || typeof google === 'undefined') return null;
-        var opts = {
-            map:       map,
-            position:  { lat: parseFloat(lat), lng: parseFloat(lng) },
-            title:     title || '',
-            animation: google.maps.Animation.DROP
-        };
-        if (iconUrl) {
-            opts.icon = typeof iconUrl === 'string'
-                ? { url: iconUrl, scaledSize: new google.maps.Size(40, 40) }
-                : iconUrl;
-        }
-        var marker = new google.maps.Marker(opts);
-        if (infoHtml) {
-            var iw = new google.maps.InfoWindow({ content: infoHtml, maxWidth: 280 });
-            marker.addListener('click', function() { iw.open(map, marker); });
-        }
-        return marker;
-    }
-
-    function drawRoute(map, oLat, oLng, dLat, dLng, callback) {
-        if (!map || typeof google === 'undefined') return null;
-        var renderer = new google.maps.DirectionsRenderer({
-            map: map,
-            suppressMarkers: false,
-            polylineOptions: { strokeColor: '#FF6B35', strokeWeight: 5, strokeOpacity: 0.85 }
+    var timer=null;
+    map.on('movestart',function(){
+      var p=document.getElementById(elementId+'_pin');
+      if(p) p.style.transform='translate(-50%,-120%)';
+    });
+    map.on('moveend',function(){
+      var p=document.getElementById(elementId+'_pin');
+      if(p) p.style.transform='translate(-50%,-100%)';
+      clearTimeout(timer);
+      timer=setTimeout(function(){
+        var c=map.getCenter();
+        reverseGeocode(c.lat,c.lng,function(addr){
+          if(addr&&onAddressChange) onAddressChange(addr,c.lat,c.lng);
         });
-        new google.maps.DirectionsService().route({
-            origin:      { lat: parseFloat(oLat), lng: parseFloat(oLng) },
-            destination: { lat: parseFloat(dLat), lng: parseFloat(dLng) },
-            travelMode:  google.maps.TravelMode.DRIVING
-        }, function(result, status) {
-            if (status === 'OK') {
-                renderer.setDirections(result);
-                if (callback) callback(result.routes[0].legs[0]);
-            } else {
-                console.warn('Directions failed:', status);
-                if (callback) callback(null);
-            }
-        });
-        return renderer;
-    }
+      },700);
+    });
+    return map;
+  }
 
-    function drawMultiStopRoute(map, originLat, originLng, waypoints, callback) {
-        if (!map || typeof google === 'undefined' || !waypoints.length) return null;
-        var dest   = waypoints[waypoints.length - 1];
-        var midpts = waypoints.slice(0, -1).map(function(wp) {
-            return { location: new google.maps.LatLng(wp.lat, wp.lng), stopover: true };
-        });
-        var renderer = new google.maps.DirectionsRenderer({
-            map: map,
-            suppressMarkers: false,
-            polylineOptions: { strokeColor: '#FF6B35', strokeWeight: 5, strokeOpacity: 0.85 }
-        });
-        new google.maps.DirectionsService().route({
-            origin:            { lat: parseFloat(originLat), lng: parseFloat(originLng) },
-            destination:       { lat: parseFloat(dest.lat),  lng: parseFloat(dest.lng)  },
-            waypoints:         midpts,
-            optimizeWaypoints: true,
-            travelMode:        google.maps.TravelMode.DRIVING
-        }, function(result, status) {
-            if (status === 'OK') {
-                renderer.setDirections(result);
-                if (callback) callback(result);
-            } else {
-                console.warn('Multi-stop directions failed:', status);
-            }
-        });
-        return renderer;
-    }
+  // ── animateMarkerTo ──────────────────────────────────────────────
+  function animateMarkerTo(marker, newLat, newLng, steps) {
+    if (!marker) return;
+    steps=steps||25;
+    var from=marker.getLatLng(), dLat=(+newLat-from.lat)/steps, dLng=(+newLng-from.lng)/steps, i=0;
+    var iv=setInterval(function(){
+      i++; marker.setLatLng([from.lat+dLat*i,from.lng+dLng*i]);
+      if(i>=steps) clearInterval(iv);
+    },35);
+  }
 
-    function autocomplete(inputId, callback) {
-        if (typeof google === 'undefined') return null;
-        var input = document.getElementById(inputId);
-        if (!input) return null;
-        var ac = new google.maps.places.Autocomplete(input, {
-            componentRestrictions: { country: 'lk' },
-            bounds: KANDY_BOUNDS.asLatLngBounds(),
-            strictBounds: false,
-            fields: ['geometry', 'formatted_address', 'name', 'address_components']
-        });
-        ac.addListener('place_changed', function() {
-            var place = ac.getPlace();
-            if (place.geometry && callback) callback(place);
-        });
-        return ac;
-    }
+  // ── fitBounds ────────────────────────────────────────────────────
+  function fitBounds(map, positions) {
+    if(!map||!positions||!positions.length) return;
+    map.fitBounds(L.latLngBounds(positions.map(function(p){return[p.lat||p[0],p.lng||p[1]];})),{padding:[50,50]});
+  }
 
-    // Geocode with caching and retry
-    function geocode(address, callback) {
-        if (typeof google === 'undefined') {
-            callback(new google.maps.LatLng(RESTAURANT.lat, RESTAURANT.lng));
-            return;
-        }
-        // Check cache
-        var cacheKey = address.trim().toLowerCase();
-        if (geocodeCache[cacheKey]) {
-            callback(new google.maps.LatLng(geocodeCache[cacheKey].lat, geocodeCache[cacheKey].lng));
-            return;
-        }
-        var queries = [
-            address,
-            address + ', Kandy, Sri Lanka',
-            address + ', Central Province, Sri Lanka',
-            'Kandy, Sri Lanka'  // final fallback
-        ];
-        var tried = 0;
-        function tryNext() {
-            if (tried >= queries.length) {
-                callback(new google.maps.LatLng(RESTAURANT.lat, RESTAURANT.lng));
-                return;
-            }
-            geocoder().geocode({ address: queries[tried] }, function(results, status) {
-                tried++;
-                if (status === 'OK' && results[0]) {
-                    var loc = results[0].geometry.location;
-                    geocodeCache[cacheKey] = { lat: loc.lat(), lng: loc.lng() };
-                    callback(loc);
-                } else if (status === 'OVER_QUERY_LIMIT') {
-                    // Rate limited - wait and retry
-                    setTimeout(tryNext, 1000);
-                } else {
-                    tryNext();
-                }
-            });
-        }
-        tryNext();
-    }
+  // ── GPS helpers ──────────────────────────────────────────────────
+  function getLiveLocation(cb) {
+    if(!navigator.geolocation){cb(null,'Not supported');return;}
+    navigator.geolocation.getCurrentPosition(
+      function(p){cb({lat:p.coords.latitude,lng:p.coords.longitude});},
+      function(e){cb(null,e.message);},{enableHighAccuracy:true,timeout:10000,maximumAge:30000});
+  }
+  function watchLocation(cb) {
+    if(!navigator.geolocation) return null;
+    return navigator.geolocation.watchPosition(
+      function(p){cb({lat:p.coords.latitude,lng:p.coords.longitude});},
+      function(){},{enableHighAccuracy:true,maximumAge:4000,timeout:15000});
+  }
 
-    function reverseGeocode(lat, lng, callback) {
-        if (typeof google === 'undefined') { callback(null); return; }
-        geocoder().geocode({ location: { lat: parseFloat(lat), lng: parseFloat(lng) } },
-            function(results, status) {
-                if (status !== 'OK' || !results.length) { callback(null); return; }
-                // Find best result - prefer street address or neighborhood
-                var best = null;
-                var priority = ['street_address','route','neighborhood','sublocality','locality'];
-                for (var p = 0; p < priority.length && !best; p++) {
-                    best = results.find(function(r) { return r.types.includes(priority[p]); });
-                }
-                best = best || results[0];
-                // Remove Plus Code prefix if present (e.g. "XXXX+XX Kandy")
-                var addr = best.formatted_address.replace(/^[A-Z0-9]{4,8}\+[A-Z0-9]{2,3}\s+/, '');
-                callback(addr);
-            }
-        );
-    }
+  // ── openNavigation (OSM directions) ─────────────────────────────
+  function openNavigation(dLat, dLng) {
+    window.open('https://www.openstreetmap.org/directions?engine=fossgis_osrm_car'
+      +'&route='+RESTAURANT.lat+'%2C'+RESTAURANT.lng+';'+dLat+'%2C'+dLng,'_blank');
+  }
 
-    // Static-pin map (map moves, pin stays centered)
-    function initStaticPinMap(elementId, lat, lng, zoom, onAddressChange) {
-        var map = initMap(elementId, lat, lng, zoom || 14);
-        if (!map) return null;
-        restrictToKandy(map);
-        // Add restaurant marker
-        addMarker(map, RESTAURANT.lat, RESTAURANT.lng, 'YummyDish Kitchen',
-            '<div style="font-family:sans-serif;padding:8px 12px;"><strong>🍽️ Kitchen</strong></div>');
-        // On idle: reverse geocode center
-        var idleTimer = null;
-        map.addListener('idle', function() {
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(function() {
-                var center = map.getCenter();
-                reverseGeocode(center.lat(), center.lng(), function(addr) {
-                    if (addr && onAddressChange) onAddressChange(addr, center.lat(), center.lng());
+  // ── autocomplete (Nominatim search-as-you-type) ──────────────────
+  function autocomplete(inputId, callback) {
+    var input=document.getElementById(inputId);
+    if(!input) return null;
+    var timer=null;
+    var dd=document.createElement('div');
+    dd.style.cssText='position:absolute;background:#fff;border:1px solid #ddd;border-radius:10px;'
+      +'z-index:9999;width:100%;box-shadow:0 4px 16px rgba(0,0,0,.15);'
+      +'max-height:220px;overflow-y:auto;display:none;top:100%;left:0;';
+    var wrap=input.parentElement;
+    wrap.style.position='relative';
+    wrap.appendChild(dd);
+    input.addEventListener('input',function(){
+      clearTimeout(timer);
+      var val=input.value.trim();
+      if(val.length<3){dd.style.display='none';return;}
+      timer=setTimeout(function(){
+        fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(val+', Kandy, Sri Lanka')
+          +'&format=json&limit=5&countrycodes=lk',{headers:{'Accept-Language':'en'}})
+          .then(function(r){return r.json();})
+          .then(function(results){
+            dd.innerHTML='';
+            if(!results.length){dd.style.display='none';return;}
+            results.forEach(function(r){
+              var item=document.createElement('div');
+              item.style.cssText='padding:9px 13px;cursor:pointer;font-size:.83rem;border-bottom:1px solid #f3f3f3;';
+              item.textContent='📍 '+r.display_name.replace(', Sri Lanka','');
+              item.onmouseenter=function(){item.style.background='#FFF0EB';};
+              item.onmouseleave=function(){item.style.background='';};
+              item.onclick=function(){
+                input.value=r.display_name.replace(', Sri Lanka','');
+                dd.style.display='none';
+                if(callback) callback({
+                  formatted_address:input.value,
+                  geometry:{location:L.latLng(+r.lat,+r.lon)}
                 });
-            }, 600); // debounce 600ms
-        });
-        return map;
-    }
+              };
+              dd.appendChild(item);
+            });
+            dd.style.display='block';
+          }).catch(function(){});
+      },400);
+    });
+    document.addEventListener('click',function(e){if(!input.contains(e.target))dd.style.display='none';});
+    return {dropdown:dd};
+  }
 
-    function getLiveLocation(callback) {
-        if (!navigator.geolocation) { callback(null, 'Geolocation not supported'); return; }
-        navigator.geolocation.getCurrentPosition(
-            function(pos) { callback({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-            function(err) { callback(null, err.message); },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-        );
-    }
-
-    function watchLocation(callback) {
-        if (!navigator.geolocation) return null;
-        return navigator.geolocation.watchPosition(
-            function(pos) { callback({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-            function() {},
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-        );
-    }
-
-    // Smooth marker animation
-    function animateMarkerTo(marker, newLat, newLng, steps) {
-        if (!marker || typeof google === 'undefined') return;
-        steps = steps || 30;
-        var cur  = marker.getPosition();
-        var dLat = (parseFloat(newLat) - cur.lat()) / steps;
-        var dLng = (parseFloat(newLng) - cur.lng()) / steps;
-        var i = 0;
-        var iv = setInterval(function() {
-            i++;
-            marker.setPosition({ lat: cur.lat() + dLat * i, lng: cur.lng() + dLng * i });
-            if (i >= steps) clearInterval(iv);
-        }, 35);
-    }
-
-    function createDriverMarker(map, lat, lng) {
-        if (!map || typeof google === 'undefined') return null;
-        var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">'
-            + '<circle cx="28" cy="28" r="26" fill="#FF6B35" stroke="white" stroke-width="3" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.4))"/>'
-            + '<text x="28" y="37" text-anchor="middle" font-size="26">🛵</text>'
-            + '</svg>';
-        return addMarker(map, lat, lng, 'Driver', null, {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-            scaledSize: new google.maps.Size(56, 56),
-            anchor:     new google.maps.Point(28, 28)
-        });
-    }
-
-    function fitBounds(map, positions) {
-        if (!map || !positions || !positions.length) return;
-        var bounds = new google.maps.LatLngBounds();
-        positions.forEach(function(p) { bounds.extend(p); });
-        map.fitBounds(bounds, { padding: 60 });
-    }
-
-    // Open Google Maps navigation
-    function openNavigation(destLat, destLng, originLat, originLng) {
-        var oLat = originLat || RESTAURANT.lat;
-        var oLng = originLng || RESTAURANT.lng;
-        var url  = 'https://www.google.com/maps/dir/?api=1'
-                 + '&origin=' + oLat + ',' + oLng
-                 + '&destination=' + destLat + ',' + destLng
-                 + '&travelmode=driving';
-        window.open(url, '_blank');
-    }
-
-    return {
-        RESTAURANT,
-        KANDY_BOUNDS,
-        initMap,
-        restrictToKandy,
-        addMarker,
-        drawRoute,
-        drawMultiStopRoute,
-        autocomplete,
-        geocode,
-        reverseGeocode,
-        initStaticPinMap,
-        getLiveLocation,
-        watchLocation,
-        animateMarkerTo,
-        createDriverMarker,
-        fitBounds,
-        openNavigation
-    };
+  // Public API
+  return {
+    RESTAURANT:         RESTAURANT,
+    KANDY_BOUNDS:       {sw:KANDY_SW,ne:KANDY_NE},
+    initMap:            initMap,
+    addMarker:          addMarker,
+    drawRoute:          drawRoute,
+    drawMultiStopRoute: drawRoute,
+    geocode:            geocode,
+    reverseGeocode:     reverseGeocode,
+    initStaticPinMap:   initStaticPinMap,
+    getLiveLocation:    getLiveLocation,
+    watchLocation:      watchLocation,
+    animateMarkerTo:    animateMarkerTo,
+    createDriverMarker: createDriverMarker,
+    fitBounds:          fitBounds,
+    openNavigation:     openNavigation,
+    autocomplete:       autocomplete,
+    _kitchenMarker:     _kitchenMarker,
+    haversine:          _haversine
+  };
 })();
