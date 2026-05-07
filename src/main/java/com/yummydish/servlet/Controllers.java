@@ -19,166 +19,503 @@ import java.util.stream.Collectors;
 
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
+class GlobalAdvice {
+    @Value("${google.maps.api.key:}")    private String mapsKey;
+    @Value("${firebase.api.key:}")       private String fbKey;
+    @Value("${firebase.auth.domain:}")   private String fbDomain;
+    @Value("${firebase.project.id:}")    private String fbProject;
+    @Value("${google.oauth.client.id:}") private String googleClientId;
+    @Value("${google.oauth.client.id:}") private String googleOAuthClientId;
+
+    private final OfferService offerService;
+    @Autowired GlobalAdvice(OfferService offerService) { this.offerService = offerService; }
+
+    @ModelAttribute("googleMapsApiKey")      public String mapsKey()          { return mapsKey; }
+    @ModelAttribute("googleOAuthClientId")   public String googleOAuthClientId() { return googleOAuthClientId; }
+    @ModelAttribute("firebaseApiKey")     public String fbKey()     { return fbKey; }
+    @ModelAttribute("firebaseAuthDomain") public String fbDomain()  { return fbDomain; }
+    @ModelAttribute("firebaseProjectId")  public String fbProject() { return fbProject; }
+    @ModelAttribute("activeOffers")       public List<Offer> offers(){ return offerService.getActive(); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CUSTOMER AUTH — /login, /signup, /logout, /forgot-password
+// ═══════════════════════════════════════════════════════════════════
 @Controller
-class CheckoutController {
-    @GetMapping("/cart") public String cart(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        m.addAttribute("user", s.getAttribute("user")); return "checkout/cart";
+class AuthController {
+    private final UserService userService;
+    @Autowired AuthController(UserService us) { this.userService = us; }
+
+    @GetMapping("/")
+    public String home(HttpSession s, Model m) {
+        // If logged in, show home landing; if not, show home landing (public page)
+        m.addAttribute("user", s.getAttribute("user"));
+        return "index";
     }
-    @GetMapping("/thank-you") public String thanks(HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        m.addAttribute("user", s.getAttribute("user")); return "checkout/thank-you";
+
+    @GetMapping("/login")
+    public String loginPage(HttpSession s) {
+        return s.getAttribute("user") != null ? "redirect:/menu" : "auth/login";
+    }
+
+    @PostMapping("/login")
+    public String doLogin(@RequestParam String email,
+                          @RequestParam String password,
+                          @RequestParam(defaultValue = "false") boolean stayLoggedIn,
+                          HttpSession s, Model m) {
+        User u = userService.authenticate(email, password);
+        if (u == null) {
+            m.addAttribute("error", "Invalid email or password.");
+            return "auth/login";
+        }
+        // Block admins and drivers from customer login page
+        if ("ADMIN".equals(u.getRole()) || "DRIVER".equals(u.getRole())) {
+            m.addAttribute("error", "Please use the Admin / Driver login page.");
+            return "auth/login";
+        }
+        s.setAttribute("user", u);
+        if (stayLoggedIn) s.setMaxInactiveInterval(2592000);
+        return "redirect:/menu";
+    }
+
+    @GetMapping("/signup")
+    public String signupPage(HttpSession s) {
+        return s.getAttribute("user") != null ? "redirect:/menu" : "auth/signup";
+    }
+
+    @PostMapping("/signup")
+    public String doSignup(@RequestParam String name,
+                           @RequestParam String email,
+                           @RequestParam String password,
+                           @RequestParam(defaultValue = "") String phone,
+                           @RequestParam(defaultValue = "") String address,
+                           @RequestParam(required = false, defaultValue = "") String cardNumber,
+                           @RequestParam(required = false, defaultValue = "") String cardHolder,
+                           @RequestParam(required = false, defaultValue = "") String cardExpiry,
+                           HttpSession s, Model m) {
+        try {
+            User u = userService.register(name, email, password, phone, address,
+                                          cardNumber, cardHolder, cardExpiry);
+            s.setAttribute("user", u);
+            return "redirect:/menu";
+        } catch (IllegalArgumentException e) {
+            m.addAttribute("error", e.getMessage());
+            return "auth/signup";
+        } catch (IOException e) {
+            m.addAttribute("error", "Registration failed. Please try again.");
+            return "auth/signup";
+        }
+    }
+
+    @PostMapping("/social-login")
+    public String socialLogin(@RequestParam(defaultValue = "") String name,
+                              @RequestParam(defaultValue = "") String email,
+                              @RequestParam(defaultValue = "") String pic,
+                              HttpSession s) throws IOException {
+        if (email.isBlank()) return "redirect:/login";
+        User existing = userService.findByEmail(email);
+        if (existing != null) {
+            if ("ADMIN".equals(existing.getRole()) || "DRIVER".equals(existing.getRole()))
+                return "redirect:/login?error=staff";
+            if (!pic.isBlank()) userService.updateProfilePic(existing.getId(), pic);
+            s.setAttribute("user", userService.findById(existing.getId()));
+            return "redirect:/menu";
+        }
+        String autoPass = "SOCIAL_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+        User nu = userService.register(name.isBlank() ? email.split("@")[0] : name,
+                                       email, autoPass, "", "Please update your address",
+                                       "", "", "");
+        if (!pic.isBlank()) userService.updateProfilePic(nu.getId(), pic);
+        s.setAttribute("user", nu);
+        return "redirect:/menu";
+    }
+
+    @GetMapping("/forgot-password") public String forgotPage() { return "auth/forgot"; }
+    @PostMapping("/forgot-password")
+    public String doForgot(@RequestParam String email, Model m) {
+        User u = userService.findByEmail(email);
+        if (u != null) m.addAttribute("success", "Reset link sent to " + email + " (Demo: password unchanged)");
+        else           m.addAttribute("error",   "No account found with that email.");
+        return "auth/forgot";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession s) { s.invalidate(); return "redirect:/login"; }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ADMIN AUTH — /admin/login (separate page, separate session key)
+// ═══════════════════════════════════════════════════════════════════
+@Controller
+@RequestMapping("/admin")
+class AdminAuthController {
+    private final UserService userService;
+    private final FoodItemService foodService;
+    private final FileStorageUtil fsu;
+    private final OfferService offerService;
+    private final com.yummydish.util.OrderQueue orderQueue;
+
+    @Autowired
+    AdminAuthController(UserService us, FoodItemService fs,
+                        FileStorageUtil fsu, OfferService os,
+                        com.yummydish.util.OrderQueue oq) {
+        this.userService = us; this.foodService = fs;
+        this.fsu = fsu;       this.offerService = os;
+        this.orderQueue = oq;
+    }
+
+    private boolean isAdmin(HttpSession s) {
+        Object o = s.getAttribute("admin");
+        return o instanceof User u && "ADMIN".equals(u.getRole());
+    }
+
+    @GetMapping("/login")
+    public String adminLoginPage(HttpSession s) {
+        return isAdmin(s) ? "redirect:/admin/dashboard" : "admin/login";
+    }
+
+    @PostMapping("/login")
+    public String doAdminLogin(@RequestParam String email,
+                               @RequestParam String password,
+                               HttpSession s, Model m) {
+        User u = userService.authenticate(email, password);
+        if (u == null || !"ADMIN".equals(u.getRole())) {
+            m.addAttribute("error", "Invalid admin credentials.");
+            return "admin/login";
+        }
+        s.setAttribute("admin", u);
+        return "redirect:/admin/dashboard";
+    }
+
+    @GetMapping("/logout")
+    public String adminLogout(HttpSession s) {
+        s.removeAttribute("admin");
+        return "redirect:/admin/login";
+    }
+
+    @GetMapping("/dashboard")
+    public String dashboard(HttpSession s, Model m) {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+
+        List<Order> orders = fsu.readAll(fsu.getOrdersFile()).stream()
+            .map(Order::fromLine).filter(Objects::nonNull)
+            .sorted(Comparator.comparing(
+                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "",
+                Comparator.reverseOrder()))
+            .collect(Collectors.toList());
+
+        long revenue = orders.stream().mapToLong(o -> (long) o.getTotalAmount()).sum();
+
+        List<Feedback> feedbacks = fsu.readAll(fsu.getFeedbackFile()).stream()
+            .map(Feedback::fromFileLine).filter(Objects::nonNull).collect(Collectors.toList());
+
+        String today = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        m.addAttribute("admin",          s.getAttribute("admin"));
+        m.addAttribute("user",           s.getAttribute("admin"));
+        m.addAttribute("foods",          foodService.getAll());
+        m.addAttribute("customers",      userService.getAllCustomers());
+        m.addAttribute("drivers",        userService.getAllDrivers());
+        m.addAttribute("orders",         orders);
+        m.addAttribute("feedback",       feedbacks);
+        m.addAttribute("offers",         offerService.getAll());
+        m.addAttribute("revenue",        revenue);
+        m.addAttribute("contacts",       fsu.readAll(fsu.getContactsFile()));
+        m.addAttribute("cookingOrders",  orders.stream().filter(o -> Order.COOKING.equals(o.getStatus())).collect(Collectors.toList()));
+        m.addAttribute("readyOrders",    orders.stream().filter(o -> Order.READY.equals(o.getStatus())).collect(Collectors.toList()));
+        m.addAttribute("onwayOrders",    orders.stream().filter(o -> Order.ONWAY.equals(o.getStatus()) || Order.HANDOVER.equals(o.getStatus())).collect(Collectors.toList()));
+        m.addAttribute("deliveredToday", orders.stream().filter(o -> Order.DELIVERED.equals(o.getStatus()) && o.getCreatedAt() != null && o.getCreatedAt().startsWith(today)).collect(Collectors.toList()));
+        return "admin/dashboard";
+    }
+
+    // ── Food management ───────────────────────────────────────────
+    @PostMapping("/food/add")
+    public String addFood(@RequestParam String name, @RequestParam String description,
+                          @RequestParam double price, @RequestParam String category,
+                          @RequestParam(defaultValue = "") String ingredients,
+                          @RequestParam(defaultValue = "—") String portionSize,
+                          @RequestParam(defaultValue = "0") int calories,
+                          @RequestParam(required = false, defaultValue = "") String imageUrl,
+                          @RequestParam(defaultValue = "MainCourse") String foodType,
+                          HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        foodService.add(name, description, price, category, ingredients,
+                        portionSize, calories, imageUrl, foodType);
+        return "redirect:/admin/dashboard?tab=food";
+    }
+
+    @PostMapping("/food/delete")
+    public String deleteFood(@RequestParam String id, HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        foodService.delete(id);
+        return "redirect:/admin/dashboard?tab=food";
+    }
+
+    @PostMapping("/food/toggle")
+    public String toggleFood(@RequestParam String id, HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        foodService.toggleAvailability(id);
+        return "redirect:/admin/dashboard?tab=food";
+    }
+
+    @GetMapping("/food/get/{id}")
+    public ResponseEntity<?> getFoodJson(@PathVariable String id, HttpSession s) {
+        if (!isAdmin(s)) return ResponseEntity.status(401).build();
+        var f = foodService.getById(id);
+        if (f == null) return ResponseEntity.notFound().build();
+        Map<String,Object> m = new LinkedHashMap<>();
+        m.put("id", f.getId()); m.put("name", f.getName()); m.put("description", f.getDescription());
+        m.put("price", f.getPrice()); m.put("category", f.getCategory());
+        m.put("ingredients", f.getIngredients() != null ? f.getIngredients() : "");
+        m.put("portionSize", f.getPortionSize() != null ? f.getPortionSize() : "");
+        m.put("calories", f.getCalories()); m.put("imageUrl", f.getImageUrl() != null ? f.getImageUrl() : "");
+        m.put("available", f.isAvailable()); m.put("popular", f.isPopular());
+        m.put("foodType", f.getFoodType());
+        return ResponseEntity.ok(m);
+    }
+
+    @PostMapping("/food/update")
+    public String updateFood(@RequestParam String id,
+                             @RequestParam String name, @RequestParam String description,
+                             @RequestParam double price, @RequestParam String category,
+                             @RequestParam(defaultValue="") String ingredients,
+                             @RequestParam(defaultValue="—") String portionSize,
+                             @RequestParam(defaultValue="0") int calories,
+                             @RequestParam(defaultValue="") String imageUrl,
+                             @RequestParam(defaultValue="MainCourse") String foodType,
+                             @RequestParam(defaultValue="true") boolean available,
+                             HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        foodService.update(id, name, description, price, category, ingredients, portionSize, calories, available, imageUrl);
+        return "redirect:/admin/dashboard?tab=food";
+    }
+
+    @PostMapping("/user/update")
+    public String adminUpdateUser(@RequestParam String id,
+                                  @RequestParam(defaultValue="") String name,
+                                  @RequestParam(defaultValue="") String phone,
+                                  @RequestParam(defaultValue="") String address,
+                                  @RequestParam(defaultValue="") String profilePicUrl,
+                                  HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        var u = userService.findById(id);
+        if (u != null) {
+            if (!name.isBlank())         u.setName(name);
+            if (!phone.isBlank())        u.setPhone(phone);
+            if (!address.isBlank())      u.setAddress(address);
+            if (!profilePicUrl.isBlank()) u.setProfilePicUrl(profilePicUrl);
+            fsu.update(fsu.getUsersFile(), id, u.toFileLine());
+        }
+        // Return to correct tab based on role
+        var user = userService.findById(id);
+        String tab = (user != null && "DRIVER".equals(user.getRole())) ? "drivers" : "users";
+        return "redirect:/admin/dashboard?tab=" + tab;
+    }
+
+    // ── Order status — MANUAL only, admin controls this ──────────
+    @PostMapping("/order/status")
+    public String updateOrderStatus(@RequestParam String orderId,
+                                    @RequestParam String status,
+                                    HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        String line = fsu.findById(fsu.getOrdersFile(), orderId);
+        if (line != null) {
+            Order o = Order.fromLine(line);
+            o.setStatus(status);
+            o.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+
+            // ── OrderQueue: dequeue when kitchen starts cooking ────────────
+            // When admin moves order to COOKING it leaves the waiting queue
+            // and enters active kitchen processing — FIFO order preserved.
+            if (Order.COOKING.equals(status)) {
+                orderQueue.removeById(orderId);
+                System.out.println("[OrderQueue] Dequeued " + orderId
+                    + " → COOKING | Remaining in queue: " + orderQueue.size());
+            }
+
+            // Auto-assign least-loaded driver when moving to READY/HANDOVER
+            if ((Order.READY.equals(status) || Order.HANDOVER.equals(status))
+                    && (o.getDriverId() == null || o.getDriverId().isBlank())) {
+                User assignedDriver = findLeastLoadedDriver();
+                if (assignedDriver != null) {
+                    o.setDriverId(assignedDriver.getId());
+                    o.setDriverName(assignedDriver.getName());
+                    o.setDriverContact(assignedDriver.getPhone() != null ? assignedDriver.getPhone() : "");
+                }
+            }
+            fsu.update(fsu.getOrdersFile(), orderId, o.toFileLine());
+        }
+        return "redirect:/admin/dashboard?tab=orders";
+    }
+
+    /** Load-balance drivers: assign to the one with fewest active orders */
+    private User findLeastLoadedDriver() {
+        List<User> drivers = userService.getAllDrivers();
+        if (drivers.isEmpty()) return null;
+        Map<String, Long> load = fsu.readAll(fsu.getOrdersFile()).stream()
+            .map(Order::fromLine).filter(Objects::nonNull)
+            .filter(o -> !Order.DELIVERED.equals(o.getStatus()) && !Order.CANCELLED.equals(o.getStatus())
+                      && o.getDriverId() != null && !o.getDriverId().isBlank())
+            .collect(java.util.stream.Collectors.groupingBy(Order::getDriverId, java.util.stream.Collectors.counting()));
+        return drivers.stream()
+            .min(Comparator.comparingLong(d -> load.getOrDefault(d.getId(), 0L)))
+            .orElse(null);
+    }
+
+    // ── User management ───────────────────────────────────────────
+    @PostMapping("/user/delete")
+    public String deleteUser(@RequestParam String id, HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        userService.delete(id);
+        return "redirect:/admin/dashboard?tab=users";
+    }
+
+    // ── Driver management ─────────────────────────────────────────
+    @PostMapping("/driver/add")
+    public String addDriver(@RequestParam String name,
+                            @RequestParam String email,
+                            @RequestParam String password,
+                            @RequestParam(defaultValue = "") String phone,
+                            HttpSession s, Model m) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        try {
+            userService.registerDriver(name, email, password, phone);
+        } catch (IllegalArgumentException e) {
+            // email already taken — just redirect back with tab
+        }
+        return "redirect:/admin/dashboard?tab=drivers";
+    }
+
+    // ── Offer management ──────────────────────────────────────────
+    @PostMapping("/offer/add")
+    public String addOffer(@RequestParam String code, @RequestParam String title,
+                           @RequestParam String description,
+                           @RequestParam double discount,
+                           @RequestParam(defaultValue = "0") double minOrder,
+                           HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        Offer o = new Offer();
+        o.setCode(code.toUpperCase()); o.setTitle(title); o.setDescription(description);
+        o.setDiscountPercent(discount); o.setMinOrderAmount(minOrder); o.setActive(true);
+        o.setCreatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        offerService.add(o);
+        return "redirect:/admin/dashboard?tab=offers";
+    }
+
+    @PostMapping("/offer/delete")
+    public String deleteOffer(@RequestParam String code, HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        offerService.delete(code);
+        return "redirect:/admin/dashboard?tab=offers";
+    }
+
+    // ── Feedback reply ────────────────────────────────────────────
+    @PostMapping("/feedback/reply")
+    public String replyFeedback(@RequestParam String feedbackId,
+                                @RequestParam String reply,
+                                HttpSession s) throws IOException {
+        if (!isAdmin(s)) return "redirect:/admin/login";
+        String line = fsu.findById(fsu.getFeedbackFile(), feedbackId);
+        if (line != null) {
+            String[] parts = line.split("\\|", -1);
+            if (parts.length >= 8) {
+                parts[7] = reply.replace("|", "").replace("\n", " ");
+                fsu.update(fsu.getFeedbackFile(), feedbackId, String.join("|", parts));
+            }
+        }
+        return "redirect:/admin/dashboard?tab=feedback";
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// ACCOUNT — customer profile (no driver section)
+// DRIVER AUTH — /driver/login (completely separate from customer)
 // ═══════════════════════════════════════════════════════════════════
-@RestController @RequestMapping("/api") class ApiCartController {
-                ? foodService.getAll()
-                : foodService.getByCategory(category);
+@Controller @RequestMapping("/account")
+class AccountController {
+    private final UserService userService;
+    @Autowired AccountController(UserService us) { this.userService = us; }
+
+    private boolean isCustomer(HttpSession s) {
+        Object u = s.getAttribute("user");
+        return u instanceof User && "CUSTOMER".equals(((User)u).getRole());
+    }
+
+    @GetMapping public String profile(HttpSession s, Model m) {
+        if (!isCustomer(s)) {
+            // Drivers go to driver portal, admins to admin portal
+            if (s.getAttribute("driver") != null) return "redirect:/driver/dashboard";
+            if (s.getAttribute("admin") != null)  return "redirect:/admin/dashboard";
+            return "redirect:/login";
         }
-
-        // ── QuickSort: sort by price when requested ────────────────────────
-        // Uses custom QuickSort implementation (O(n log n) average-case)
-        // instead of Java's built-in sort — see com.yummydish.util.QuickSort
-        if ("price_asc".equals(sort)) {
-            com.yummydish.util.QuickSort.sortByPriceAscending(items);
-        } else if ("price_desc".equals(sort)) {
-            com.yummydish.util.QuickSort.sortByPriceDescending(items);
-        }
-
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (FoodItem f : items) {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("id",            f.getId());
-            map.put("name",          f.getName());
-            map.put("price",         f.getPrice());
-            map.put("category",      f.getCategory());
-            map.put("description",   f.getDescription());
-            map.put("imageUrl",      f.getImageUrl() != null ? f.getImageUrl() : "");
-            map.put("calories",      f.getCalories());
-            map.put("portionSize",   f.getPortionSize() != null ? f.getPortionSize() : "");
-            map.put("popular",       f.isPopular());
-            map.put("rating",        f.getRating());
-            map.put("ingredients",   f.getIngredients() != null ? f.getIngredients() : "");
-            map.put("nutritionalInfo", f.getNutritionalInfo());
-            map.put("foodType",      f.getFoodType());
-            map.put("available",     f.isAvailable());
-            map.put("reviewCount",   f.getReviewCount());
-            result.add(map);
-        }
-        return ResponseEntity.ok(result);
-    }
-
-    /**
-     * GET /api/queue/status — returns current OrderQueue state for admin dashboard.
-     * Shows queue depth, next order to process, and all waiting orders in FIFO order.
-     */
-    @GetMapping("/queue/status")
-    public ResponseEntity<?> queueStatus(HttpSession s) {
-        if (s.getAttribute("admin") == null) return ResponseEntity.status(403).build();
-        Map<String, Object> resp = new LinkedHashMap<>();
-        resp.put("queueDepth",  orderQueue.size());
-        resp.put("isEmpty",     orderQueue.isEmpty());
-        Order next = orderQueue.peek();
-        resp.put("nextOrderId", next != null ? next.getOrderId() : null);
-        resp.put("queue", orderQueue.snapshot().stream().map(o -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("orderId",   o.getOrderId());
-            m.put("customer",  o.getCustomerName());
-            m.put("total",     o.getTotalAmount());
-            m.put("createdAt", o.getCreatedAt());
-            return m;
-        }).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
-
-    @PostMapping("/validate-offer")
-    public ResponseEntity<?> validateOffer(@RequestBody Map<String, Object> body, HttpSession s) {
-        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
-        String code  = body.getOrDefault("code",    "").toString();
-        double sub   = ((Number) body.getOrDefault("subtotal", 0)).doubleValue();
-        return ResponseEntity.ok(offerService.validateCode(code, sub));
-    }
-
-    @PostMapping("/order")
-    public ResponseEntity<?> placeOrder(@RequestBody Map<String, Object> body, HttpSession s) {
-    @GetMapping("/orders/new-count")
-    public ResponseEntity<?> newOrdersCount(HttpSession s) {
-        if (s.getAttribute("admin") == null && s.getAttribute("driver") == null)
-            return ResponseEntity.status(401).build();
-        long count = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(o -> o != null && Order.COOKING.equals(o.getStatus()))
-            .count();
-        return ResponseEntity.ok(Map.of("count", count));
-    }
-
-    @PostMapping("/group/create")
-    public ResponseEntity<?> createRoom(HttpSession s) throws IOException {
-        User u = (User) s.getAttribute("user"); if (u == null) return ResponseEntity.status(401).build();
-        String code = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
-        fsu.appendLine(fsu.getGroupRoomsFile(),
-            code + "|" + u.getId() + "|" + u.getName() + "|OPEN|" + LocalDateTime.now().format(DTF));
-        return ResponseEntity.ok(Map.of("code", code));
-    }
-
-    @GetMapping("/group/join/{code}")
-    public ResponseEntity<?> joinRoom(@PathVariable String code, HttpSession s) {
-        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
-        String line = fsu.findById(fsu.getGroupRoomsFile(), code);
-        if (line == null) return ResponseEntity.status(404).body(Map.of("error", "Room not found"));
-        String[] p = line.split("\\|", -1);
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("code", code); r.put("creatorName", p.length > 2 ? p[2] : "Host");
-        r.put("status", p.length > 3 ? p[3] : "OPEN");
-        return ResponseEntity.ok(r);
-    }
-
-    // ── Driver location update (from browser GPS) ─────────────────
-    @PostMapping("/driver/location")
-    public ResponseEntity<?> updateDriverLocation(@RequestBody Map<String, Object> body,
-                                                  HttpSession s) throws IOException {
-        if (s.getAttribute("driver") == null) return ResponseEntity.status(401).build();
-        User driver = (User) s.getAttribute("driver");
-        double lat = ((Number) body.getOrDefault("lat", 0)).doubleValue();
-        double lng = ((Number) body.getOrDefault("lng", 0)).doubleValue();
-        // Store driver location as a simple file entry (keyed by driver ID)
-        String locationLine = driver.getId() + "|" + lat + "|" + lng + "|" + LocalDateTime.now().format(DTF);
-        // Simulate driver moving around Kandy
-        double baseLat = 7.2906 + (Math.random() - 0.5) * 0.015;
-        double baseLng = 80.6337 + (Math.random() - 0.5) * 0.015;
-        return ResponseEntity.ok(Map.of("lat", baseLat, "lng", baseLng, "available", true));
-    }
-
-    // ── My orders (for account page quick view) ───────────────────
-    @GetMapping("/my-orders")
-    public ResponseEntity<?> myOrders(@RequestParam(defaultValue = "5") int limit, HttpSession s) {
+        // Refresh user from file so loyalty points are up to date
         User u = (User) s.getAttribute("user");
-        if (u == null) return ResponseEntity.status(401).build();
-        List<Map<String, Object>> result = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(Objects::nonNull)
-            .filter(o -> u.getId().equals(o.getCustomerId()))
-            .sorted(Comparator.comparing(
-                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "",
-                Comparator.reverseOrder()))
-            .limit(limit)
-            .map(o -> {
-                Map<String, Object> m = new LinkedHashMap<>();
-                m.put("orderId",     o.getOrderId());
-                m.put("status",      o.getStatus());
-                m.put("statusBadge", o.getStatusBadge());
-                m.put("totalAmount", o.getTotalAmount());
-                m.put("createdAt",   o.getCreatedAt());
-                m.put("items",       o.getItems().stream().map(i -> {
-                    Map<String,Object> im = new LinkedHashMap<>();
-                    im.put("foodId",   i.getFoodId());
-                    im.put("foodName", i.getFoodName());
-                    im.put("price",    i.getPrice());
-                    im.put("quantity", i.getQuantity());
-                    im.put("imageUrl", i.getImageUrl() != null ? i.getImageUrl() : "");
-                    return im;
-                }).collect(Collectors.toList()));
-                return m;
-            })
+        User fresh = userService.findById(u.getId());
+        if (fresh != null) s.setAttribute("user", fresh);
+        m.addAttribute("user", s.getAttribute("user"));
+        return "account/profile";
+    }
+
+    @PostMapping("/update")
+    public String update(@RequestParam(defaultValue = "") String name,
+                         @RequestParam(defaultValue = "") String phone,
+                         @RequestParam(defaultValue = "") String address,
+                         @RequestParam(required = false, defaultValue = "") String cardNumber,
+                         @RequestParam(required = false, defaultValue = "") String cardHolder,
+                         @RequestParam(required = false, defaultValue = "") String cardExpiry,
+                         HttpSession s, Model m) throws IOException {
+        User u = (User) s.getAttribute("user"); if (u == null) return "redirect:/login";
+        userService.update(u.getId(), name, phone, address, cardNumber, cardHolder, cardExpiry);
+        User updated = userService.findById(u.getId());
+        s.setAttribute("user", updated != null ? updated : u);
+        m.addAttribute("user", s.getAttribute("user"));
+        m.addAttribute("success", "Profile updated! ✅");
+        return "account/profile";
+    }
+
+    @PostMapping("/delete")
+    public String delete(HttpSession s) throws IOException {
+        User u = (User) s.getAttribute("user");
+        if (u != null) { userService.delete(u.getId()); s.invalidate(); }
+        return "redirect:/login?deleted=true";
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body, HttpSession s) {
+        User u = (User) s.getAttribute("user");
+        if (u == null) return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        String current = body.getOrDefault("currentPassword", "");
+        String newPwd  = body.getOrDefault("newPassword", "");
+        if (current.isBlank() || newPwd.isBlank() || newPwd.length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Password must be at least 6 characters."));
+        }
+        try {
+            boolean ok = userService.changePassword(u.getId(), current, newPwd);
+            if (!ok) return ResponseEntity.badRequest().body(Map.of("error", "Current password is incorrect."));
+            User updated = userService.findById(u.getId());
+            s.setAttribute("user", updated != null ? updated : u);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to update password."));
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ACTIVITY
+// ═══════════════════════════════════════════════════════════════════
+class YummyDishErrorController implements org.springframework.boot.web.servlet.error.ErrorController {
+    @org.springframework.web.bind.annotation.GetMapping
+    public String handleError(jakarta.servlet.http.HttpServletRequest req, org.springframework.ui.Model m) {
+        Object code = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_STATUS_CODE_ATTRIBUTE);
+        Object msg  = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_MESSAGE_ATTRIBUTE);
+        Object ex   = req.getAttribute(org.springframework.web.util.WebUtils.ERROR_EXCEPTION_ATTRIBUTE);
+        // Log the real exception to console for debugging
+        if (ex instanceof Throwable t) {
+            System.err.println("[YummyDish ERROR] " + t.getClass().getName() + ": " + t.getMessage());
+            t.printStackTrace();
+        }
+        String displayMsg = (msg != null && !msg.toString().isBlank()) ? msg.toString() : "An unexpected error occurred";
+        m.addAttribute("errorCode",    code != null ? code.toString() : "500");
+        m.addAttribute("errorMessage", displayMsg);
+        return "error";
+    }
 }
