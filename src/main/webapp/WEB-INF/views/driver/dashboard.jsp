@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" buffer="128kb" autoFlush="true" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -7,7 +7,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Driver — YummyDish</title>
+<title>Driver &mdash; YummyDish</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -456,7 +456,7 @@ function planAllRoutes(){
     var distKm=(r.summary.totalDistance/1000).toFixed(1);
     var mins=Math.round(r.summary.totalTime/60);
     document.getElementById('navBar').classList.add('show');
-    document.getElementById('navDest').textContent=ready.length+' stops — optimized route';
+    document.getElementById('navDest').textContent=ready.length+' stops &mdash; optimized route';
     document.getElementById('navEta').textContent=distKm+' km total · ~'+mins+' min';
     document.getElementById('planBtn').classList.add('active');
     toast('Planned: '+ready.length+' stops, '+distKm+' km');

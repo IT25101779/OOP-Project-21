@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "YummyDish - Spring Boot",
+            "request": "launch",
+            "mainClass": "com.yummydish.YummyDishApplication",
+            "projectName": "yummydish",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "-Dspring.profiles.active=default",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "YummyDish - Debug",
+            "request": "launch",
+            "mainClass": "com.yummydish.YummyDishApplication",
+            "projectName": "yummydish",
+            "args": "",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "-Dspring.profiles.active=default -Xdebug",
+            "console": "integratedTerminal"
+        }
+    ]
+}
