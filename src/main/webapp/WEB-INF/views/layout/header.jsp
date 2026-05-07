@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"  uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
@@ -6,10 +7,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#FF6B35">
-<title><c:out value="${not empty pageTitle ? pageTitle : 'Menu'}"/> — YummyDish</title>
-<!-- Professional fonts: Inter + Fraunces display -->
+<title><c:out value="${not empty pageTitle ? pageTitle : 'YummyDish'}"/> &mdash; YummyDish</title>
+<!-- Futuristic fonts: Syne display + DM Sans body + DM Mono data -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Favicon / tab icon -->
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,11 +23,11 @@
   if(t==='dark') document.documentElement.setAttribute('data-theme','dark');
 })();
 window.FB_API_KEY='${firebaseApiKey}';
-// Leaflet is synchronous — always ready
+// Leaflet is synchronous &mdash; always ready
 window.mapsLoaded=true;
 function onMapsReady(fn){ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fn);}else{fn();} }
 </script>
-<!-- Leaflet — free maps, no API key needed -->
+<!-- Leaflet &mdash; free maps, no API key needed -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

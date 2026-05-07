@@ -1,7 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
-<c:set var="pageTitle" value="YummyDish — Kandy's Finest Food Delivered"/>
+<c:set var="pageTitle" value="YummyDish &mdash; Kandy's Finest Food Delivered"/>
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
 <style>
 .hero{min-height:88vh;background:linear-gradient(135deg,#0F0F0F 0%,#1a1a1a 60%,#0d0d0d 100%);display:flex;align-items:center;position:relative;overflow:hidden;}
@@ -290,7 +290,7 @@ function renderPopular() {
 function addHomeCart(id) {
   var d = _popData[id];
   if (!d) return;
-  // Safe Cart call — works whether app.js loaded synchronously or deferred
+  // Safe Cart call &mdash; works whether app.js loaded synchronously or deferred
   if (typeof Cart !== 'undefined') {
     Cart.add(id, d.name, d.price, 1, d.img);
   } else {

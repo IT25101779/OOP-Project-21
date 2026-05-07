@@ -1,0 +1,1 @@
+ADMIN001|Admin User|admin@yummydish.lk|$2a$10$/Dcrj9h4vfNnAOZwsn7KL.hWB2GA9Wpa9Zj1QKLxr3k3bNADFrJI.|+94812345678|YummyDish HQ Kandy|ADMIN|2026-05-04 08:55:14||||.|0
