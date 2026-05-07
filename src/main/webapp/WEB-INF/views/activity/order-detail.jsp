@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -111,7 +111,7 @@
           <div style="font-size:.72rem;font-weight:700;color:var(--c-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Delivery Details</div>
           <div style="font-size:.875rem;color:var(--c-text2);margin-bottom:6px;display:flex;align-items:flex-start;gap:7px;"><span>📍</span><span>${order.deliveryAddress}</span></div>
           <c:if test="${fn:length(order.driverName) > 0}">
-            <div style="font-size:.875rem;color:var(--c-text2);display:flex;align-items:center;gap:7px;"><span>🛵</span><span>${order.driverName} — ${order.driverContact}</span></div>
+            <div style="font-size:.875rem;color:var(--c-text2);display:flex;align-items:center;gap:7px;"><span>🛵</span><span>${order.driverName} &mdash; ${order.driverContact}</span></div>
           </c:if>
           <c:if test="${fn:length(order.chefNote) > 0}">
             <div style="margin-top:8px;padding:8px 12px;background:var(--c-orange-l);border-radius:10px;font-size:.8rem;color:var(--c-text2);">👨‍🍳 Note to Chef: ${order.chefNote}</div>

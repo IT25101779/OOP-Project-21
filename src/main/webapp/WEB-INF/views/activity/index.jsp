@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -37,7 +37,7 @@
           <span class="yd-live-dot"></span>Live Tracking
         </span>
       </div>
-      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-top:4px;">Real-time updates — your driver's location is updated every 8 seconds</p>
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-top:4px;">Real-time updates &mdash; your driver's location is updated every 8 seconds</p>
     </div>
   </div>
 
@@ -193,7 +193,7 @@
       <div class="yd-card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span style="font-weight:700;font-size:.9rem;">⭐ Loyalty Points</span>
-          <span style="font-size:1.6rem;font-weight:800;color:#FFB800;" id="loyaltyPts">—</span>
+          <span style="font-size:1.6rem;font-weight:800;color:#FFB800;" id="loyaltyPts">&mdash;</span>
         </div>
         <div class="loyalty-bar"><div class="loyalty-fill" id="loyaltyFill" style="width:0%;"></div></div>
         <div style="font-size:.72rem;color:var(--c-muted);margin-top:5px;">1 point per LKR 10 spent · 100 pts = LKR 10 off</div>
@@ -258,12 +258,12 @@ function startEta(orderId, initialMins) {
       state.mins--;
       state.secs = 59;
     } else {
-      // Time up — add 10 min and show delay message
+      // Time up &mdash; add 10 min and show delay message
       if (!state.delayed) {
         state.delayed  = true;
         state.mins     = 10;
         state.secs     = 0;
-        if (traf) traf.textContent = '⚠️ Traffic delay — adding 10 min. Sorry for the inconvenience!';
+        if (traf) traf.textContent = '⚠️ Traffic delay &mdash; adding 10 min. Sorry for the inconvenience!';
         if (traf) traf.style.color = '#E65100';
         showNotif('⚠️','Delivery Delayed','Heavy traffic. Updated ETA +10 min. Sorry!','rgba(230,81,0,.12)');
         YDSound && YDSound.statusUpdate && YDSound.statusUpdate();
@@ -389,7 +389,7 @@ function startPoller(orderId) {
         var msgs = {
           COOKING:'Our chef is preparing your order 🍳',
           READY:'Packed and waiting for your driver 📦',
-          HANDOVER:'Driver has your order — heading to you! 🛵',
+          HANDOVER:'Driver has your order &mdash; heading to you! 🛵',
           ON_WAY:'Your driver is on the way! 🛵',
           DELIVERED:'Delivered! Enjoy your meal 🍽️',
           CANCELLED:'This order was cancelled'
