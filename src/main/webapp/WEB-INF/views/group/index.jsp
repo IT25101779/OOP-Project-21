@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn"  uri="jakarta.tags.functions" %>
@@ -22,7 +22,7 @@
     <div class="container" style="position:relative;z-index:1;max-width:720px;text-align:center;">
       <div style="font-size:3.5rem;margin-bottom:16px;animation:float 3s ease-in-out infinite;">👥</div>
       <h1 style="font-family:var(--font-display);color:white;font-size:2.4rem;margin-bottom:10px;">Group Orders</h1>
-      <p style="color:rgba(255,255,255,.6);font-size:1rem;max-width:480px;margin:0 auto;">Perfect for office lunches. Create a room, share the code, everyone picks their food — one delivery, one payment.</p>
+      <p style="color:rgba(255,255,255,.6);font-size:1rem;max-width:480px;margin:0 auto;">Perfect for office lunches. Create a room, share the code, everyone picks their food &mdash; one delivery, one payment.</p>
     </div>
   </div>
 

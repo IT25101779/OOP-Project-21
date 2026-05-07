@@ -19,184 +19,125 @@ import java.util.stream.Collectors;
 
 // ── Global model attributes injected into every JSP ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
-@Controller
-@RequestMapping("/driver")
-class DriverController {
-    private final UserService userService;
-    private final FileStorageUtil fsu;
-
-    @Autowired
-    DriverController(UserService us, FileStorageUtil fsu) {
-        this.userService = us; this.fsu = fsu;
+@Controller class AdvancedOrderPageController {
     }
 
-    private boolean isDriver(HttpSession s) {
-        Object o = s.getAttribute("driver");
-        return o instanceof User u && "DRIVER".equals(u.getRole());
+    @GetMapping("/group")    public String group(HttpSession s, Model m) {
+        if (s.getAttribute("user") == null) return "redirect:/login";
+        m.addAttribute("user", s.getAttribute("user")); m.addAttribute("foods", foodService.getAvailable());
+        return "group/index";
     }
-
-    @GetMapping("/login")
-    public String driverLoginPage(HttpSession s) {
-        return isDriver(s) ? "redirect:/driver/dashboard" : "driver/login";
-    }
-
-    @PostMapping("/login")
-    public String doDriverLogin(@RequestParam String email,
-                                @RequestParam String password,
-                                HttpSession s, Model m) {
-        User u = userService.authenticate(email, password);
-        if (u == null || !"DRIVER".equals(u.getRole())) {
-            m.addAttribute("error", "Invalid driver credentials.");
-            return "driver/login";
-        }
-        s.setAttribute("driver", u);
-        return "redirect:/driver/dashboard";
-    }
-
-    @GetMapping("/logout")
-    public String driverLogout(HttpSession s) {
-        s.removeAttribute("driver");
-        return "redirect:/driver/login";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard(HttpSession s, Model m) {
-        if (!isDriver(s)) return "redirect:/driver/login";
-
-        // READY = admin approved pickup. HANDOVER + ON_WAY = already with driver.
-        List<Order> queue = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(Objects::nonNull)
-            .filter(o -> Order.READY.equals(o.getStatus())
-                      || Order.HANDOVER.equals(o.getStatus())
-                      || Order.ONWAY.equals(o.getStatus()))
-            .sorted(Comparator.comparing(
-                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : ""))
-            .collect(Collectors.toList());
-
-        m.addAttribute("driver",  s.getAttribute("driver"));
-        m.addAttribute("restaurant_lat", 7.2937);  // Queens Hotel area, Kandy
-        m.addAttribute("restaurant_lng", 80.6340);
-        m.addAttribute("orders",  queue);
-        return "driver/dashboard";
-    }
-
-    // Driver marks order as picked up (READY → HANDOVER)
-    @PostMapping("/pickup/{orderId}")
-    public String markPickedUp(@PathVariable String orderId, HttpSession s) throws IOException {
-        if (!isDriver(s)) return "redirect:/driver/login";
-        String line = fsu.findById(fsu.getOrdersFile(), orderId);
-        if (line != null) {
-            Order o = Order.fromLine(line);
-            if (Order.READY.equals(o.getStatus())) {
-                updateOrderStatus(orderId, Order.HANDOVER);
-            }
-        }
-        return "redirect:/driver/dashboard";
-    }
-
-    // Driver marks order as out for delivery (HANDOVER → ON_WAY)
-    @PostMapping("/delivering/{orderId}")
-    public String markDelivering(@PathVariable String orderId, HttpSession s) throws IOException {
-        if (!isDriver(s)) return "redirect:/driver/login";
-        updateOrderStatus(orderId, Order.ONWAY);
-        return "redirect:/driver/dashboard";
-    }
-
-    // Driver marks order as delivered (ON_WAY → DELIVERED)
-    @PostMapping("/delivered/{orderId}")
-    public String markDelivered(@PathVariable String orderId, HttpSession s) throws IOException {
-        if (!isDriver(s)) return "redirect:/driver/login";
-        updateOrderStatus(orderId, Order.DELIVERED);
-        return "redirect:/driver/dashboard";
-    }
-
-    private void updateOrderStatus(String orderId, String status) throws IOException {
-        String line = fsu.findById(fsu.getOrdersFile(), orderId);
-        if (line != null) {
-            Order o = Order.fromLine(line);
-            o.setStatus(status);
-            o.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-            fsu.update(fsu.getOrdersFile(), orderId, o.toFileLine());
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MENU
-// ═══════════════════════════════════════════════════════════════════
-@Controller @RequestMapping("/activity")
-class ActivityController {
-    private final FileStorageUtil fsu;
-    @Autowired ActivityController(FileStorageUtil f) { this.fsu = f; }
-
-    @GetMapping public String activity(HttpSession s, Model m) {
+    @GetMapping("/schedule") public String schedule(HttpSession s, Model m) {
         if (s.getAttribute("user") == null) return "redirect:/login";
         User u = (User) s.getAttribute("user");
-        List<Order> all = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(Objects::nonNull)
-            .filter(o -> u.getId().equals(o.getCustomerId()))
-            .sorted(Comparator.comparing(
-                (Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "",
-                Comparator.reverseOrder()))
-            .collect(Collectors.toList());
-        List<Order> ongoing = all.stream()
-            .filter(o -> !Order.DELIVERED.equals(o.getStatus()) && !Order.CANCELLED.equals(o.getStatus()))
-            .collect(Collectors.toList());
-        List<Order> history = all.stream()
-            .filter(o -> Order.DELIVERED.equals(o.getStatus()) || Order.CANCELLED.equals(o.getStatus()))
-            .collect(Collectors.toList());
-        m.addAttribute("user",    u);
-        m.addAttribute("orders",  all);
-        m.addAttribute("ongoing", ongoing);
-        m.addAttribute("history", history);
-        return "activity/index";
-    }
-
-    @GetMapping("/order/{id}") public String detail(@PathVariable String id, HttpSession s, Model m) {
-        if (s.getAttribute("user") == null) return "redirect:/login";
-        String l = fsu.findById(fsu.getOrdersFile(), id); if (l == null) return "redirect:/activity";
-        m.addAttribute("order", Order.fromLine(l)); m.addAttribute("user", s.getAttribute("user"));
-        return "activity/order-detail";
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// EXTRA PAGES — about, contact, reviews, group, schedule
-// ═══════════════════════════════════════════════════════════════════
-@RestController @RequestMapping("/api") class ApiDriverController {
-    public ResponseEntity<?> placeOrder(@RequestBody Map<String, Object> body, HttpSession s) {
-        User u = (User) s.getAttribute("user");
-        if (u == null) return ResponseEntity.status(401).body(Map.of("error", "Not logged in"));
+        List<Order> scheduledOrders = new java.util.ArrayList<>();
         try {
-            Order o = buildOrder(body, u);
-            fsu.appendLine(fsu.getOrdersFile(), o.toFileLine());
+            scheduledOrders = fsu.readAll(fsu.getOrdersFile()).stream()
+                .map(line -> { try { return Order.fromLine(line); } catch(Exception e) { return null; } })
+                .filter(Objects::nonNull)
+                .filter(o -> u.getId().equals(o.getCustomerId()) && "SCHEDULED".equals(o.getOrderType()))
+                .sorted(Comparator.comparing(o -> o.getCreatedAt() != null ? o.getCreatedAt() : "", Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("[Schedule] Error loading scheduled orders: " + e.getMessage());
+        }
+        m.addAttribute("user",            u);
+        m.addAttribute("foods",           foodService.getAvailable());
+        m.addAttribute("scheduledOrders", scheduledOrders);
+        return "schedule/index";
+    }
+}
 
-            // ── OrderQueue: enqueue new STANDARD orders for FIFO processing ──
-            // Scheduled orders are queued when their scheduled time arrives,
-            // not immediately at placement.
-            if (!"SCHEDULED".equals(o.getOrderType())) {
-                orderQueue.enqueue(o);
-                System.out.println("[OrderQueue] Enqueued order " + o.getOrderId()
-                    + " | Queue depth: " + orderQueue.size());
-            }
+// ═══════════════════════════════════════════════════════════════════
+// REST API
+// ═══════════════════════════════════════════════════════════════════
+}
+@RestController @RequestMapping("/api") class ApiAdvancedOrderController {
+                m.put("adminReply",   p.length>7?p[7]:"");
+                int rating = 5;
+                try { if(p.length>10) rating = Integer.parseInt(p[10]); } catch(Exception ignored){}
+                m.put("rating", rating);
+                return m;
+            })
+            .sorted(Comparator.comparing((Map<String,Object> m) -> m.getOrDefault("createdAt","").toString(), Comparator.reverseOrder()))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(reviews);
+    }
 
-            // For scheduled orders, also write to scheduled_orders.txt
-            if ("SCHEDULED".equals(o.getOrderType()) && o.getScheduledFor() != null && !o.getScheduledFor().isEmpty()) {
-                fsu.appendLine(fsu.getScheduledOrdersFile(), o.toFileLine());
-            }
-            // Award loyalty points to user
-            try {
-                User usr = userService.findById(u.getId());
-                if (usr != null) {
-                    usr.addLoyaltyPoints(o.getLoyaltyPoints());
-                    fsu.update(fsu.getUsersFile(), u.getId(), usr.toFileLine());
+    @GetMapping("/weather")
+    public ResponseEntity<?> getWeather() {
+        Map<String,Object> result = new LinkedHashMap<>();
+        try {
+            String apiKey = openWeatherKey != null ? openWeatherKey.trim() : "";
+            if (!apiKey.isEmpty()) {
+                String url = "https://api.openweathermap.org/data/2.5/weather?lat=7.2906&lon=80.6337&appid=" + apiKey + "&units=metric";
+                var conn = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                conn.setConnectTimeout(4000); conn.setReadTimeout(4000);
+                if (conn.getResponseCode() == 200) {
+                    String json = new String(conn.getInputStream().readAllBytes());
+                    double temp = 28.0; String desc = "partly cloudy"; String main = "Clouds";
+                    try { int ti=json.indexOf("\"temp\":"); if(ti>=0){int end=json.indexOf(",",ti+7);if(end>ti)temp=Double.parseDouble(json.substring(ti+7,end).trim());} } catch(Exception ignored){}
+                    try { int di=json.indexOf("\"description\":\""); if(di>=0){int s2=di+15;int e2=json.indexOf("\"",s2);if(e2>s2)desc=json.substring(s2,e2);} } catch(Exception ignored){}
+                    try { int mi=json.indexOf("\"main\":\""); if(mi>=0){int s2=mi+8;int e2=json.indexOf("\"",s2);if(e2>s2)main=json.substring(s2,e2);} } catch(Exception ignored){}
+                    boolean isRaining = main.equalsIgnoreCase("Rain")||main.equalsIgnoreCase("Drizzle")||main.equalsIgnoreCase("Thunderstorm");
+                    boolean isHeavy   = main.equalsIgnoreCase("Thunderstorm")||desc.contains("heavy");
+                    String icon = switch(main.toLowerCase()) {
+                        case "rain"         -> "🌧️";
+                        case "drizzle"      -> "🌦️";
+                        case "thunderstorm" -> "⛈️";
+                        case "clouds"       -> "⛅";
+                        case "mist","fog","haze" -> "🌫️";
+                        default             -> "☀️";
+                    };
+                    result.put("condition", icon + " " + desc.substring(0,1).toUpperCase() + desc.substring(1));
+                    result.put("temp",      String.format("%.0f°C", temp));
+                    result.put("extraFee",  isHeavy ? 100 : isRaining ? 50 : 0);
+                    result.put("isRaining", isRaining);
+                    result.put("isHeavy",   isHeavy);
+                    result.put("source",    "live");
+                    return ResponseEntity.ok(result);
                 }
-            } catch(Exception ignored) {}
-            Map<String, Object> resp = new LinkedHashMap<>();
-            resp.put("success",        true);
-            resp.put("orderId",        o.getOrderId());
-            resp.put("total",          o.getTotalAmount());
-            resp.put("loyaltyPoints",  o.getLoyaltyPoints());
+            }
+        } catch (Exception ignored) { /* fall through to fast local simulation */ }
+
+        // Fast local fallback — always returns immediately, no network call
+        int hour = LocalDateTime.now().getHour();
+        // Kandy climate: afternoon showers 14-17h, morning usually clear
+        boolean afternoonRain = (hour >= 14 && hour <= 17);
+        boolean morning = (hour >= 6 && hour <= 10);
+        String icon, condition; int extraFee; boolean isRaining, isHeavy;
+        if (afternoonRain && Math.random() < 0.55) {
+            boolean heavy = Math.random() < 0.3;
+            icon = heavy ? "⛈️" : "🌧️"; condition = heavy ? "Heavy rain" : "Light rain";
+            extraFee = heavy ? 100 : 50; isRaining = true; isHeavy = heavy;
+        } else if (morning) {
+            icon = "☀️"; condition = "Clear sky"; extraFee = 0; isRaining = false; isHeavy = false;
+        } else {
+            icon = "⛅"; condition = "Partly cloudy"; extraFee = 0; isRaining = false; isHeavy = false;
+        }
+        int temp = 26 + (int)(Math.random() * 7);
+        result.put("condition", icon + " " + condition);
+        result.put("temp",      temp + "°C");
+        result.put("extraFee",  extraFee);
+        result.put("isRaining", isRaining);
+        result.put("isHeavy",   isHeavy);
+        result.put("source",    "local");
+        result.put("updatedAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+        result.put("source",    "Estimated");
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/scheduled-orders")
+    public ResponseEntity<?> myScheduledOrders(HttpSession s) {
+        User u = (User) s.getAttribute("user");
+        if (u == null) return ResponseEntity.status(401).build();
+        List<Map<String,Object>> result = fsu.readAll(fsu.getScheduledOrdersFile()).stream()
+            .filter(l -> l.contains(u.getId()))
+            .map(l -> {
+                String[] p = l.split("\\|",-1);
+                Map<String,Object> m = new LinkedHashMap<>();
+                m.put("id",          p.length>0?p[0]:"");
+                m.put("customerId",  p.length>1?p[1]:"");
                 m.put("scheduledAt", p.length>2?p[2]:"");
                 m.put("status",      p.length>3?p[3]:"PENDING");
                 m.put("depositPaid", p.length>4?p[4]:"0");
@@ -213,117 +154,4 @@ class ActivityController {
 
     @PostMapping("/scheduled-orders/{id}/cancel")
     public ResponseEntity<?> cancelScheduled(@PathVariable String id, HttpSession s) throws IOException {
-            }
-        } catch(Exception e) { /* allow cancel if parse fails */ }
-        // Mark as CANCELLED
-        p[3] = "CANCELLED";
-        fsu.update(fsu.getScheduledOrdersFile(), id, String.join("|", p));
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    @GetMapping("/group/room/{code}/details")
-    public ResponseEntity<?> groupRoomDetails(@PathVariable String code, HttpSession s) {
-        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
-        String line = fsu.findById(fsu.getGroupRoomsFile(), code);
-        if (line == null) return ResponseEntity.status(404).body(Map.of("error","Room not found"));
-        String[] p = line.split("\\|",-1);
-        Map<String,Object> r = new LinkedHashMap<>();
-        r.put("code",        code);
-        r.put("creatorId",   p.length>1?p[1]:"");
-        r.put("creatorName", p.length>2?p[2]:"");
-        r.put("status",      p.length>3?p[3]:"OPEN");
-        r.put("createdAt",   p.length>4?p[4]:"");
-        r.put("memberCount", p.length>5?Integer.parseInt(p[5].isBlank()?"1":p[5]):1);
-        r.put("members",     p.length>6?p[6]:"");
-        return ResponseEntity.ok(r);
-    }
-
-    @PostMapping("/group/room/{code}/join")
-    public ResponseEntity<?> joinGroupRoom(@PathVariable String code, HttpSession s) throws IOException {
-        User u = (User) s.getAttribute("user");
-        if (u == null) return ResponseEntity.status(401).build();
-        String line = fsu.findById(fsu.getGroupRoomsFile(), code);
-        if (line == null) return ResponseEntity.status(404).body(Map.of("error","Room not found"));
-        String[] p = line.split("\\|",-1);
-        if (!"OPEN".equals(p.length>3?p[3]:"OPEN"))
-            return ResponseEntity.badRequest().body(Map.of("error","Room is closed"));
-        // Update member count and list
-        int cnt = (p.length>5 && !p[5].isBlank()) ? Integer.parseInt(p[5]) + 1 : 2;
-        String members = (p.length>6 ? p[6] : "") + (p.length>6&&!p[6].isBlank()?",":"") + u.getName();
-        String[] newP = java.util.Arrays.copyOf(p, Math.max(7, p.length));
-        newP[5] = String.valueOf(cnt);
-        newP[6] = members;
-        fsu.update(fsu.getGroupRoomsFile(), code, String.join("|", newP));
-        return ResponseEntity.ok(Map.of("success",true,"memberCount",cnt,"members",members));
-    }
-
-    // ── New orders count for admin polling ──────────────────────────
-    @GetMapping("/orders/new-count")
-        String locationLine = driver.getId() + "|" + lat + "|" + lng + "|" + LocalDateTime.now().format(DTF);
-        // Update or append
-        if (!fsu.update("data/driver_locations.txt", driver.getId(), locationLine)) {
-            fsu.appendLine("data/driver_locations.txt", locationLine);
-        }
-        return ResponseEntity.ok(Map.of("success", true));
-    }
-
-    // ── Get driver location (for customer tracking) ───────────────
-    @GetMapping("/driver/location/{orderId}")
-    public ResponseEntity<?> getDriverLocation(@PathVariable String orderId, HttpSession s) {
-        if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
-        // Try to find real driver location; fall back to restaurant as default
-        String order = fsu.findById(fsu.getOrdersFile(), orderId);
-        if (order != null) {
-            Order o = Order.fromLine(order);
-            if (o.getDriverId() != null && !o.getDriverId().isBlank()) {
-                String loc = fsu.findById("data/driver_locations.txt", o.getDriverId());
-                if (loc != null) {
-                    String[] p = loc.split("\\|", -1);
-                    if (p.length >= 3) {
-                        try {
-                            double lat = Double.parseDouble(p[1]);
-                            double lng = Double.parseDouble(p[2]);
-                            return ResponseEntity.ok(Map.of("lat", lat, "lng", lng, "available", true));
-                        } catch (Exception ignored) {}
-                    }
-                }
-            }
-        }
-        // Simulate driver moving around Kandy
-            })
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(result);
-    }
-
-    // ── Poll for new orders (admin/driver use for auto-refresh) ─────
-    @GetMapping("/orders/poll")
-    public ResponseEntity<?> pollOrders(@RequestParam(defaultValue = "0") long since, HttpSession s) {
-        boolean isAdmin  = s.getAttribute("admin")  instanceof User;
-        boolean isDriver = s.getAttribute("driver") instanceof User;
-        boolean isUser   = s.getAttribute("user")   instanceof User;
-        if (!isAdmin && !isDriver && !isUser) return ResponseEntity.status(401).build();
-
-        List<Map<String,Object>> orders = fsu.readAll(fsu.getOrdersFile()).stream()
-            .map(Order::fromLine).filter(Objects::nonNull)
-            .filter(o -> {
-                if (isUser) {
-                    User u = (User) s.getAttribute("user");
-                    return u.getId().equals(o.getCustomerId());
-                }
-                if (isDriver) return Order.READY.equals(o.getStatus()) || Order.HANDOVER.equals(o.getStatus()) || Order.ONWAY.equals(o.getStatus());
-                return true; // admin sees all
-            })
-            .sorted(Comparator.comparing((Order o) -> o.getCreatedAt() != null ? o.getCreatedAt() : "", Comparator.reverseOrder()))
-            .limit(50)
-            .map(o -> {
-                Map<String,Object> m = new LinkedHashMap<>();
-                m.put("orderId",     o.getOrderId());
-                m.put("status",      o.getStatus());
-                m.put("statusBadge", o.getStatusBadge());
-                m.put("progress",    o.getStatusProgress());
-                m.put("customerName",o.getCustomerName());
-                m.put("totalAmount", o.getTotalAmount());
-                m.put("createdAt",   o.getCreatedAt());
-                m.put("driverName",  o.getDriverName()    != null ? o.getDriverName()    : "");
-                m.put("driverContact",o.getDriverContact() != null ? o.getDriverContact() : "");
 }
