@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Order Placed!"/>
 <c:set var="pageId"    value="thankyou"/>
@@ -49,11 +49,11 @@
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:.9rem;">
           <span style="color:var(--c-muted);">Payment</span>
-          <strong id="tyPayment">—</strong>
+          <strong id="tyPayment">&mdash;</strong>
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.9rem;">
           <span style="color:var(--c-muted);">Loyalty Points Earned</span>
-          <strong style="color:#FFB800;" id="tyPoints">⭐ —</strong>
+          <strong style="color:#FFB800;" id="tyPoints">⭐ &mdash;</strong>
         </div>
       </div>
     </div>

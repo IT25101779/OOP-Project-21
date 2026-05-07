@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="pageTitle" value="Cart"/>
@@ -277,7 +277,7 @@ async function applyPromo() {
   }
 }
 
-// ── Static pin map — map moves, pin stays centered ────────────────
+// ── Static pin map &mdash; map moves, pin stays centered ────────────────
 function initDeliveryMap() {
   var saved = document.getElementById('deliveryAddress').value.trim();
 
@@ -381,7 +381,7 @@ function calcETA() {
   // Base prep time by number of items (kitchen gets slower with more items)
   var prepMins = 10 + Math.min(itemCount * 3, 25);
 
-  // Peak hours: lunch 12-14, dinner 18-21 — add traffic + kitchen load
+  // Peak hours: lunch 12-14, dinner 18-21 &mdash; add traffic + kitchen load
   var peakDelay = 0;
   if ((hour >= 12 && hour < 14) || (hour >= 18 && hour < 21)) peakDelay = 10;
   else if (hour >= 11 && hour < 15) peakDelay = 5;
@@ -391,7 +391,7 @@ function calcETA() {
   if (weatherExtraFee >= 100) weatherDelay = 15;  // heavy rain
   else if (weatherExtraFee >= 50) weatherDelay = 7; // light rain
 
-  // Base delivery ride — ~15 min for Kandy District
+  // Base delivery ride &mdash; ~15 min for Kandy District
   var rideMins = 15;
   if (weatherExtraFee >= 50) rideMins += weatherDelay; // rain slows rider
 
@@ -526,7 +526,7 @@ function fmtCard(i) { var v=i.value.replace(/\s+/g,'').replace(/\D/g,'');var p=[
 onMapsReady(initDeliveryMap);
 renderCart();
 renderSavedChips();
-updSum();      // Show bill immediately — don't wait for weather
+updSum();      // Show bill immediately &mdash; don't wait for weather
 loadWeather(); // Update bill again once weather data arrives
 setInterval(loadWeather, 300000);
 
