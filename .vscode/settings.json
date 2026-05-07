@@ -1,0 +1,28 @@
+{
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "default": true
+        }
+    ],
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.project.sourcePaths": [
+        "src/main/java",
+        "src/main/resources"
+    ],
+    "java.project.referencedLibraries": [
+        "target/dependency/*.jar"
+    ],
+    "maven.executable.preferMavenWrapper": false,
+    "java.dependency.packagePresentation": "hierarchical",
+    "spring-boot.ls.java.home": "",
+    "java.autobuild.enabled": true,
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true,
+        "**/target/classes": false
+    },
+    "editor.formatOnSave": true
+}

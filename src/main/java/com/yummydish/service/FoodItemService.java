@@ -11,10 +11,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.yummydish.util.QuickSort;
+
 /**
  * FoodItemService — CRUD operations for menu items.
- * CREATE: add()       READ: getAll(), getById(), getByCategory(), search(), sorted()
+ * CREATE: add()       READ: getAll(), getById(), getByCategory(), search(), sortedByPrice()
  * UPDATE: update(), toggleAvailability()    DELETE: delete()
+ *
+ * Sorting uses a custom QuickSort implementation (O(n log n) average)
+ * instead of Java's built-in Collections.sort(), fulfilling the
+ * QuickSort data-structures requirement.
  */
 @Service
 public class FoodItemService {
@@ -82,11 +88,37 @@ public class FoodItemService {
             .collect(Collectors.toList());
     }
 
+    /**
+     * Sort available food items by price using QuickSort algorithm.
+     * QuickSort average O(n log n) — see com.yummydish.util.QuickSort for full details.
+     *
+     * @param ascending true = cheapest first, false = most expensive first
+     * @return new sorted list of available items
+     */
     public List<FoodItem> sorted(boolean ascending) {
         List<FoodItem> items = getAvailable();
-        Comparator<FoodItem> byPrice = Comparator.comparingDouble(FoodItem::getPrice);
-        items.sort(ascending ? byPrice : byPrice.reversed());
+        // ── QuickSort (custom implementation, not Java's built-in sort) ──
+        QuickSort.sortByPriceAscending(items);
+        if (!ascending) {
+            // Reverse the ascending result for descending order
+            // (avoids a second full sort pass)
+            java.util.Collections.reverse(items);
+        }
         return items;
+    }
+
+    /**
+     * Convenience: sort by price ascending using QuickSort.
+     */
+    public List<FoodItem> sortedByPriceLowToHigh() {
+        return sorted(true);
+    }
+
+    /**
+     * Convenience: sort by price descending using QuickSort.
+     */
+    public List<FoodItem> sortedByPriceHighToLow() {
+        return sorted(false);
     }
 
     // ── UPDATE ────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" %>
+<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -240,11 +240,12 @@
       <div class="col-6 col-md-4 col-lg-3 yd-fade">
         <div class="yd-food-card">
           <div class="yd-food-img-wrap" onclick="location.href='/menu/item/${food.id}'" style="cursor:pointer;">
-            <img class="yd-food-img yd-img-lazy" 
-                 src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=20&amp;q=10"
-                 data-src="${food.imageUrl}"
-                 data-fallback="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&amp;q=80"
-                 alt="${food.name}">
+            <img class="yd-food-img"
+                 src="${not empty food.imageUrl ? food.imageUrl : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'}"
+                 onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'"
+                 alt="${food.name}"
+                 loading="lazy"
+                 style="filter:none;transform:none;">
             <c:if test="${not food.available}"><div style="position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:5;display:flex;align-items:center;justify-content:center;"><span style="background:rgba(0,0,0,.75);color:white;padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:700;backdrop-filter:blur(4px);">⏸ Temporarily Unavailable</span></div></c:if>
           <c:if test="${food.popular}"><span class="yd-badge yd-badge-pop">⭐ Popular</span></c:if>
             <span class="yd-badge yd-badge-cat">${food.category}</span>
@@ -275,20 +276,23 @@
             <p class="yd-food-desc"><span class="fd-desc-el" data-desc="${food.description}"></span></p>
             <div class="d-flex align-items-center gap-2">
               <div class="yd-qty">
-                <button class="yd-qty-btn" onclick="dec('q${food.id}')">−</button>
+                <button class="yd-qty-btn" onclick="event.stopPropagation();dec('q${food.id}')">-</button>
                 <span class="yd-qty-val" id="q${food.id}">1</span>
-                <button class="yd-qty-btn" onclick="inc('q${food.id}')">+</button>
+                <button class="yd-qty-btn" onclick="event.stopPropagation();inc('q${food.id}')">+</button>
               </div>
               <c:choose><c:when test="${food.available}">
                 <button class="yd-btn yd-btn-primary yd-add-btn" style="flex:1;padding:10px;font-size:.82rem;"
-                        data-food-id="${food.id}" data-food-name="${food.name}"
-                        data-food-price="${food.price}" data-food-img="${food.imageUrl}"
-                        data-food-qty="q${food.id}" onclick="doAddToCart(this)">
+                        data-food-id="${food.id}"
+                        data-food-name="${fn:escapeXml(food.name)}"
+                        data-food-price="${food.price}"
+                        data-food-img="${fn:escapeXml(food.imageUrl)}"
+                        data-food-qty="q${food.id}"
+                        onclick="event.stopPropagation();doAddToCart(this)">
                   <i class="bi bi-cart-plus me-1"></i>Add
                 </button>
               </c:when><c:otherwise>
                 <button class="yd-btn" style="flex:1;padding:10px;font-size:.82rem;background:#f0f0f0;color:#aaa;border:none;cursor:not-allowed;" disabled>
-                  ⏸ Unavailable
+                  Unavailable
                 </button>
               </c:otherwise></c:choose>
             </div>
@@ -316,30 +320,71 @@
 </a>
 
 <script>
-// ── Add to cart — safe wrapper that works even before app.js defer loads ─
-function doAddToCart(btn) {
-  // Wait for Cart to be available (app.js loads with defer)
-  if (typeof Cart === 'undefined') {
-    setTimeout(function(){ doAddToCart(btn); }, 100);
-    return;
-  }
-  var id    = btn.dataset.foodId;
-  var name  = btn.dataset.foodName;
-  var price = parseFloat(btn.dataset.foodPrice);
-  var img   = btn.dataset.foodImg || '';
-  var qEl   = document.getElementById(btn.dataset.foodQty);
-  var qty   = qEl ? (parseInt(qEl.textContent) || 1) : 1;
-  Cart.add(id, name, price, qty, img);
-  btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Added!';
-  btn.style.background = 'linear-gradient(135deg,#22C55E,#16a34a)';
-  setTimeout(function() {
-    btn.innerHTML = '<i class="bi bi-cart-plus me-1"></i>Add';
-    btn.style.background = '';
-  }, 1200);
+// ── Qty controls ────────────────────────────────────────────────
+function inc(id) {
+  var e = document.getElementById(id);
+  if (e) e.textContent = (parseInt(e.textContent) || 1) + 1;
+}
+function dec(id) {
+  var e = document.getElementById(id);
+  if (e && parseInt(e.textContent) > 1) e.textContent = parseInt(e.textContent) - 1;
 }
 
-function inc(id){var e=document.getElementById(id);if(e)e.textContent=parseInt(e.textContent)+1;}
-function dec(id){var e=document.getElementById(id);if(e&&parseInt(e.textContent)>1)e.textContent=parseInt(e.textContent)-1;}
+// ── Add to cart ─────────────────────────────────────────────────
+function doAddToCart(btn) {
+  var id    = btn.getAttribute('data-food-id');
+  var name  = btn.getAttribute('data-food-name') || id;
+  var price = parseFloat(btn.getAttribute('data-food-price')) || 0;
+  var img   = btn.getAttribute('data-food-img') || '';
+  var qtyId = btn.getAttribute('data-food-qty');
+  var qEl   = qtyId ? document.getElementById(qtyId) : null;
+  var qty   = qEl ? (parseInt(qEl.textContent) || 1) : 1;
+
+  // Write to localStorage directly &mdash; works 100% regardless of Cart state
+  try {
+    var items = JSON.parse(localStorage.getItem('ydCart') || '[]');
+    var ex = items.find(function(i) { return i.id === id; });
+    if (ex) { ex.qty += qty; } 
+    else { items.push({ id: id, name: name, price: price, qty: qty, img: img }); }
+    localStorage.setItem('ydCart', JSON.stringify(items));
+
+    // Update cart count badges
+    var total = items.reduce(function(s, i) { return s + i.qty; }, 0);
+    document.querySelectorAll('#cartCount').forEach(function(el) { el.textContent = total; });
+    var fc = document.getElementById('floatCount');
+    var ft = document.getElementById('floatTotal');
+    var cf = document.getElementById('cartFloat');
+    if (fc) fc.textContent = total;
+    if (ft) ft.textContent = 'LKR ' + Math.round(items.reduce(function(s,i){return s+i.price*i.qty;},0)).toLocaleString();
+    if (cf) cf.classList.toggle('visible', total > 0);
+
+    // Also call Cart.add if available (keeps Cart in sync)
+    if (typeof Cart !== 'undefined' && typeof Cart.add === 'function') {
+      // Already saved to storage above, just trigger the UI update
+      if (typeof Cart.updateUI === 'function') Cart.updateUI();
+    }
+  } catch(e) {
+    console.error('Cart error:', e);
+  }
+
+  // Visual feedback
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Added!';
+  btn.style.background = 'linear-gradient(135deg,#22C55E,#16a34a)';
+  btn.style.borderColor = '#16a34a';
+  btn.disabled = true;
+  setTimeout(function() {
+    btn.innerHTML = orig;
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.disabled = false;
+  }, 1400);
+
+  // Show toast if available
+  if (typeof showToast === 'function') {
+    showToast('&#x1F6D2; ' + name + ' added to cart!');
+  }
+}
 
 // Star ratings
 document.querySelectorAll('.yd-stars[data-rating]').forEach(function(el){
@@ -498,7 +543,7 @@ if (searchInput) {
     var val = this.value.trim();
     searchTimer = setTimeout(function() {
       if (val.length < 2 && val.length > 0) return; // wait for 2+ chars
-      fetch('/api/foods?search=' + encodeURIComponent(val) + '&category=${category}')
+      fetch('/api/foods?search=' + encodeURIComponent(val) + '&category=${category}&sort=' + encodeURIComponent('${sort}' === 'asc' ? 'price_asc' : '${sort}' === 'desc' ? 'price_desc' : 'none'))
         .then(function(r){ return r.json(); })
         .then(function(foods) { renderLiveResults(foods, val); })
         .catch(function(){});
@@ -513,36 +558,80 @@ function renderLiveResults(foods, query) {
     grid.innerHTML = '<div class="col-12" style="text-align:center;padding:60px 0;">'
       + '<div style="font-size:3.5rem;margin-bottom:12px;">🔍</div>'
       + '<h4 style="color:var(--c-muted);">No results for "' + query + '"</h4>'
-      + '<button onclick="location.href='/menu'" class="yd-btn yd-btn-primary mt-3" style="width:auto;padding:11px 24px;">Clear Search</button>'
+      + '<button onclick="location.href=\'/menu\'" class="yd-btn yd-btn-primary mt-3" style="width:auto;padding:11px 24px;">Clear Search</button>'
       + '</div>';
     return;
   }
+  var FB2 = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80';
   grid.innerHTML = foods.map(function(food) {
-    var available = food.available !== false;
-    return '<div class="col-6 col-md-4 col-lg-3 yd-fade yd-visible">'
-      + '<div class="yd-food-card" onclick="location.href='/menu/item/' + food.id + ''" style="cursor:pointer;">'
-      + '<div class="yd-food-img-wrap" style="position:relative;">'
-      + '<img class="yd-food-img" src="' + (food.imageUrl||'') + '" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">'
-      + (food.popular ? '<span class="yd-badge yd-badge-pop">⭐ Popular</span>' : '')
-      + '<span class="yd-badge yd-badge-cat">' + food.category + '</span>'
-      + (!available ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:5;display:flex;align-items:center;justify-content:center;"><span style="background:rgba(0,0,0,.75);color:white;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:700;">⏸ Unavailable</span></div>' : '')
-      + '<button class="yd-fav-btn" data-fav-id="' + food.id + '" data-fav-name="' + food.name + '" data-fav-price="' + food.price + '" data-fav-img="' + (food.imageUrl||'') + '"'
-      + ' onclick="event.stopPropagation();var b=this;var a=Favs.toggle(b.dataset.favId,b.dataset.favName,b.dataset.favPrice,b.dataset.favImg);b.textContent=a?'♥':'♡';b.classList.toggle('active',a);">'
-      + (Favs.has(food.id) ? '♥' : '♡') + '</button>'
-      + '</div>'
-      + '<div class="yd-food-body">'
-      + '<div class="d-flex justify-content-between align-items-start mb-1">'
-      + '<div class="yd-food-name">' + food.name + '</div>'
-      + '<div class="yd-food-price text-nowrap">LKR ' + Math.round(food.price).toLocaleString() + '</div>'
-      + '</div>'
-      + '<p class="yd-food-desc">' + (food.description||'').substring(0,65) + (food.description&&food.description.length>65?'…':'') + '</p>'
-      + '<div class="d-flex align-items-center gap-2">'
-      + '<div class="yd-qty"><button class="yd-qty-btn" onclick="event.stopPropagation();dec('lq' + food.id + '')">−</button><span class="yd-qty-val" id="lq' + food.id + '">1</span><button class="yd-qty-btn" onclick="event.stopPropagation();inc('lq' + food.id + '')">+</button></div>'
-      + (available
-        ? '<button class="yd-btn yd-btn-primary yd-add-btn" style="flex:1;padding:9px;font-size:.82rem;" data-food-id="' + food.id + '" data-food-name="' + food.name + '" data-food-price="' + food.price + '" data-food-img="' + (food.imageUrl||'') + '" data-food-qty="lq' + food.id + '" onclick="event.stopPropagation();doAddToCart(this)"><i class="bi bi-cart-plus me-1"></i>Add</button>'
-        : '<button class="yd-btn" style="flex:1;padding:9px;font-size:.82rem;background:#f0f0f0;color:#aaa;border:none;cursor:not-allowed;" disabled>⏸ Unavailable</button>')
-      + '</div></div></div></div>';
+    var av  = food.available !== false;
+    var img = food.imageUrl || FB2;
+    var isFav = Favs.has(food.id);
+    // Build card using array join to avoid quote nesting issues
+    var parts = [
+      '<div class="col-6 col-md-4 col-lg-3 yd-fade yd-visible">',
+      '<div class="yd-food-card lv-card" data-item-id="', food.id, '" style="cursor:pointer;">',
+      '<div class="yd-food-img-wrap" style="position:relative;">',
+      '<img class="yd-food-img" src="', img, '" loading="lazy" style="filter:none;transform:none;"',
+      ' onerror="this.src=this.src===&quot;', FB2, '&quot;?&quot;&quot;:&quot;', FB2, '&quot;">',
+      food.popular ? '<span class="yd-badge yd-badge-pop">Popular</span>' : '',
+      '<span class="yd-badge yd-badge-cat">', food.category, '</span>',
+      av ? '' : '<div style="position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:5;display:flex;align-items:center;justify-content:center;"><span style="background:rgba(0,0,0,.75);color:white;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:700;">Unavailable</span></div>',
+      '<button class="yd-fav-btn', isFav ? ' active' : '', '"',
+      ' data-fav-id="', food.id, '"',
+      ' data-fav-name="', (food.name||'').replace(/"/g,'&quot;'), '"',
+      ' data-fav-price="', food.price, '"',
+      ' data-fav-img="', (img).replace(/"/g,'&quot;'), '"',
+      ' onclick="event.stopPropagation();liveFavToggle(this)">',
+      isFav ? '&#x2665;' : '&#x2661;',
+      '</button>',
+      '</div>',
+      '<div class="yd-food-body">',
+      '<div class="d-flex justify-content-between align-items-start mb-1">',
+      '<div class="yd-food-name">', food.name, '</div>',
+      '<div class="yd-food-price text-nowrap">LKR ', Math.round(food.price).toLocaleString(), '</div>',
+      '</div>',
+      '<p class="yd-food-desc">', (food.description||'').substring(0,65), (food.description&&food.description.length>65?'&#x2026;':''), '</p>',
+      '<div class="d-flex align-items-center gap-2">',
+      '<div class="yd-qty">',
+      '<button class="yd-qty-btn" data-target="lq', food.id, '" onclick="event.stopPropagation();liveQty(this,-1)">-</button>',
+      '<span class="yd-qty-val" id="lq', food.id, '">1</span>',
+      '<button class="yd-qty-btn" data-target="lq', food.id, '" onclick="event.stopPropagation();liveQty(this,1)">+</button>',
+      '</div>',
+      av
+        ? '<button class="yd-btn yd-btn-primary yd-add-btn lv-add" style="flex:1;padding:9px;font-size:.82rem;"'
+          + ' data-food-id="' + food.id + '"'
+          + ' data-food-name="' + (food.name||'').replace(/"/g,'&quot;') + '"'
+          + ' data-food-price="' + food.price + '"'
+          + ' data-food-img="' + img.replace(/"/g,'&quot;') + '"'
+          + ' data-food-qty="lq' + food.id + '"'
+          + ' onclick="event.stopPropagation();doAddToCart(this)">'
+          + '<i class="bi bi-cart-plus me-1"></i>Add</button>'
+        : '<button class="yd-btn" style="flex:1;padding:9px;font-size:.82rem;background:#f0f0f0;color:#aaa;border:none;cursor:not-allowed;" disabled>Unavailable</button>',
+      '</div></div></div></div>'
+    ];
+    return parts.join('');
   }).join('');
+  // Wire up card navigation (avoids onclick nesting issues)
+  grid.querySelectorAll('.lv-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      location.href = '/menu/item/' + card.dataset.itemId;
+    });
+  });
+}
+
+// ── Helpers for JS-rendered live search cards ──────────────────
+function liveFavToggle(btn) {
+  var active = Favs.toggle(btn.dataset.favId, btn.dataset.favName,
+                           btn.dataset.favPrice, btn.dataset.favImg);
+  btn.innerHTML = active ? '&#x2665;' : '&#x2661;';
+  btn.classList.toggle('active', active);
+}
+function liveQty(btn, delta) {
+  var el = document.getElementById(btn.dataset.target);
+  if (!el) return;
+  var v = parseInt(el.textContent) || 1;
+  el.textContent = Math.max(1, v + delta);
 }
 
 // Restore fav hearts

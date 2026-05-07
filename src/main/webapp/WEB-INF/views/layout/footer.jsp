@@ -1,39 +1,5 @@
 
 
-<!-- Mobile bottom navigation -->
-<nav class="yd-bottom-nav" id="mobileNav">
-  <a href="/menu"     id="mnMenu"    ><i class="bi bi-house-door"></i>Menu</a>
-  <a href="/activity" id="mnOrders"  ><i class="bi bi-bag-check"></i>Orders</a>
-  <a href="/cart"     id="mnCart"    style="position:relative;">
-    <i class="bi bi-cart3"></i>
-    <span id="mobileCartBadge" class="notif-badge" style="display:none;"></span>
-    Cart
-  </a>
-  <a href="/account"  id="mnAccount" ><i class="bi bi-person-circle"></i>Account</a>
-</nav>
-<script>
-// Highlight active mobile nav
-(function() {
-  var path = location.pathname;
-  var map = { '/menu':'mnMenu', '/activity':'mnOrders', '/cart':'mnCart', '/account':'mnAccount' };
-  Object.keys(map).forEach(function(k) {
-    if (path.startsWith(k)) {
-      var el = document.getElementById(map[k]);
-      if (el) el.classList.add('active');
-    }
-  });
-  // Show cart badge
-  document.addEventListener('DOMContentLoaded', function() {
-    var cnt = (typeof Cart !== 'undefined') ? Cart.count() : 0;
-    var badge = document.getElementById('mobileCartBadge');
-    if (badge) {
-      badge.textContent = cnt;
-      badge.style.display = cnt > 0 ? 'flex' : 'none';
-    }
-  });
-})();
-</script>
-
 
 
 <!-- ── Commercial Site Footer ─────────────────────────────────── -->
@@ -226,7 +192,7 @@ function dismissNotif(btn) {
   setTimeout(function() { if (n.parentNode) n.parentNode.removeChild(n); }, 320);
 }
 
-// ── Custom cursor (desktop only) — deferred to avoid blocking render ──
+// ── Custom cursor (desktop only) &mdash; deferred to avoid blocking render ──
 document.addEventListener('DOMContentLoaded', function() {
   if (!window.matchMedia('(pointer:fine)').matches) return;
   var cursor = document.getElementById('yd-cursor');
