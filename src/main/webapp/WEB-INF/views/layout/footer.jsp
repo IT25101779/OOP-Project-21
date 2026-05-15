@@ -10,7 +10,7 @@
       <div>
         <a href="/menu" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:20px;">
           <span style="font-size:1.8rem;">&#x1F37D;&#xFE0F;</span>
-          <span style="font-family:var(--font-display,serif);font-size:1.5rem;font-weight:900;color:white;">YummyDish</span>
+          <span style="font-family:var(--font-display,serif);font-size:1.5rem;font-weight:900;color:white;">කටගැස්ම</span>
         </a>
         <p style="color:rgba(255,255,255,.42);font-size:.875rem;line-height:1.8;max-width:280px;margin-bottom:24px;">
           Kandy&rsquo;s favourite food delivery platform. Hot, fresh meals to your door in under 30 minutes with live GPS tracking and loyalty rewards.
@@ -49,7 +49,7 @@
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div style="display:flex;gap:10px;"><i class="bi bi-geo-alt-fill" style="color:var(--c-orange);margin-top:2px;flex-shrink:0;"></i><span style="color:rgba(255,255,255,.45);font-size:.82rem;line-height:1.6;">Queens Hotel Area, Dalada Veediya,<br>Kandy 20000, Sri Lanka</span></div>
           <div style="display:flex;gap:10px;align-items:center;"><i class="bi bi-telephone-fill" style="color:var(--c-orange);flex-shrink:0;"></i><a href="tel:+94812345678" style="color:rgba(255,255,255,.45);font-size:.82rem;text-decoration:none;">+94 81 234 5678</a></div>
-          <div style="display:flex;gap:10px;align-items:center;"><i class="bi bi-envelope-fill" style="color:var(--c-orange);flex-shrink:0;"></i><a href="mailto:hello@yummydish.lk" style="color:rgba(255,255,255,.45);font-size:.82rem;text-decoration:none;">hello@yummydish.lk</a></div>
+          <div style="display:flex;gap:10px;align-items:center;"><i class="bi bi-envelope-fill" style="color:var(--c-orange);flex-shrink:0;"></i><a href="mailto:hello@katagasma.lk" style="color:rgba(255,255,255,.45);font-size:.82rem;text-decoration:none;">hello@katagasma.lk</a></div>
           <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:13px 15px;margin-top:4px;">
             <div class="ft-hd" style="margin-bottom:8px;">Delivery Hours</div>
             <div style="font-size:.79rem;display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:rgba(255,255,255,.45);">Mon &ndash; Fri</span><strong style="color:white;">8AM &ndash; 10PM</strong></div>
@@ -68,7 +68,7 @@
       <span class="ft-trust"><i class="bi bi-people-fill" style="color:var(--c-orange);"></i> Group Orders</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:28px;">
-      <span style="color:rgba(255,255,255,.2);font-size:.76rem;">&copy; 2025 YummyDish. All rights reserved. Made with &#10084;&#65039; in Kandy.</span>
+      <span style="color:rgba(255,255,255,.2);font-size:.76rem;">&copy; 2025 Katagasma. All rights reserved. Made by SLIIT Kandy University · Y1S2 · Group 21</span>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="color:rgba(255,255,255,.18);font-size:.72rem;">Payment:</span>
         <span class="ft-pay">VISA</span><span class="ft-pay">MC</span><span class="ft-pay">AMEX</span><span class="ft-pay">Cash</span>
@@ -111,7 +111,7 @@
 <script>
 var Tour = (function() {
   var steps = [
-    { icon:'🍽️', title:'Welcome to YummyDish!', text:'Kandy\'s tastiest food delivered to your door. Let us show you around!', anchor: null },
+    { icon:'🍽️', title:'Welcome to Katagasma!', text:'Kandy\'s tastiest food delivered to your door. Let us show you around!', anchor: null },
     { icon:'🛒', title:'Browse the Menu', text:'Browse by category, search live, or explore popular dishes. Tap any item to see details and reviews.', anchor: '.yd-brand' },
     { icon:'📍', title:'Set Your Location', text:'Click your address at the top of the menu page to set your delivery location. Use GPS or drop a pin on the map.', anchor: null },
     { icon:'⭐', title:'Earn Loyalty Points', text:'Every LKR 10 you spend earns 1 loyalty point. Collect 100 points for a LKR 10 discount on your next order!', anchor: null },
@@ -155,7 +155,7 @@ var Tour = (function() {
   function start() {
     if (localStorage.getItem('ydTourDone')) return;
     // Only show on menu page for logged-in users
-    if (!document.querySelector('.yd-nav')) return;
+    
     setTimeout(function() { show(0); }, 1200);
   }
 

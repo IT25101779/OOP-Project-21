@@ -46,8 +46,8 @@
 .step-pill:first-child { border-radius: 12px 0 0 12px; }
 .step-pill:last-child  { border-radius: 0 12px 12px 0; }
 .step-pill.active {
-  background: var(--c-orange);
-  border-color: var(--c-orange);
+  background: var(--copper);
+  border-color: var(--copper);
   color: white;
 }
 .step-pill .pill-num {
@@ -78,8 +78,8 @@
   background: var(--c-surface);
   user-select: none;
 }
-.time-chip:hover  { border-color: var(--c-orange); color: var(--c-orange); }
-.time-chip.active { background: var(--c-orange); border-color: var(--c-orange); color: white; }
+.time-chip:hover  { border-color: var(--copper); color: var(--copper); }
+.time-chip.active { background: var(--copper); border-color: var(--copper); color: white; }
 .time-chip.past   { opacity: .35; cursor: not-allowed; pointer-events: none; }
 
 /* Food selector */
@@ -107,9 +107,9 @@
 .sf-qty-btn {
   width: 30px; height: 30px;
   border-radius: 50%;
-  border: 1.5px solid var(--c-orange);
+  border: 1.5px solid var(--copper);
   background: none;
-  color: var(--c-orange);
+  color: var(--copper);
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
@@ -117,7 +117,7 @@
   transition: all .15s;
   line-height: 1;
 }
-.sf-qty-btn:hover { background: var(--c-orange); color: white; }
+.sf-qty-btn:hover { background: var(--copper); color: white; }
 .sf-qty-num {
   min-width: 24px;
   text-align: center;
@@ -176,22 +176,22 @@
 }
 .sched-tab.active {
   background: var(--c-surface);
-  color: var(--c-orange);
+  color: var(--copper);
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 </style>
 
-<div class="yd-page">
+<div class="kg-page">
 
   <!-- Hero -->
   <div class="sched-hero">
     <div class="container" style="position:relative;z-index:1;max-width:760px;">
       <div style="display:flex;align-items:center;gap:20px;">
-        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--c-orange),var(--c-orange-d));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;box-shadow:0 8px 24px rgba(255,107,53,.4);">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--copper),var(--copper-d));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0;box-shadow:0 8px 24px rgba(255,107,53,.4);">
           &#x1F4C5;
         </div>
         <div>
-          <h1 style="font-family:var(--font-display);color:white;font-size:2rem;margin-bottom:6px;line-height:1.2;">Schedule a Delivery</h1>
+          <h1 style="font-family:var(--font-serif);color:white;font-size:2rem;margin-bottom:6px;line-height:1.2;">Schedule a Delivery</h1>
           <p style="color:rgba(255,255,255,.55);font-size:.9rem;margin:0;">Plan ahead. Order now, deliver on your schedule. Cancel free up to 24h before.</p>
         </div>
       </div>
@@ -202,14 +202,14 @@
 
     <!-- No card warning -->
     <c:if test="${empty user.cardNumber}">
-    <div class="yd-card mb-4" style="border:2px solid #FFB800;background:#FFF8E1;">
-      <div class="yd-card-body" style="display:flex;align-items:center;gap:14px;">
+    <div class="kg-card mb-4" style="border:2px solid #FFB800;background:#FFF8E1;">
+      <div class="kg-card-body" style="display:flex;align-items:center;gap:14px;">
         <div style="font-size:2rem;flex-shrink:0;">&#x1F4B3;</div>
         <div style="flex:1;">
           <div style="font-weight:700;margin-bottom:3px;">Card Required for Scheduled Orders</div>
           <div style="font-size:.82rem;color:var(--c-muted);">A 50% deposit is charged at booking. Add a payment card to your account first.</div>
         </div>
-        <a href="/account" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;white-space:nowrap;">Add Card &#x2192;</a>
+        <a href="/account" class="kg-btn kg-btn-primary kg-btn-sm" style="width:auto;white-space:nowrap;">Add Card &#x2192;</a>
       </div>
     </div>
     </c:if>
@@ -217,27 +217,27 @@
     <!-- Tabs -->
     <div class="sched-tabs">
       <button class="sched-tab active" id="tabNew" onclick="showTab('new')">&#x1F4C5; New Schedule</button>
-      <button class="sched-tab"        id="tabMy"  onclick="showTab('my')">&#x1F4CB; My Schedules <c:if test="${not empty scheduledOrders}"><span style="background:var(--c-orange);color:white;border-radius:20px;padding:1px 7px;font-size:.7rem;margin-left:4px;">${fn:length(scheduledOrders)}</span></c:if></button>
+      <button class="sched-tab"        id="tabMy"  onclick="showTab('my')">&#x1F4CB; My Schedules <c:if test="${not empty scheduledOrders}"><span style="background:var(--copper);color:white;border-radius:20px;padding:1px 7px;font-size:.7rem;margin-left:4px;">${fn:length(scheduledOrders)}</span></c:if></button>
     </div>
 
     <!-- ════ NEW SCHEDULE PANE ════ -->
     <div id="paneNew">
 
       <!-- Step 1: Date & Time -->
-      <div class="yd-card mb-3">
-        <div class="yd-card-body">
+      <div class="kg-card mb-3">
+        <div class="kg-card-body">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <div style="width:32px;height:32px;background:var(--c-orange);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">1</div>
+            <div style="width:32px;height:32px;background:var(--copper);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">1</div>
             <h6 style="margin:0;font-weight:700;font-size:.95rem;">Pick Date &amp; Time</h6>
           </div>
 
           <div class="row g-3">
             <div class="col-md-5">
-              <label class="yd-label">Delivery Date</label>
-              <input type="date" id="schedDate" class="yd-input" onchange="updateSlots()">
+              <label class="kg-label">Delivery Date</label>
+              <input type="date" id="schedDate" class="kg-input" onchange="updateSlots()">
             </div>
             <div class="col-md-7">
-              <label class="yd-label">Preferred Time Slot</label>
+              <label class="kg-label">Preferred Time Slot</label>
               <div class="time-grid" id="timeGrid">
                 <div class="time-chip" onclick="selectTime(this,'9:00 AM')">9:00 AM</div>
                 <div class="time-chip" onclick="selectTime(this,'11:00 AM')">11:00 AM</div>
@@ -249,39 +249,39 @@
             </div>
           </div>
 
-          <div class="yd-form-group mt-3">
-            <label class="yd-label">Delivery Address</label>
+          <div class="kg-form-group mt-3">
+            <label class="kg-label">Delivery Address</label>
             <div style="position:relative;">
-              <input type="text" id="schedAddress" class="yd-input" style="padding-right:48px;"
+              <input type="text" id="schedAddress" class="kg-input" style="padding-right:48px;"
                      value="${fn:escapeXml(user.address)}" placeholder="Enter delivery address in Kandy District">
               <button onclick="schedGPS()" title="Use my location"
-                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--c-orange);border:none;border-radius:8px;width:32px;height:32px;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--copper);border:none;border-radius:8px;width:32px;height:32px;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;">
                 <i class="bi bi-crosshair" style="font-size:.85rem;"></i>
               </button>
             </div>
           </div>
 
-          <div class="yd-form-group mb-0">
-            <label class="yd-label">Special Instructions <span style="color:var(--c-muted);font-weight:400;">(optional)</span></label>
-            <textarea id="schedNote" class="yd-input" rows="2"
+          <div class="kg-form-group mb-0">
+            <label class="kg-label">Special Instructions <span style="color:var(--c-muted);font-weight:400;">(optional)</span></label>
+            <textarea id="schedNote" class="kg-input" rows="2"
               placeholder="E.g. Ring bell, leave at door, extra napkins..." style="resize:none;"></textarea>
           </div>
         </div>
       </div>
 
       <!-- Step 2: Choose Items -->
-      <div class="yd-card mb-3">
-        <div class="yd-card-body">
+      <div class="kg-card mb-3">
+        <div class="kg-card-body">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
             <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:32px;height:32px;background:var(--c-orange);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">2</div>
+              <div style="width:32px;height:32px;background:var(--copper);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">2</div>
               <h6 style="margin:0;font-weight:700;font-size:.95rem;">Choose Items</h6>
             </div>
             <span id="selCount" style="font-size:.78rem;color:var(--c-muted);">0 items selected</span>
           </div>
 
           <!-- Search -->
-          <input type="text" id="sfSearch" class="yd-input" placeholder="&#x1F50D; Search menu items..."
+          <input type="text" id="sfSearch" class="kg-input" placeholder="&#x1F50D; Search menu items..."
             style="margin-bottom:12px;" oninput="filterSfItems()">
 
           <div style="max-height:340px;overflow-y:auto;padding-right:4px;" id="sfList">
@@ -295,7 +295,7 @@
                   <div style="flex:1;min-width:0;">
                     <div style="font-weight:700;font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
                     <div style="font-size:.75rem;color:var(--c-muted);">${f.category}</div>
-                    <div style="font-size:.82rem;font-weight:700;color:var(--c-orange);">LKR <fmt:formatNumber value="${f.price}" pattern="#,##0"/></div>
+                    <div style="font-size:.82rem;font-weight:700;color:var(--copper);">LKR <fmt:formatNumber value="${f.price}" pattern="#,##0"/></div>
                   </div>
                   <div class="sf-qty-wrap">
                     <button class="sf-qty-btn" onclick="sfQty('${f.id}',-1)">&#x2212;</button>
@@ -320,10 +320,10 @@
       </div>
 
       <!-- Step 3: Review & Book -->
-      <div class="yd-card mb-4">
-        <div class="yd-card-body">
+      <div class="kg-card mb-4">
+        <div class="kg-card-body">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-            <div style="width:32px;height:32px;background:var(--c-orange);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">3</div>
+            <div style="width:32px;height:32px;background:var(--copper);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:.85rem;flex-shrink:0;">3</div>
             <h6 style="margin:0;font-weight:700;font-size:.95rem;">Review &amp; Book</h6>
           </div>
 
@@ -335,12 +335,12 @@
           </div>
 
           <!-- Deposit notice -->
-          <div style="background:var(--c-orange-l);border:1px solid rgba(255,107,53,.25);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.82rem;display:flex;align-items:flex-start;gap:10px;">
-            <i class="bi bi-info-circle-fill" style="color:var(--c-orange);font-size:1rem;margin-top:1px;flex-shrink:0;"></i>
+          <div style="background:var(--copper-l);border:1px solid rgba(255,107,53,.25);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:.82rem;display:flex;align-items:flex-start;gap:10px;">
+            <i class="bi bi-info-circle-fill" style="color:var(--copper);font-size:1rem;margin-top:1px;flex-shrink:0;"></i>
             <div>A <strong>50% deposit</strong> will be charged to your saved card at booking. The remaining balance is collected on delivery. <strong>Cancel free up to 24 hours before.</strong></div>
           </div>
 
-          <button onclick="placeScheduled()" class="yd-btn yd-btn-primary" id="schedBtn"
+          <button onclick="placeScheduled()" class="kg-btn kg-btn-primary" id="schedBtn"
             style="font-size:.95rem;padding:14px;">
             <i class="bi bi-calendar-check me-2"></i>Book Scheduled Order
           </button>
@@ -379,15 +379,15 @@
                   </c:choose>
                 </div>
                 <div style="font-size:.82rem;color:var(--c-muted);margin-bottom:3px;">
-                  <i class="bi bi-calendar3 me-1" style="color:var(--c-orange);"></i>
+                  <i class="bi bi-calendar3 me-1" style="color:var(--copper);"></i>
                   ${fn:length(so.scheduledFor) > 0 ? so.scheduledFor : 'Time not set'}
                 </div>
                 <div style="font-size:.78rem;color:var(--c-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                  <i class="bi bi-geo-alt-fill me-1" style="color:var(--c-orange);"></i>${so.deliveryAddress}
+                  <i class="bi bi-geo-alt-fill me-1" style="color:var(--copper);"></i>${so.deliveryAddress}
                 </div>
               </div>
               <div style="text-align:right;flex-shrink:0;">
-                <div style="font-weight:800;color:var(--c-orange);font-size:.95rem;">LKR <fmt:formatNumber value="${so.totalAmount}" pattern="#,##0"/></div>
+                <div style="font-weight:800;color:var(--copper);font-size:.95rem;">LKR <fmt:formatNumber value="${so.totalAmount}" pattern="#,##0"/></div>
                 <div style="font-size:.72rem;color:var(--c-muted);margin-top:2px;">${fn:length(so.items)} item(s)</div>
               </div>
             </div>
@@ -409,7 +409,7 @@
             <div style="margin-top:12px;">
               <form action="/api/scheduled-orders/${so.orderId}/cancel" method="post"
                     onsubmit="return confirm('Cancel order #${so.orderId}? This cannot be undone.')">
-                <button type="submit" class="yd-btn yd-btn-sm"
+                <button type="submit" class="kg-btn kg-btn-sm"
                   style="background:#FFEBEE;color:#C62828;border:1px solid #FFCDD2;width:auto;padding:7px 16px;">
                   <i class="bi bi-x-circle me-1"></i>Cancel Order
                 </button>
@@ -424,7 +424,7 @@
             <div style="font-size:4rem;margin-bottom:16px;">&#x1F4EB;</div>
             <h5 style="color:var(--c-text);margin-bottom:8px;">No Scheduled Orders Yet</h5>
             <p style="font-size:.875rem;max-width:300px;margin:0 auto 20px;">Plan ahead &mdash; schedule a delivery for any date up to 7 days in advance.</p>
-            <button onclick="showTab('new')" class="yd-btn yd-btn-primary" style="width:auto;padding:10px 24px;">
+            <button onclick="showTab('new')" class="kg-btn kg-btn-primary" style="width:auto;padding:10px 24px;">
               <i class="bi bi-plus-lg me-1"></i>Create Schedule
             </button>
           </div>
@@ -551,8 +551,8 @@ function updateSummary() {
   });
   html += '</div>'
     + '<div class="sum-row" style="color:var(--c-muted);"><span>Delivery Fee</span><span>LKR 250</span></div>'
-    + '<div class="sum-row total"><span>Total</span><span style="color:var(--c-orange);">LKR ' + Math.round(sub + 250).toLocaleString() + '</span></div>'
-    + '<div style="margin-top:8px;padding:8px 12px;background:var(--c-orange-l);border-radius:8px;font-size:.78rem;color:var(--c-orange);font-weight:600;">'
+    + '<div class="sum-row total"><span>Total</span><span style="color:var(--copper);">LKR ' + Math.round(sub + 250).toLocaleString() + '</span></div>'
+    + '<div style="margin-top:8px;padding:8px 12px;background:var(--copper-l);border-radius:8px;font-size:.78rem;color:var(--copper);font-weight:600;">'
     + '&#x1F4B3; 50% deposit now: <strong>LKR ' + Math.round(dep).toLocaleString() + '</strong> &nbsp;|&nbsp; Remainder on delivery: LKR ' + Math.round(sub + 250 - dep).toLocaleString()
     + '</div>';
 

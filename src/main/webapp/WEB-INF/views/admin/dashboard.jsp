@@ -7,12 +7,12 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Dashboard &mdash; YummyDish</title>
+<title>Admin Dashboard &mdash; Katagasma</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<link href="/css/yummydish.css" rel="stylesheet">
+<link href="/css/katagasma.css" rel="stylesheet">
 <script>(function(){var t=localStorage.getItem('ydTheme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();</script>
 <script src="/js/app.js" defer></script>
 </head>
@@ -28,7 +28,7 @@
 .kanban-card{background:var(--c-surface);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--c-border);transition:all .22s var(--ease);cursor:pointer;}
 .kanban-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
 .food-img-sm{width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;}
-#adminNewAlert{position:fixed;top:80px;right:16px;background:linear-gradient(135deg,var(--c-orange),var(--c-orange-d));color:white;padding:16px 22px;border-radius:16px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(255,107,53,.5);cursor:pointer;animation:slideLeft .4s var(--ease);}
+#adminNewAlert{position:fixed;top:80px;right:16px;background:linear-gradient(135deg,var(--copper),var(--copper-d));color:white;padding:16px 22px;border-radius:16px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(255,107,53,.5);cursor:pointer;animation:slideLeft .4s var(--ease);}
 </style>
 
 <div class="yd-page">
@@ -37,8 +37,8 @@
     <div class="container-xl">
       <div class="d-flex align-items-center justify-content-between">
         <div>
-          <h2 style="font-family:var(--font-display);color:white;font-size:1.8rem;margin:0;">⚙️ Admin Dashboard</h2>
-          <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-top:4px;">YummyDish Kandy</p>
+          <h2 style="font-family:var(--font-serif);color:white;font-size:1.8rem;margin:0;">⚙️ Admin Dashboard</h2>
+          <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-top:4px;">Katagasma Kandy</p>
         </div>
         <div class="d-flex align-items-center gap-3">
           <div class="yd-live-badge" style="border-color:rgba(255,255,255,.3);color:white;background:rgba(255,255,255,.1);">
@@ -54,37 +54,37 @@
   <!-- Stats -->
   <div class="container-xl py-4">
     <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3 yd-fade">
+      <div class="col-6 col-md-3 kg-fade">
         <div class="stat-box"><div style="font-size:.7rem;color:var(--c-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Menu Items</div>
-        <div class="stat-num" style="color:var(--c-orange);">${fn:length(foods)}</div></div>
+        <div class="stat-num" style="color:var(--copper);">${fn:length(foods)}</div></div>
       </div>
-      <div class="col-6 col-md-3 yd-fade">
+      <div class="col-6 col-md-3 kg-fade">
         <div class="stat-box"><div style="font-size:.7rem;color:var(--c-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Customers</div>
         <div class="stat-num" style="color:#667eea;">${fn:length(customers)}</div></div>
       </div>
-      <div class="col-6 col-md-3 yd-fade">
+      <div class="col-6 col-md-3 kg-fade">
         <div class="stat-box"><div style="font-size:.7rem;color:var(--c-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Total Orders</div>
-        <div class="stat-num" style="color:var(--c-success);">${fn:length(orders)}</div></div>
+        <div class="stat-num" style="color:var(--leaf-green);">${fn:length(orders)}</div></div>
       </div>
-      <div class="col-6 col-md-3 yd-fade">
+      <div class="col-6 col-md-3 kg-fade">
         <div class="stat-box"><div style="font-size:.7rem;color:var(--c-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Revenue</div>
-        <div class="stat-num" style="color:var(--c-orange);font-size:1.3rem;">LKR <fmt:formatNumber value="${revenue}" pattern="#,##0"/></div></div>
+        <div class="stat-num" style="color:var(--copper);font-size:1.3rem;">LKR <fmt:formatNumber value="${revenue}" pattern="#,##0"/></div></div>
       </div>
     </div>
 
     <!-- Tabs -->
     <div style="display:flex;gap:2px;border-bottom:2px solid var(--c-border);margin-bottom:24px;overflow-x:auto;">
-      <button class="yd-admin-tab active" id="atKanban"   onclick="admTab('Kanban')">📊 Live Orders</button>
-      <button class="yd-admin-tab"        id="atFood"     onclick="admTab('Food')">🍽️ Food</button>
-      <button class="yd-admin-tab"        id="atOrders"   onclick="admTab('Orders')">📦 All Orders</button>
-      <button class="yd-admin-tab"        id="atUsers"    onclick="admTab('Users')">👥 Users</button>
-      <button class="yd-admin-tab"        id="atDrivers"  onclick="admTab('Drivers')">🛵 Drivers</button>
-      <button class="yd-admin-tab"        id="atOffers"   onclick="admTab('Offers')">🎁 Offers</button>
-      <button class="yd-admin-tab"        id="atFeedback" onclick="admTab('Feedback')">💬 Reviews</button>
+      <button class="kg-admin-tab active" id="atKanban"   onclick="admTab('Kanban')">📊 Live Orders</button>
+      <button class="kg-admin-tab"        id="atFood"     onclick="admTab('Food')">🍽️ Food</button>
+      <button class="kg-admin-tab"        id="atOrders"   onclick="admTab('Orders')">📦 All Orders</button>
+      <button class="kg-admin-tab"        id="atUsers"    onclick="admTab('Users')">👥 Users</button>
+      <button class="kg-admin-tab"        id="atDrivers"  onclick="admTab('Drivers')">🛵 Drivers</button>
+      <button class="kg-admin-tab"        id="atOffers"   onclick="admTab('Offers')">🎁 Offers</button>
+      <button class="kg-admin-tab"        id="atFeedback" onclick="admTab('Feedback')">💬 Reviews</button>
     </div>
 
     <!-- KANBAN -->
-    <div class="adm-pane" id="paneKanban">
+    <div class="kg-adm-pane" id="paneKanban">
       <div class="row g-3">
         <div class="col-md-3">
           <div class="kanban-col">
@@ -97,7 +97,7 @@
               <form action="/admin/order/status" method="post" class="mt-2">
                 <input type="hidden" name="orderId" value="${o.orderId}">
                 <input type="hidden" name="status" value="READY">
-                <button type="submit" class="yd-btn yd-btn-sm" style="background:#E8F5E9;color:#2E7D32;border:none;padding:5px 12px;font-size:.72rem;width:100%;">✓ Mark Ready</button>
+                <button type="submit" class="kg-btn kg-btn-sm" style="background:#E8F5E9;color:#2E7D32;border:none;padding:5px 12px;font-size:.72rem;width:100%;">✓ Mark Ready</button>
               </form>
             </div>
             </c:forEach>
@@ -142,20 +142,20 @@
     </div>
 
     <!-- FOOD -->
-    <div class="adm-pane" id="paneFood" style="display:none;">
+    <div class="kg-adm-pane" id="paneFood" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold mb-0">Menu Items</h5>
-        <button onclick="document.getElementById('addFoodModal').style.display='flex'" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Item</button>
+        <button onclick="document.getElementById('addFoodModal').style.display='flex'" class="kg-btn kg-btn-primary kg-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Item</button>
       </div>
       <div style="overflow-x:auto;">
-        <table class="yd-table">
+        <table class="kg-table">
           <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Status</th><th>Rating</th><th>Actions</th></tr></thead>
           <tbody>
             <c:forEach items="${foods}" var="f">
             <tr>
               <td><div class="d-flex align-items-center gap-2"><img src="${f.imageUrl}" class="food-img-sm" onerror="this.style.display='none'"><div><div style="font-weight:600;font-size:.88rem;">${f.name}</div><div style="font-size:.72rem;color:var(--c-muted);">${f.foodType} · ${f.calories} kcal</div></div></div></td>
               <td style="font-size:.82rem;">${f.category}</td>
-              <td style="font-weight:700;color:var(--c-orange);">LKR <fmt:formatNumber value="${f.price}" pattern="#,##0"/></td>
+              <td style="font-weight:700;color:var(--copper);">LKR <fmt:formatNumber value="${f.price}" pattern="#,##0"/></td>
               <td>
                 <form action="/admin/food/toggle" method="post" style="display:inline;">
                   <input type="hidden" name="id" value="${f.id}">
@@ -166,11 +166,11 @@
               </td>
               <td style="font-size:.82rem;color:#FFB800;">★ ${f.rating} (${f.reviewCount})</td>
               <td><div class="d-flex gap-1">
-                <a href="/menu/item/${f.id}" target="_blank" class="yd-btn yd-btn-outline yd-btn-sm" style="padding:6px 10px;"><i class="bi bi-eye"></i></a>
-                <button onclick="editFood('${f.id}')" class="yd-btn yd-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
+                <a href="/menu/item/${f.id}" target="_blank" class="kg-btn kg-btn-outline kg-btn-sm" style="padding:6px 10px;"><i class="bi bi-eye"></i></a>
+                <button onclick="editFood('${f.id}')" class="kg-btn kg-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
                 <form action="/admin/food/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete ${f.name}?')">
                   <input type="hidden" name="id" value="${f.id}">
-                  <button type="submit" class="yd-btn yd-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-trash3"></i></button>
+                  <button type="submit" class="kg-btn kg-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-trash3"></i></button>
                 </form>
               </div></td>
             </tr>
@@ -181,31 +181,31 @@
     </div>
 
     <!-- ALL ORDERS -->
-    <div class="adm-pane" id="paneOrders" style="display:none;">
+    <div class="kg-adm-pane" id="paneOrders" style="display:none;">
       <h5 class="fw-bold mb-3">All Orders</h5>
       <div style="overflow-x:auto;">
-        <table class="yd-table">
+        <table class="kg-table">
           <thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Update</th></tr></thead>
           <tbody>
             <c:forEach items="${orders}" var="o">
             <tr>
               <td style="font-family:monospace;font-weight:700;">#${o.orderId}<br><span style="font-size:.7rem;color:var(--c-muted);font-family:sans-serif;">${o.createdAt}</span></td>
               <td><div style="font-weight:600;font-size:.85rem;">${o.customerName}</div><div style="font-size:.72rem;color:var(--c-muted);">${o.deliveryAddress}</div></td>
-              <td style="font-weight:700;color:var(--c-orange);">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></td>
+              <td style="font-weight:700;color:var(--copper);">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></td>
               <td style="font-size:.78rem;">${o.paymentMethod}</td>
               <td>
                 <c:choose>
-                  <c:when test="${o.status=='COOKING'}"><span class="yd-status yd-s-cooking">${o.statusBadge}</span></c:when>
-                  <c:when test="${o.status=='READY'}"><span class="yd-status yd-s-ready">${o.statusBadge}</span></c:when>
-                  <c:when test="${o.status=='ON_WAY' or o.status=='HANDOVER'}"><span class="yd-status yd-s-onway">${o.statusBadge}</span></c:when>
-                  <c:when test="${o.status=='DELIVERED'}"><span class="yd-status yd-s-delivered">${o.statusBadge}</span></c:when>
-                  <c:when test="${o.status=='CANCELLED'}"><span class="yd-status yd-s-cancelled">${o.statusBadge}</span></c:when>
-                  <c:otherwise><span class="yd-status yd-s-pending">${o.statusBadge}</span></c:otherwise>
+                  <c:when test="${o.status=='COOKING'}"><span class="kg-pill kg-pill-cooking">${o.statusBadge}</span></c:when>
+                  <c:when test="${o.status=='READY'}"><span class="kg-pill kg-pill-ready">${o.statusBadge}</span></c:when>
+                  <c:when test="${o.status=='ON_WAY' or o.status=='HANDOVER'}"><span class="kg-pill kg-pill-onway">${o.statusBadge}</span></c:when>
+                  <c:when test="${o.status=='DELIVERED'}"><span class="kg-pill kg-pill-delivered">${o.statusBadge}</span></c:when>
+                  <c:when test="${o.status=='CANCELLED'}"><span class="kg-pill kg-pill-cancelled">${o.statusBadge}</span></c:when>
+                  <c:otherwise><span class="kg-pill yd-s-pending">${o.statusBadge}</span></c:otherwise>
                 </c:choose>
               </td>
               <td><form action="/admin/order/status" method="post">
                 <input type="hidden" name="orderId" value="${o.orderId}">
-                <select name="status" class="yd-input" style="padding:6px 10px;font-size:.78rem;border-radius:8px;min-width:148px;" onchange="this.form.submit()">
+                <select name="status" class="kg-input" style="padding:6px 10px;font-size:.78rem;border-radius:8px;min-width:148px;" onchange="this.form.submit()">
                   <option value="COOKING"   ${o.status=='COOKING'?'selected':''}>🍳 Cooking</option>
                   <option value="READY"     ${o.status=='READY'?'selected':''}>📦 Ready for Driver</option>
                   <option value="HANDOVER"  ${o.status=='HANDOVER'?'selected':''}>🤝 Picked Up</option>
@@ -222,25 +222,25 @@
     </div>
 
     <!-- USERS -->
-    <div class="adm-pane" id="paneUsers" style="display:none;">
+    <div class="kg-adm-pane" id="paneUsers" style="display:none;">
       <h5 class="fw-bold mb-3">Customers</h5>
       <div style="overflow-x:auto;">
-        <table class="yd-table">
+        <table class="kg-table">
           <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Loyalty</th><th>Actions</th></tr></thead>
           <tbody>
             <c:forEach items="${customers}" var="cu">
             <tr>
               <td><div class="d-flex align-items-center gap-2">
                 <c:choose><c:when test="${fn:length(cu.profilePicUrl)>0}"><img src="${cu.profilePicUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"></c:when>
-                <c:otherwise><div style="width:36px;height:36px;border-radius:50%;background:var(--c-orange-l);color:var(--c-orange);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(cu.name,0,1)}</div></c:otherwise></c:choose>
+                <c:otherwise><div style="width:36px;height:36px;border-radius:50%;background:var(--copper-l);color:var(--copper);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(cu.name,0,1)}</div></c:otherwise></c:choose>
                 <div><div style="font-weight:600;font-size:.88rem;">${cu.name}</div><div style="font-size:.72rem;color:var(--c-muted);">${cu.createdAt}</div></div>
               </div></td>
               <td style="font-size:.82rem;">${cu.email}</td>
               <td style="font-size:.82rem;">${cu.phone}</td>
               <td style="font-size:.82rem;color:#FFB800;">⭐ ${cu.loyaltyPoints}</td>
               <td><div class="d-flex gap-1">
-                <button onclick="editUser('${cu.id}','${cu.name}','${cu.phone}','${cu.address}','')" class="yd-btn yd-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
-                <form action="/admin/user/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete ${cu.name}?')"><input type="hidden" name="id" value="${cu.id}"><button type="submit" class="yd-btn yd-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-person-x"></i></button></form>
+                <button onclick="editUser('${cu.id}','${cu.name}','${cu.phone}','${cu.address}','')" class="kg-btn kg-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
+                <form action="/admin/user/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete ${cu.name}?')"><input type="hidden" name="id" value="${cu.id}"><button type="submit" class="kg-btn kg-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-person-x"></i></button></form>
               </div></td>
             </tr>
             </c:forEach>
@@ -250,28 +250,28 @@
     </div>
 
     <!-- DRIVERS -->
-    <div class="adm-pane" id="paneDrivers" style="display:none;">
+    <div class="kg-adm-pane" id="paneDrivers" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold mb-0">Drivers</h5>
-        <button onclick="document.getElementById('addDriverModal').style.display='flex'" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Driver</button>
+        <button onclick="document.getElementById('addDriverModal').style.display='flex'" class="kg-btn kg-btn-primary kg-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Driver</button>
       </div>
       <div style="overflow-x:auto;">
-        <table class="yd-table">
+        <table class="kg-table">
           <thead><tr><th>Driver</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             <c:forEach items="${drivers}" var="dr">
             <tr>
               <td><div class="d-flex align-items-center gap-2">
                 <c:choose><c:when test="${fn:length(dr.profilePicUrl)>0}"><img src="${dr.profilePicUrl}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"></c:when>
-                <c:otherwise><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c-orange),var(--c-orange-d));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(dr.name,0,1)}</div></c:otherwise></c:choose>
+                <c:otherwise><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--copper),var(--copper-d));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(dr.name,0,1)}</div></c:otherwise></c:choose>
                 <div style="font-weight:600;font-size:.88rem;">${dr.name}</div>
               </div></td>
               <td style="font-size:.82rem;">${dr.email}</td>
               <td style="font-size:.82rem;">${dr.phone}</td>
-              <td><span class="yd-status yd-s-ready" style="font-size:.72rem;">Active</span></td>
+              <td><span class="kg-pill kg-pill-ready" style="font-size:.72rem;">Active</span></td>
               <td><div class="d-flex gap-1">
-                <button onclick="editUser('${dr.id}','${dr.name}','${dr.phone}','${dr.address}','${dr.profilePicUrl}')" class="yd-btn yd-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
-                <form action="/admin/user/delete" method="post" style="display:inline;" onsubmit="return confirm('Remove ${dr.name}?')"><input type="hidden" name="id" value="${dr.id}"><button type="submit" class="yd-btn yd-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-person-x"></i></button></form>
+                <button onclick="editUser('${dr.id}','${dr.name}','${dr.phone}','${dr.address}','${dr.profilePicUrl}')" class="kg-btn kg-btn-sm" style="background:#E3F2FD;color:#1565C0;border:none;padding:6px 10px;"><i class="bi bi-pencil"></i></button>
+                <form action="/admin/user/delete" method="post" style="display:inline;" onsubmit="return confirm('Remove ${dr.name}?')"><input type="hidden" name="id" value="${dr.id}"><button type="submit" class="kg-btn kg-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;padding:6px 10px;"><i class="bi bi-person-x"></i></button></form>
               </div></td>
             </tr>
             </c:forEach>
@@ -281,21 +281,21 @@
     </div>
 
     <!-- OFFERS -->
-    <div class="adm-pane" id="paneOffers" style="display:none;">
+    <div class="kg-adm-pane" id="paneOffers" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold mb-0">Promo Offers</h5>
-        <button onclick="document.getElementById('addOfferModal').style.display='flex'" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Offer</button>
+        <button onclick="document.getElementById('addOfferModal').style.display='flex'" class="kg-btn kg-btn-primary kg-btn-sm" style="width:auto;"><i class="bi bi-plus-lg me-1"></i>Add Offer</button>
       </div>
       <div class="row g-3">
         <c:forEach items="${offers}" var="o">
-        <div class="col-md-4 yd-fade">
-          <div class="yd-card" style="border-top:4px solid var(--c-orange);">
-            <div class="yd-card-body">
-              <div style="font-size:1.4rem;font-weight:800;color:var(--c-orange);letter-spacing:2px;">${o.code}</div>
+        <div class="col-md-4 kg-fade">
+          <div class="yd-card" style="border-top:4px solid var(--copper);">
+            <div class="kg-card-body">
+              <div style="font-size:1.4rem;font-weight:800;color:var(--copper);letter-spacing:2px;">${o.code}</div>
               <div style="font-weight:700;margin:6px 0 4px;">${o.title}</div>
               <div style="font-size:.78rem;color:var(--c-muted);">${o.description}</div>
               <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:.78rem;background:var(--c-orange-l);color:var(--c-orange);padding:3px 10px;border-radius:20px;font-weight:700;">${o.discountPercent}% OFF</span>
+                <span style="font-size:.78rem;background:var(--copper-l);color:var(--copper);padding:3px 10px;border-radius:20px;font-weight:700;">${o.discountPercent}% OFF</span>
                 <form action="/admin/offer/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete offer ${o.code}?')"><input type="hidden" name="code" value="${o.code}"><button type="submit" style="background:none;border:none;color:#f44336;cursor:pointer;font-size:.85rem;">✕ Delete</button></form>
               </div>
             </div>
@@ -306,21 +306,21 @@
     </div>
 
     <!-- FEEDBACK / REVIEWS -->
-    <div class="adm-pane" id="paneFeedback" style="display:none;">
+    <div class="kg-adm-pane" id="paneFeedback" style="display:none;">
       <h5 class="fw-bold mb-3">Customer Reviews</h5>
       <c:forEach items="${feedback}" var="fb">
-      <div class="yd-card mb-3 yd-fade">
-        <div class="yd-card-body">
+      <div class="kg-card mb-3 kg-fade">
+        <div class="kg-card-body">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div><div style="font-weight:700;font-size:.9rem;">${fb.customerName}</div><div style="font-size:.72rem;color:var(--c-muted);">${fb.createdAt} · ${fb.foodItemName}</div></div>
             <div style="color:#FFB800;">★★★★★</div>
           </div>
           <p style="font-size:.875rem;color:var(--c-text2);font-style:italic;margin-bottom:12px;">"${fb.text}"</p>
-          <c:if test="${fn:length(fb.adminReply)>0}"><div style="background:var(--c-orange-l);padding:8px 12px;border-radius:10px;font-size:.82rem;color:var(--c-text2);margin-bottom:12px;border-left:3px solid var(--c-orange);"><strong>Your reply:</strong> ${fb.adminReply}</div></c:if>
+          <c:if test="${fn:length(fb.adminReply)>0}"><div style="background:var(--copper-l);padding:8px 12px;border-radius:10px;font-size:.82rem;color:var(--c-text2);margin-bottom:12px;border-left:3px solid var(--copper);"><strong>Your reply:</strong> ${fb.adminReply}</div></c:if>
           <form action="/admin/feedback/reply" method="post" class="d-flex gap-2">
             <input type="hidden" name="feedbackId" value="${fb.id}">
-            <input type="text" name="reply" class="yd-input" placeholder="Reply to this review..." value="${fb.adminReply}" style="flex:1;padding:9px 14px;border-radius:10px;">
-            <button type="submit" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;padding:9px 18px;"><i class="bi bi-send"></i></button>
+            <input type="text" name="reply" class="kg-input" placeholder="Reply to this review..." value="${fb.adminReply}" style="flex:1;padding:9px 14px;border-radius:10px;">
+            <button type="submit" class="kg-btn kg-btn-primary kg-btn-sm" style="width:auto;padding:9px 18px;"><i class="bi bi-send"></i></button>
           </form>
         </div>
       </div>
@@ -332,22 +332,22 @@
 <!-- Add Food Modal -->
 <div id="addFoodModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:30px;max-width:560px;width:100%;animation:scaleIn .3s var(--ease);">
-    <h4 style="font-family:var(--font-display);margin-bottom:20px;">➕ Add Food Item</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:20px;">➕ Add Food Item</h4>
     <form action="/admin/food/add" method="post">
       <div class="row g-3">
-        <div class="col-12 yd-form-group"><label class="yd-label">Name *</label><input type="text" name="name" class="yd-input" required></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Description</label><textarea name="description" class="yd-input" rows="2" style="resize:none;"></textarea></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Price (LKR) *</label><input type="number" name="price" class="yd-input" step="0.01" required></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Category</label><select name="category" class="yd-input"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Others</option></select></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Food Type</label><select name="foodType" class="yd-input"><option>MainCourse</option><option>Beverage</option><option>Dessert</option></select></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Calories</label><input type="number" name="calories" class="yd-input" value="0"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Portion Size</label><input type="text" name="portionSize" class="yd-input" placeholder="e.g. 350g"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Ingredients</label><input type="text" name="ingredients" class="yd-input" placeholder="Rice, Chicken, Spices"></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Image URL</label><input type="text" name="imageUrl" class="yd-input" placeholder="https://..."></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Name *</label><input type="text" name="name" class="kg-input" required></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Description</label><textarea name="description" class="kg-input" rows="2" style="resize:none;"></textarea></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Price (LKR) *</label><input type="number" name="price" class="kg-input" step="0.01" required></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Category</label><select name="category" class="kg-input"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Others</option></select></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Food Type</label><select name="foodType" class="kg-input"><option>MainCourse</option><option>Beverage</option><option>Dessert</option></select></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Calories</label><input type="number" name="calories" class="kg-input" value="0"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Portion Size</label><input type="text" name="portionSize" class="kg-input" placeholder="e.g. 350g"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Ingredients</label><input type="text" name="ingredients" class="kg-input" placeholder="Rice, Chicken, Spices"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Image URL</label><input type="text" name="imageUrl" class="kg-input" placeholder="https://..."></div>
       </div>
       <div class="d-flex gap-2 mt-2">
-        <button type="submit" class="yd-btn yd-btn-primary" style="flex:1;">Add to Menu</button>
-        <button type="button" onclick="document.getElementById('addFoodModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Cancel</button>
+        <button type="submit" class="kg-btn kg-btn-primary" style="flex:1;">Add to Menu</button>
+        <button type="button" onclick="document.getElementById('addFoodModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Cancel</button>
       </div>
     </form>
   </div>
@@ -356,23 +356,23 @@
 <!-- Edit Food Modal -->
 <div id="editFoodModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;padding:20px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:30px;max-width:560px;width:100%;animation:scaleIn .3s var(--ease);">
-    <h4 style="font-family:var(--font-display);margin-bottom:20px;">✏️ Edit Food Item</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:20px;">✏️ Edit Food Item</h4>
     <form action="/admin/food/update" method="post">
       <input type="hidden" name="id" id="ef_id">
       <div class="row g-3">
-        <div class="col-12 yd-form-group"><label class="yd-label">Name</label><input type="text" name="name" id="ef_name" class="yd-input" required></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Description</label><textarea name="description" id="ef_desc" class="yd-input" rows="2" style="resize:none;"></textarea></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Price (LKR)</label><input type="number" name="price" id="ef_price" class="yd-input" step="0.01"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Category</label><select name="category" id="ef_cat" class="yd-input"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Others</option></select></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Calories</label><input type="number" name="calories" id="ef_calories" class="yd-input"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Portion Size</label><input type="text" name="portionSize" id="ef_portion" class="yd-input"></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Ingredients</label><input type="text" name="ingredients" id="ef_ingredients" class="yd-input"></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Image URL</label><input type="text" name="imageUrl" id="ef_img" class="yd-input"></div>
-        <div class="col-12"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;font-weight:600;"><input type="checkbox" name="available" id="ef_avail" style="accent-color:var(--c-orange);width:18px;height:18px;"> Available on Menu</label></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Name</label><input type="text" name="name" id="ef_name" class="kg-input" required></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Description</label><textarea name="description" id="ef_desc" class="kg-input" rows="2" style="resize:none;"></textarea></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Price (LKR)</label><input type="number" name="price" id="ef_price" class="kg-input" step="0.01"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Category</label><select name="category" id="ef_cat" class="kg-input"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Others</option></select></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Calories</label><input type="number" name="calories" id="ef_calories" class="kg-input"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Portion Size</label><input type="text" name="portionSize" id="ef_portion" class="kg-input"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Ingredients</label><input type="text" name="ingredients" id="ef_ingredients" class="kg-input"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Image URL</label><input type="text" name="imageUrl" id="ef_img" class="kg-input"></div>
+        <div class="col-12"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;font-weight:600;"><input type="checkbox" name="available" id="ef_avail" style="accent-color:var(--copper);width:18px;height:18px;"> Available on Menu</label></div>
       </div>
       <div class="d-flex gap-2 mt-3">
-        <button type="submit" class="yd-btn yd-btn-primary" style="flex:1;">Save Changes</button>
-        <button type="button" onclick="document.getElementById('editFoodModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Cancel</button>
+        <button type="submit" class="kg-btn kg-btn-primary" style="flex:1;">Save Changes</button>
+        <button type="button" onclick="document.getElementById('editFoodModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Cancel</button>
       </div>
     </form>
   </div>
@@ -381,18 +381,18 @@
 <!-- Edit User/Driver Modal -->
 <div id="editUserModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:30px;max-width:460px;width:100%;animation:scaleIn .3s var(--ease);">
-    <h4 style="font-family:var(--font-display);margin-bottom:20px;">✏️ Edit User / Driver</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:20px;">✏️ Edit User / Driver</h4>
     <form action="/admin/user/update" method="post">
       <input type="hidden" name="id" id="eu_id">
       <div class="row g-3">
-        <div class="col-12 yd-form-group"><label class="yd-label">Full Name</label><input type="text" name="name" id="eu_name" class="yd-input"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Phone</label><input type="text" name="phone" id="eu_phone" class="yd-input"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Address</label><input type="text" name="address" id="eu_addr" class="yd-input"></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Profile Photo URL</label><input type="text" name="profilePicUrl" id="eu_pic" class="yd-input" placeholder="https://... (for drivers)"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Full Name</label><input type="text" name="name" id="eu_name" class="kg-input"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Phone</label><input type="text" name="phone" id="eu_phone" class="kg-input"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Address</label><input type="text" name="address" id="eu_addr" class="kg-input"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Profile Photo URL</label><input type="text" name="profilePicUrl" id="eu_pic" class="kg-input" placeholder="https://... (for drivers)"></div>
       </div>
       <div class="d-flex gap-2 mt-2">
-        <button type="submit" class="yd-btn yd-btn-primary" style="flex:1;">Save Changes</button>
-        <button type="button" onclick="document.getElementById('editUserModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Cancel</button>
+        <button type="submit" class="kg-btn kg-btn-primary" style="flex:1;">Save Changes</button>
+        <button type="button" onclick="document.getElementById('editUserModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Cancel</button>
       </div>
     </form>
   </div>
@@ -401,18 +401,18 @@
 <!-- Add Driver Modal -->
 <div id="addDriverModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:30px;max-width:440px;width:100%;animation:scaleIn .3s var(--ease);">
-    <h4 style="font-family:var(--font-display);margin-bottom:20px;">🛵 Add Driver</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:20px;">🛵 Add Driver</h4>
     <form action="/admin/driver/add" method="post">
       <div class="row g-3">
-        <div class="col-12 yd-form-group"><label class="yd-label">Full Name</label><input type="text" name="name" class="yd-input" required></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Email</label><input type="email" name="email" class="yd-input" required></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Phone</label><input type="text" name="phone" class="yd-input"></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Password</label><input type="password" name="password" class="yd-input" required></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Profile Photo URL</label><input type="text" name="photoUrl" class="yd-input" placeholder="https://..."></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Full Name</label><input type="text" name="name" class="kg-input" required></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Email</label><input type="email" name="email" class="kg-input" required></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Phone</label><input type="text" name="phone" class="kg-input"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Password</label><input type="password" name="password" class="kg-input" required></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Profile Photo URL</label><input type="text" name="photoUrl" class="kg-input" placeholder="https://..."></div>
       </div>
       <div class="d-flex gap-2 mt-2">
-        <button type="submit" class="yd-btn yd-btn-primary" style="flex:1;">Add Driver</button>
-        <button type="button" onclick="document.getElementById('addDriverModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Cancel</button>
+        <button type="submit" class="kg-btn kg-btn-primary" style="flex:1;">Add Driver</button>
+        <button type="button" onclick="document.getElementById('addDriverModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Cancel</button>
       </div>
     </form>
   </div>
@@ -421,18 +421,18 @@
 <!-- Add Offer Modal -->
 <div id="addOfferModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:30px;max-width:420px;width:100%;animation:scaleIn .3s var(--ease);">
-    <h4 style="font-family:var(--font-display);margin-bottom:20px;">🎁 Add Promo Offer</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:20px;">🎁 Add Promo Offer</h4>
     <form action="/admin/offer/add" method="post">
       <div class="row g-3">
-        <div class="col-12 yd-form-group"><label class="yd-label">Code (e.g. FIRST20)</label><input type="text" name="code" class="yd-input" style="text-transform:uppercase;letter-spacing:2px;" required></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Title</label><input type="text" name="title" class="yd-input" placeholder="e.g. 20% Off Your First Order!" required></div>
-        <div class="col-12 yd-form-group"><label class="yd-label">Description</label><input type="text" name="description" class="yd-input" placeholder="e.g. First-time customers only"></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Discount %</label><input type="number" name="discountPercent" class="yd-input" min="1" max="80" required></div>
-        <div class="col-6 yd-form-group"><label class="yd-label">Min Order (LKR)</label><input type="number" name="minOrder" class="yd-input" value="0"></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Code (e.g. FIRST20)</label><input type="text" name="code" class="kg-input" style="text-transform:uppercase;letter-spacing:2px;" required></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Title</label><input type="text" name="title" class="kg-input" placeholder="e.g. 20% Off Your First Order!" required></div>
+        <div class="col-12 kg-form-group"><label class="kg-label">Description</label><input type="text" name="description" class="kg-input" placeholder="e.g. First-time customers only"></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Discount %</label><input type="number" name="discountPercent" class="kg-input" min="1" max="80" required></div>
+        <div class="col-6 kg-form-group"><label class="kg-label">Min Order (LKR)</label><input type="number" name="minOrder" class="kg-input" value="0"></div>
       </div>
       <div class="d-flex gap-2 mt-2">
-        <button type="submit" class="yd-btn yd-btn-primary" style="flex:1;">Add Offer</button>
-        <button type="button" onclick="document.getElementById('addOfferModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Cancel</button>
+        <button type="submit" class="kg-btn kg-btn-primary" style="flex:1;">Add Offer</button>
+        <button type="button" onclick="document.getElementById('addOfferModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Cancel</button>
       </div>
     </form>
   </div>
@@ -441,8 +441,8 @@
 <script>
 // Tab switching &mdash; safe, runs immediately (no DOM dependency on tab logic)
 function admTab(name) {
-  document.querySelectorAll('.adm-pane').forEach(function(p){ p.style.display='none'; });
-  document.querySelectorAll('.yd-admin-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.kg-adm-pane').forEach(function(p){ p.style.display='none'; });
+  document.querySelectorAll('.kg-admin-tab').forEach(function(t){ t.classList.remove('active'); });
   var pane = document.getElementById('pane' + name);
   var tab  = document.getElementById('at' + name);
   if (pane) pane.style.display = 'block';

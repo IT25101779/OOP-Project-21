@@ -6,23 +6,23 @@
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
 <style>
 .pay-lbl{display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:12px;border:1.5px solid var(--c-border);cursor:pointer;margin-bottom:8px;transition:all .2s;background:var(--c-surface);}
-.pay-lbl.sel{border-color:var(--c-orange);background:var(--c-orange-l);}
+.pay-lbl.sel{border-color:var(--copper);background:var(--copper-l);}
 #deliveryMap{width:100%;height:260px;border-radius:16px;border:1px solid var(--c-border);background:#f0f0f0;position:relative;}
 .map-pin-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:10;pointer-events:none;font-size:2.2rem;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));}
 .weather-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;border:1px solid var(--c-border);background:var(--c-surface);font-size:.82rem;margin-top:8px;}
 .saved-loc-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:1.5px solid var(--c-border);background:var(--c-surface);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;margin:3px;}
-.saved-loc-chip:hover,.saved-loc-chip.sel{background:var(--c-orange);color:white;border-color:var(--c-orange);}
+.saved-loc-chip:hover,.saved-loc-chip.sel{background:var(--copper);color:white;border-color:var(--copper);}
 .tip-btn{padding:8px 18px;border-radius:20px;border:1.5px solid var(--c-border);background:var(--c-surface);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;margin:3px;}
-.tip-btn.sel{background:linear-gradient(135deg,var(--c-orange),var(--c-orange-d));color:white;border-color:var(--c-orange);}
+.tip-btn.sel{background:linear-gradient(135deg,var(--copper),var(--copper-d));color:white;border-color:var(--copper);}
 </style>
 
-<div class="yd-page container-xl py-4" style="max-width:1080px;">
-  <h2 style="font-family:var(--font-display);font-size:2rem;margin-bottom:24px;">Your Cart 🛒</h2>
+<div class="kg-page container-xl py-4" style="max-width:1080px;">
+  <h2 style="font-family:var(--font-serif);font-size:2rem;margin-bottom:24px;">Your Cart 🛒</h2>
 
   <div id="emptyCart" style="display:none;text-align:center;padding:80px 0;">
     <div style="font-size:5rem;margin-bottom:16px;animation:float 3s ease-in-out infinite;">🛒</div>
     <h4 style="color:var(--c-muted);">Your cart is empty</h4>
-    <a href="/menu" class="yd-btn yd-btn-primary mt-3" style="width:auto;padding:12px 28px;">Browse Menu</a>
+    <a href="/menu" class="kg-btn kg-btn-primary mt-3" style="width:auto;padding:12px 28px;">Browse Menu</a>
   </div>
 
   <div id="cartContent">
@@ -30,16 +30,16 @@
       <!-- LEFT -->
       <div class="col-lg-7">
         <!-- Cart items -->
-        <div class="yd-card mb-4 yd-fade">
-          <div class="yd-card-body">
+        <div class="kg-card mb-4 kg-fade">
+          <div class="kg-card-body">
             <h5 class="fw-bold mb-3">Order Items</h5>
             <div id="cartItems"></div>
           </div>
         </div>
 
         <!-- Delivery -->
-        <div class="yd-card mb-4 yd-fade">
-          <div class="yd-card-body">
+        <div class="kg-card mb-4 kg-fade">
+          <div class="kg-card-body">
             <h5 class="fw-bold mb-3">📍 Delivery Address</h5>
 
             <!-- Saved locations chips -->
@@ -47,11 +47,11 @@
 
             <!-- Address input -->
             <div class="position-relative mb-2">
-              <i class="bi bi-geo-alt-fill" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--c-orange);pointer-events:none;"></i>
-              <input type="text" id="deliveryAddress" class="yd-input" style="padding-left:38px!important;" placeholder="e.g. 15 Dalada Veediya, Kandy" value="${fn:length(user.address)>0 ? user.address : ''}">
+              <i class="bi bi-geo-alt-fill" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--copper);pointer-events:none;"></i>
+              <input type="text" id="deliveryAddress" class="kg-input" style="padding-left:38px!important;" placeholder="e.g. 15 Dalada Veediya, Kandy" value="${fn:length(user.address)>0 ? user.address : ''}">
             </div>
             <div class="d-flex gap-2 mb-3">
-              <button onclick="useGPSCart()" class="yd-btn yd-btn-outline yd-btn-sm" style="width:auto;padding:7px 14px;"><i class="bi bi-crosshair me-1" style="color:var(--c-orange);"></i>Use My Location</button>
+              <button onclick="useGPSCart()" class="kg-btn kg-btn-outline kg-btn-sm" style="width:auto;padding:7px 14px;"><i class="bi bi-crosshair me-1" style="color:var(--copper);"></i>Use My Location</button>
             </div>
 
             <!-- Single map with static pin -->
@@ -62,31 +62,31 @@
                 Move the map to position the pin
               </div>
             </div>
-            <div id="mapAddressResult" style="margin-top:8px;padding:8px 12px;background:var(--c-orange-l);border-radius:10px;font-size:.82rem;color:var(--c-text2);display:none;border:1px solid rgba(255,107,53,.2);">
-              <i class="bi bi-geo-alt-fill me-1" style="color:var(--c-orange);"></i><span id="mapAddrText"></span>
-              <button onclick="applyMapAddress()" class="yd-btn yd-btn-primary yd-btn-sm" style="float:right;padding:3px 12px;width:auto;">Use this</button>
+            <div id="mapAddressResult" style="margin-top:8px;padding:8px 12px;background:var(--copper-l);border-radius:10px;font-size:.82rem;color:var(--c-text2);display:none;border:1px solid rgba(255,107,53,.2);">
+              <i class="bi bi-geo-alt-fill me-1" style="color:var(--copper);"></i><span id="mapAddrText"></span>
+              <button onclick="applyMapAddress()" class="kg-btn kg-btn-primary kg-btn-sm" style="float:right;padding:3px 12px;width:auto;">Use this</button>
             </div>
 
             <!-- Weather info -->
             <div class="weather-bar" id="weatherBar">
               <span id="weatherIcon">⏳</span>
               <div style="flex:1;"><div id="weatherText" style="font-weight:600;color:var(--c-text);">Loading weather...</div><div id="weatherFee" style="font-size:.72rem;color:var(--c-muted);"></div></div>
-              <span id="weatherTemp" style="font-weight:700;color:var(--c-orange);"></span>
+              <span id="weatherTemp" style="font-weight:700;color:var(--copper);"></span>
             </div>
 
             <!-- Notes -->
-            <div class="yd-form-group mt-3">
-              <label class="yd-label">Note for Chef</label>
-              <textarea id="chefNote" class="yd-input" rows="2" placeholder="Allergies, spice level, no onions..." style="resize:none;"></textarea>
+            <div class="kg-form-group mt-3">
+              <label class="kg-label">Note for Chef</label>
+              <textarea id="chefNote" class="kg-input" rows="2" placeholder="Allergies, spice level, no onions..." style="resize:none;"></textarea>
             </div>
-            <div class="yd-form-group">
-              <label class="yd-label">Note for Driver</label>
-              <textarea id="driverNote" class="yd-input" rows="2" placeholder="Ring doorbell, call on arrival..." style="resize:none;"></textarea>
+            <div class="kg-form-group">
+              <label class="kg-label">Note for Driver</label>
+              <textarea id="driverNote" class="kg-input" rows="2" placeholder="Ring doorbell, call on arrival..." style="resize:none;"></textarea>
             </div>
 
             <!-- Tip -->
-            <div class="yd-form-group">
-              <label class="yd-label">💝 Tip for Driver (optional)</label>
+            <div class="kg-form-group">
+              <label class="kg-label">💝 Tip for Driver (optional)</label>
               <div class="d-flex flex-wrap gap-1">
                 <button class="tip-btn" onclick="setTip(0,this)">No tip</button>
                 <button class="tip-btn" onclick="setTip(50,this)">LKR 50</button>
@@ -99,17 +99,17 @@
       </div>
 
       <!-- RIGHT: Summary -->
-      <div class="col-lg-5 yd-fade">
-        <div class="yd-card" style="position:sticky;top:80px;">
-          <div class="yd-card-body">
+      <div class="col-lg-5 kg-fade">
+        <div class="kg-card" style="position:sticky;top:80px;">
+          <div class="kg-card-body">
             <h5 class="fw-bold mb-4">Order Summary</h5>
             <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Subtotal</span><span id="sumSub">LKR 0</span></div>
             <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Delivery Fee</span><span id="sumDelivery">LKR 250</span></div>
             <div id="weatherFeeRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:#E65100;"><span>&#x1F327;&#xFE0F; Weather Surcharge</span><span id="sumWeatherFee">LKR 0</span></div>
             <div id="tipRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-muted);"><span>Driver Tip</span><span id="sumTip">LKR 0</span></div>
-            <div id="discRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--c-success);"><span>Offer (<span id="offerLbl"></span>)</span><span id="sumDisc">- LKR 0</span></div>
+            <div id="discRow" style="display:none;justify-content:space-between;font-size:.9rem;padding:6px 0;color:var(--leaf-green);"><span>Offer (<span id="offerLbl"></span>)</span><span id="sumDisc">- LKR 0</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;border-top:1px solid var(--c-border);margin-top:8px;padding-top:12px;">
-              <span>Total</span><span style="color:var(--c-orange);" id="sumTotal">LKR 0</span>
+              <span>Total</span><span style="color:var(--copper);" id="sumTotal">LKR 0</span>
             </div>
             <!-- ETA row -->
             <div id="etaRow" style="margin-top:10px;padding:10px 14px;background:#E3F2FD;border-radius:10px;border:1px solid #BBDEFB;font-size:.82rem;display:none;">
@@ -123,29 +123,29 @@
 
             <!-- Promo -->
             <div class="mt-4">
-              <label class="yd-label">Promo Code</label>
-              <div class="yd-promo-wrap">
-                <input type="text" id="promoInput" class="yd-input" placeholder="e.g. FIRST20" style="text-transform:uppercase;letter-spacing:2px;">
-                <button onclick="applyPromo()" class="yd-btn yd-btn-dark yd-btn-sm" style="white-space:nowrap;">Apply</button>
+              <label class="kg-label">Promo Code</label>
+              <div class="d-flex gap-2">
+                <input type="text" id="promoInput" class="kg-input" placeholder="e.g. FIRST20" style="text-transform:uppercase;letter-spacing:2px;">
+                <button onclick="applyPromo()" class="kg-btn kg-btn-ghost kg-btn-sm" style="white-space:nowrap;">Apply</button>
               </div>
-              <div id="promoMsg" style="display:none;" class="yd-promo-msg"></div>
+              <div id="promoMsg" style="display:none;" class="kg-promo-msg"></div>
             </div>
 
             <!-- Payment -->
             <h6 class="fw-bold mt-4 mb-3">Payment Method</h6>
             <label class="pay-lbl sel" id="lCOD" onclick="selPay('COD')">
-              <input type="radio" name="pay" value="COD" checked style="accent-color:var(--c-orange);">
+              <input type="radio" name="pay" value="COD" checked style="accent-color:var(--copper);">
               <span>💵 Cash on Delivery</span>
             </label>
             <label class="pay-lbl" id="lCard" onclick="selPay('CARD')">
-              <input type="radio" name="pay" value="CARD" style="accent-color:var(--c-orange);">
+              <input type="radio" name="pay" value="CARD" style="accent-color:var(--copper);">
               <span>💳 Credit / Debit Card</span>
             </label>
 
-            <button class="yd-btn yd-btn-primary mt-4" onclick="proceedPay()">
+            <button class="kg-btn kg-btn-primary mt-4" onclick="proceedPay()">
               <i class="bi bi-lock-fill me-2"></i>Proceed to Payment →
             </button>
-            <a href="/menu" class="yd-btn yd-btn-outline mt-2 d-flex justify-content-center" style="color:var(--c-muted);">
+            <a href="/menu" class="kg-btn kg-btn-outline mt-2 d-flex justify-content-center" style="color:var(--c-muted);">
               <i class="bi bi-arrow-left me-1"></i>Continue Shopping
             </a>
           </div>
@@ -160,28 +160,28 @@
   <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
     <div class="modal-content" style="border-radius:24px;border:none;background:var(--c-surface);">
       <div class="modal-body p-4">
-        <h4 style="font-family:var(--font-display);margin-bottom:4px;" id="payTitle">Confirm Order</h4>
-        <p style="color:var(--c-muted);font-size:.875rem;margin-bottom:20px;">Total: <strong style="color:var(--c-orange);font-size:1.1rem;" id="payTotal">LKR 0</strong></p>
+        <h4 style="font-family:var(--font-serif);margin-bottom:4px;" id="payTitle">Confirm Order</h4>
+        <p style="color:var(--c-muted);font-size:.875rem;margin-bottom:20px;">Total: <strong style="color:var(--copper);font-size:1.1rem;" id="payTotal">LKR 0</strong></p>
         <div id="cardFlds" style="display:none;">
-          <div class="yd-form-group"><label class="yd-label">Card Number</label><input type="text" id="cNum" class="yd-input" placeholder="4242 4242 4242 4242" maxlength="19" oninput="fmtCard(this)"></div>
-          <div class="yd-form-group"><label class="yd-label">Cardholder</label><input type="text" id="cName" class="yd-input" value="${user.name}"></div>
+          <div class="kg-form-group"><label class="kg-label">Card Number</label><input type="text" id="cNum" class="kg-input" placeholder="4242 4242 4242 4242" maxlength="19" oninput="fmtCard(this)"></div>
+          <div class="kg-form-group"><label class="kg-label">Cardholder</label><input type="text" id="cName" class="kg-input" value="${user.name}"></div>
           <div class="row g-2">
-            <div class="col-6 yd-form-group"><label class="yd-label">Expiry</label><input type="text" id="cExp" class="yd-input" placeholder="12/26" maxlength="5"></div>
-            <div class="col-6 yd-form-group"><label class="yd-label">CVV</label><input type="password" id="cCvv" class="yd-input" placeholder="•••" maxlength="4"></div>
+            <div class="col-6 kg-form-group"><label class="kg-label">Expiry</label><input type="text" id="cExp" class="kg-input" placeholder="12/26" maxlength="5"></div>
+            <div class="col-6 kg-form-group"><label class="kg-label">CVV</label><input type="password" id="cCvv" class="kg-input" placeholder="•••" maxlength="4"></div>
           </div>
-          <div style="background:#f8f4f0;padding:8px 12px;border-radius:8px;font-size:.75rem;color:#888;margin-bottom:12px;"><i class="bi bi-lock-fill me-1" style="color:var(--c-success);"></i>Secured with 256-bit SSL</div>
+          <div style="background:#f8f4f0;padding:8px 12px;border-radius:8px;font-size:.75rem;color:#888;margin-bottom:12px;"><i class="bi bi-lock-fill me-1" style="color:var(--leaf-green);"></i>Secured with 256-bit SSL</div>
         </div>
         <div id="codFlds" style="text-align:center;padding:16px 0;">
           <div style="font-size:3rem;margin-bottom:12px;">🛵</div>
           <p style="color:var(--c-text2);">Pay cash when your order arrives.</p>
         </div>
         <div id="procFlds" style="display:none;text-align:center;padding:20px 0;">
-          <div style="width:48px;height:48px;border:4px solid var(--c-border);border-top-color:var(--c-orange);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+          <div style="width:48px;height:48px;border:4px solid var(--c-border);border-top-color:var(--copper);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
           <p style="font-weight:600;">Placing your order...</p>
         </div>
         <div class="d-flex gap-2 mt-2">
-          <button class="yd-btn yd-btn-primary" id="payBtn" onclick="placeOrder()" style="flex:1;"><span id="payBtnLbl">Confirm Order</span></button>
-          <button class="yd-btn yd-btn-outline" data-bs-dismiss="modal" style="color:var(--c-muted);">Cancel</button>
+          <button class="kg-btn kg-btn-primary" id="payBtn" onclick="placeOrder()" style="flex:1;"><span id="payBtnLbl">Confirm Order</span></button>
+          <button class="kg-btn kg-btn-outline" data-bs-dismiss="modal" style="color:var(--c-muted);">Cancel</button>
         </div>
       </div>
     </div>
@@ -210,14 +210,14 @@ function renderCart() {
     var name = item.name || '';
     var id   = item.id   || '';
     var price = Number(item.price || 0), qty = Number(item.qty || 1);
-    html += '<div class="yd-cart-row">'
+    html += '<div class="kg-cart-item">'
       + '<img src="' + img + '" onerror="this.src=\'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&amp;q=80\'" style="width:68px;height:68px;object-fit:cover;border-radius:12px;flex-shrink:0;">'
       + '<div style="flex:1;"><div style="font-weight:600;font-size:.9rem;">' + name + '</div>'
-      + '<div style="color:var(--c-orange);font-size:.82rem;font-weight:700;">LKR ' + price.toLocaleString() + '</div></div>'
-      + '<div class="yd-qty">'
-      + '<button class="yd-qty-btn" onclick="Cart.updateQty(\'' + id + '\',' + (qty-1) + ');renderCart();">−</button>'
-      + '<span class="yd-qty-val">' + qty + '</span>'
-      + '<button class="yd-qty-btn" onclick="Cart.updateQty(\'' + id + '\',' + (qty+1) + ');renderCart();">+</button>'
+      + '<div style="color:var(--copper);font-size:.82rem;font-weight:700;">LKR ' + price.toLocaleString() + '</div></div>'
+      + '<div class="kg-qty">'
+      + '<button class="kg-qty-btn" onclick="Cart.updateQty(\'' + id + '\',' + (qty-1) + ');renderCart();">−</button>'
+      + '<span class="kg-qty-val">' + qty + '</span>'
+      + '<button class="kg-qty-btn" onclick="Cart.updateQty(\'' + id + '\',' + (qty+1) + ');renderCart();">+</button>'
       + '</div>'
       + '<div style="font-weight:700;min-width:90px;text-align:right;">LKR ' + Math.round(price*qty).toLocaleString() + '</div>'
       + '<button onclick="Cart.remove(\'' + id + '\');renderCart();" style="background:none;border:none;color:#f44336;padding:4px 8px;font-size:1rem;cursor:pointer;">✕</button>'

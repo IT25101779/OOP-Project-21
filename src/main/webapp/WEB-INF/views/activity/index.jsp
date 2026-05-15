@@ -13,28 +13,28 @@
 .order-body{padding:16px 18px;}
 .step-bar{display:flex;gap:0;margin-bottom:14px;}
 .step-seg{flex:1;height:5px;background:var(--c-border);border-radius:99px;margin:0 2px;transition:background 1s;}
-.step-seg.done{background:linear-gradient(90deg,var(--c-orange),#f7971e);}
-.step-seg.pulse{background:var(--c-orange);animation:segPulse 1.5s ease-in-out infinite;}
+.step-seg.done{background:linear-gradient(90deg,var(--copper),#f7971e);}
+.step-seg.pulse{background:var(--copper);animation:segPulse 1.5s ease-in-out infinite;}
 @keyframes segPulse{0%,100%{opacity:1}50%{opacity:.5}}
-.eta-box{background:var(--c-orange-l);border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
-.eta-time{font-size:2rem;font-weight:800;color:var(--c-orange);font-family:monospace;line-height:1;}
+.eta-box{background:var(--copper-l);border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.eta-time{font-size:2rem;font-weight:800;color:var(--copper);font-family:monospace;line-height:1;}
 .live-map{width:100%;height:250px;border-radius:14px;overflow:hidden;border:1px solid var(--c-border);background:var(--c-bg);margin-top:12px;}
 .driver-chip{display:flex;align-items:center;gap:10px;background:var(--c-bg);border-radius:12px;padding:10px 14px;border:1px solid var(--c-border);margin-top:10px;}
 .hist-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--c-border);}
 .hist-row:last-child{border-bottom:none;}
 .tab-strip{display:flex;gap:3px;background:var(--c-bg);border:1px solid var(--c-border);border-radius:14px;padding:4px;margin-bottom:22px;}
 .tab-s{flex:1;padding:10px;border:none;background:none;font-weight:600;font-size:.85rem;color:var(--c-muted);border-radius:10px;cursor:pointer;transition:all .2s;}
-.tab-s.on{background:var(--c-surface);color:var(--c-orange);box-shadow:var(--shadow);}
+.tab-s.on{background:var(--c-surface);color:var(--copper);box-shadow:var(--shadow);}
 </style>
 
-<div class="yd-page">
+<div class="kg-page">
   <!-- Hero -->
   <div class="track-hero">
     <div class="container" style="max-width:720px;">
       <div class="d-flex align-items-center gap-3">
-        <h2 style="font-family:var(--font-display);color:white;font-size:1.8rem;margin:0;">My Orders</h2>
-        <span class="yd-live-badge" style="border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8);background:rgba(255,255,255,.08);">
-          <span class="yd-live-dot"></span>Live Tracking
+        <h2 style="font-family:var(--font-serif);color:white;font-size:1.8rem;margin:0;">My Orders</h2>
+        <span class="kg-live-badge" style="border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8);background:rgba(255,255,255,.08);">
+          <span class="kg-live-dot"></span>Live Tracking
         </span>
       </div>
       <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-top:4px;">Real-time updates &mdash; your driver's location is updated every 8 seconds</p>
@@ -53,16 +53,16 @@
     <div id="paneOngoing">
       <c:choose>
         <c:when test="${empty ongoing}">
-          <div class="yd-card yd-fade" style="text-align:center;padding:48px 24px;">
+          <div class="kg-card kg-fade" style="text-align:center;padding:48px 24px;">
             <div style="font-size:4rem;margin-bottom:16px;animation:float 3s ease-in-out infinite;">📭</div>
             <h4 style="margin-bottom:8px;">No Active Orders</h4>
             <p style="color:var(--c-muted);font-size:.9rem;margin-bottom:20px;">Place an order and track it live right here</p>
-            <a href="/menu" class="yd-btn yd-btn-primary" style="width:auto;padding:12px 28px;"><i class="bi bi-bag me-2"></i>Order Now</a>
+            <a href="/menu" class="kg-btn kg-btn-primary" style="width:auto;padding:12px 28px;"><i class="bi bi-bag me-2"></i>Order Now</a>
           </div>
         </c:when>
         <c:otherwise>
           <c:forEach items="${ongoing}" var="o">
-          <div class="order-card yd-fade" id="card_${o.orderId}">
+          <div class="order-card kg-fade" id="card_${o.orderId}">
             <!-- Header -->
             <div class="order-head">
               <div>
@@ -70,11 +70,11 @@
                 <div style="font-size:.72rem;color:var(--c-muted);margin-top:2px;">${o.createdAt}</div>
               </div>
               <div class="d-flex align-items-center gap-2">
-                <span class="yd-status" id="badge_${o.orderId}"
+                <span class="kg-pill" id="badge_${o.orderId}"
                   style="background:${o.status=='COOKING'?'#FFF3E0':o.status=='READY'?'#E8F5E9':'#E3F2FD'};color:${o.status=='COOKING'?'#E65100':o.status=='READY'?'#2E7D32':'#1565C0'};">
                   ${o.statusBadge}
                 </span>
-                <span style="font-weight:800;color:var(--c-orange);">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></span>
+                <span style="font-weight:800;color:var(--copper);">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></span>
               </div>
             </div>
 
@@ -93,7 +93,7 @@
               <!-- ETA box -->
               <div class="eta-box" id="etaBox_${o.orderId}">
                 <div>
-                  <div style="font-size:.7rem;font-weight:700;color:var(--c-orange);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Estimated Arrival</div>
+                  <div style="font-size:.7rem;font-weight:700;color:var(--copper);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Estimated Arrival</div>
                   <div class="eta-time" id="etaTimer_${o.orderId}">--:--</div>
                 </div>
                 <div style="flex:1;">
@@ -111,7 +111,7 @@
                   <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
                     <img src="${item.imageUrl}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
                     <div style="flex:1;font-size:.82rem;">${item.foodName}</div>
-                    <div style="font-size:.78rem;font-weight:600;color:var(--c-orange);">×${item.quantity}</div>
+                    <div style="font-size:.78rem;font-weight:600;color:var(--copper);">×${item.quantity}</div>
                   </div>
                   </c:if>
                 </c:forEach>
@@ -123,12 +123,12 @@
               <!-- Driver chip -->
               <c:if test="${fn:length(o.driverName) > 0}">
               <div class="driver-chip" id="driverChip_${o.orderId}">
-                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c-orange),var(--c-orange-d));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(o.driverName,0,1)}</div>
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--copper),var(--copper-d));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">${fn:substring(o.driverName,0,1)}</div>
                 <div style="flex:1;">
                   <div style="font-weight:700;font-size:.85rem;">${o.driverName}</div>
                   <div style="font-size:.72rem;color:var(--c-muted);">Your delivery driver</div>
                 </div>
-                <a href="tel:${o.driverContact}" class="yd-btn yd-btn-outline yd-btn-sm" style="width:auto;padding:7px 12px;"><i class="bi bi-telephone-fill"></i></a>
+                <a href="tel:${o.driverContact}" class="kg-btn kg-btn-outline kg-btn-sm" style="width:auto;padding:7px 12px;"><i class="bi bi-telephone-fill"></i></a>
               </div>
               </c:if>
 
@@ -140,11 +140,11 @@
               <!-- Actions -->
               <div class="d-flex gap-2 mt-3">
                 <c:if test="${o.status=='COOKING' || o.status=='PENDING'}">
-                <button onclick="cancelOrder('${o.orderId}',this)" class="yd-btn yd-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;width:auto;">
+                <button onclick="cancelOrder('${o.orderId}',this)" class="kg-btn kg-btn-sm" style="background:#FFEBEE;color:#C62828;border:none;width:auto;">
                   <i class="bi bi-x-circle me-1"></i>Cancel
                 </button>
                 </c:if>
-                <a href="/activity/order/${o.orderId}" class="yd-btn yd-btn-outline yd-btn-sm" style="width:auto;"><i class="bi bi-receipt me-1"></i>Receipt</a>
+                <a href="/activity/order/${o.orderId}" class="kg-btn kg-btn-outline kg-btn-sm" style="width:auto;"><i class="bi bi-receipt me-1"></i>Receipt</a>
                 <button onclick="shareOnWhatsApp('${o.orderId}',[],${o.totalAmount})" class="yd-wa-btn" style="width:auto;padding:7px 14px;font-size:.75rem;">📱 Share</button>
               </div>
             </div>
@@ -158,15 +158,15 @@
     <div id="paneHistory" style="display:none;">
       <c:choose>
         <c:when test="${empty history}">
-          <div class="yd-card yd-fade" style="text-align:center;padding:40px 24px;">
+          <div class="kg-card kg-fade" style="text-align:center;padding:40px 24px;">
             <div style="font-size:3.5rem;margin-bottom:12px;">📋</div>
             <h4 style="margin-bottom:8px;">No order history</h4>
-            <a href="/menu" class="yd-btn yd-btn-primary mt-2" style="width:auto;padding:11px 28px;">Start Ordering</a>
+            <a href="/menu" class="kg-btn kg-btn-primary mt-2" style="width:auto;padding:11px 28px;">Start Ordering</a>
           </div>
         </c:when>
         <c:otherwise>
-          <div class="yd-card yd-fade">
-            <div class="yd-card-body">
+          <div class="kg-card kg-fade">
+            <div class="kg-card-body">
               <c:forEach items="${history}" var="o">
               <div class="hist-row">
                 <div style="flex:1;">
@@ -177,8 +177,8 @@
                   background:${o.status=='DELIVERED'?'#E8F5E9':'#FFEBEE'};
                   color:${o.status=='DELIVERED'?'#2E7D32':'#C62828'};">${o.statusBadge}</span>
                 <div style="text-align:right;min-width:90px;">
-                  <div style="font-weight:700;color:var(--c-orange);font-size:.875rem;">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></div>
-                  <button onclick="reorder('${o.orderId}')" class="yd-btn yd-btn-sm" style="background:var(--c-orange-l);color:var(--c-orange);border:none;margin-top:4px;padding:4px 10px;font-size:.7rem;width:auto;">🔄 Reorder</button>
+                  <div style="font-weight:700;color:var(--copper);font-size:.875rem;">LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/></div>
+                  <button onclick="reorder('${o.orderId}')" class="kg-btn kg-btn-sm" style="background:var(--copper-l);color:var(--copper);border:none;margin-top:4px;padding:4px 10px;font-size:.7rem;width:auto;">🔄 Reorder</button>
                 </div>
               </div>
               </c:forEach>
@@ -189,8 +189,8 @@
     </div><!-- /history -->
 
     <!-- Loyalty bar -->
-    <div class="yd-card mt-3 yd-fade">
-      <div class="yd-card-body">
+    <div class="kg-card mt-3 kg-fade">
+      <div class="kg-card-body">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span style="font-weight:700;font-size:.9rem;">⭐ Loyalty Points</span>
           <span style="font-size:1.6rem;font-weight:800;color:#FFB800;" id="loyaltyPts">&mdash;</span>
@@ -206,7 +206,7 @@
 <div id="ratingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center;padding:16px;">
   <div style="background:var(--c-surface);border-radius:24px;padding:32px;max-width:360px;width:100%;text-align:center;animation:scaleIn .3s var(--ease);">
     <div style="font-size:3.5rem;margin-bottom:12px;">🍽️</div>
-    <h4 style="font-family:var(--font-display);margin-bottom:6px;">How was your meal?</h4>
+    <h4 style="font-family:var(--font-serif);margin-bottom:6px;">How was your meal?</h4>
     <p style="color:var(--c-muted);font-size:.875rem;margin-bottom:18px;" id="ratingLabel">Rate your order</p>
     <div style="display:flex;justify-content:center;gap:6px;margin-bottom:16px;" id="ratingStars">
       <span class="rstar" data-v="1" style="font-size:2.5rem;cursor:pointer;filter:grayscale(1);transition:all .18s;">⭐</span>
@@ -215,10 +215,10 @@
       <span class="rstar" data-v="4" style="font-size:2.5rem;cursor:pointer;filter:grayscale(1);transition:all .18s;">⭐</span>
       <span class="rstar" data-v="5" style="font-size:2.5rem;cursor:pointer;filter:grayscale(1);transition:all .18s;">⭐</span>
     </div>
-    <textarea id="ratingTxt" class="yd-input" rows="2" placeholder="Tell us what you think..." style="resize:none;margin-bottom:14px;text-align:left;"></textarea>
+    <textarea id="ratingTxt" class="kg-input" rows="2" placeholder="Tell us what you think..." style="resize:none;margin-bottom:14px;text-align:left;"></textarea>
     <div class="d-flex gap-2">
-      <button onclick="submitRating()" class="yd-btn yd-btn-primary" style="flex:1;" id="ratingBtn">Submit</button>
-      <button onclick="document.getElementById('ratingModal').style.display='none'" class="yd-btn yd-btn-outline" style="color:var(--c-muted);">Skip</button>
+      <button onclick="submitRating()" class="kg-btn kg-btn-primary" style="flex:1;" id="ratingBtn">Submit</button>
+      <button onclick="document.getElementById('ratingModal').style.display='none'" class="kg-btn kg-btn-outline" style="color:var(--c-muted);">Skip</button>
     </div>
   </div>
 </div>

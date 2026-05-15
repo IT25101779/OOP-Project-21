@@ -9,12 +9,12 @@
 .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden;}
 .confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall linear forwards;}
 @keyframes confettiFall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.eta-timer{font-size:2.4rem;font-weight:800;color:var(--c-orange);font-family:monospace;}
+.eta-timer{font-size:2.4rem;font-weight:800;color:var(--copper);font-family:monospace;}
 .step-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--c-border);transition:all .4s;}
 .step-row:last-child{border-bottom:none;}
 .step-dot{width:36px;height:36px;border-radius:50%;border:2.5px solid var(--c-border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .4s var(--ease);}
-.step-row.done .step-dot{background:var(--c-orange);border-color:var(--c-orange);color:white;}
-.step-row.active .step-dot{border-color:var(--c-orange);background:var(--c-orange-l);animation:pulse 2s ease-in-out infinite;}
+.step-row.done .step-dot{background:var(--copper);border-color:var(--copper);color:white;}
+.step-row.active .step-dot{border-color:var(--copper);background:var(--copper-l);animation:pulse 2s ease-in-out infinite;}
 .step-row.pending{opacity:.4;}
 </style>
 
@@ -22,14 +22,14 @@
 <div class="ty-wrap">
   <div class="ty-card">
     <!-- Success -->
-    <div class="yd-card mb-4" style="text-align:center;">
-      <div class="yd-card-body" style="padding:36px 28px;">
-        <div class="yd-success-icon" style="font-size:5rem;margin-bottom:16px;">🎉</div>
-        <h1 style="font-family:var(--font-display);font-size:2.2rem;margin-bottom:8px;">Order Placed!</h1>
+    <div class="kg-card mb-4" style="text-align:center;">
+      <div class="kg-card-body" style="padding:36px 28px;">
+        <div class="kg-success-icon" style="font-size:5rem;margin-bottom:16px;">🎉</div>
+        <h1 style="font-family:var(--font-serif);font-size:2.2rem;margin-bottom:8px;">Order Placed!</h1>
         <p style="color:var(--c-muted);margin-bottom:20px;">Your food is being prepared with love 🍳</p>
         <!-- ETA countdown -->
-        <div style="background:var(--c-orange-l);border-radius:16px;padding:16px;border:1px solid rgba(255,107,53,.2);">
-          <div style="font-size:.75rem;font-weight:700;color:var(--c-orange);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Estimated Delivery</div>
+        <div style="background:var(--copper-l);border-radius:16px;padding:16px;border:1px solid rgba(255,107,53,.2);">
+          <div style="font-size:.75rem;font-weight:700;color:var(--copper);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Estimated Delivery</div>
           <div class="eta-timer" id="etaDisplay">--:--</div>
           <div style="font-size:.8rem;color:var(--c-muted);margin-top:4px;">arrives in approx. 25–35 minutes</div>
         </div>
@@ -37,15 +37,15 @@
     </div>
 
     <!-- Order details -->
-    <div class="yd-card mb-3">
-      <div class="yd-card-body">
+    <div class="kg-card mb-3">
+      <div class="kg-card-body">
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:.9rem;">
           <span style="color:var(--c-muted);">Order ID</span>
           <strong style="color:var(--c-text);font-family:monospace;" id="tyOrderId">#---</strong>
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:.9rem;">
           <span style="color:var(--c-muted);">Total Paid</span>
-          <strong style="color:var(--c-orange);" id="tyTotal">LKR 0</strong>
+          <strong style="color:var(--copper);" id="tyTotal">LKR 0</strong>
         </div>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-border);font-size:.9rem;">
           <span style="color:var(--c-muted);">Payment</span>
@@ -59,11 +59,11 @@
     </div>
 
     <!-- Live tracking steps -->
-    <div class="yd-card mb-3">
-      <div class="yd-card-body">
+    <div class="kg-card mb-3">
+      <div class="kg-card-body">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h6 style="font-weight:700;margin:0;">Live Order Status</h6>
-          <span class="yd-live-badge"><span class="yd-live-dot"></span>Tracking</span>
+          <span class="kg-live-badge"><span class="kg-live-dot"></span>Tracking</span>
         </div>
         <div id="trackSteps">
           <div class="step-row done" id="s1"><div class="step-dot">✓</div><div><div style="font-weight:600;font-size:.875rem;">Order confirmed</div><div style="font-size:.75rem;color:var(--c-muted);">We got your order!</div></div></div>
@@ -77,10 +77,10 @@
 
     <!-- Actions -->
     <div class="d-flex gap-2 mb-3">
-      <a href="/activity" class="yd-btn yd-btn-primary" style="flex:1;"><i class="bi bi-map me-2"></i>Track Live</a>
+      <a href="/activity" class="kg-btn kg-btn-primary" style="flex:1;"><i class="bi bi-map me-2"></i>Track Live</a>
       <button class="yd-wa-btn" id="waBtn" style="flex:1;justify-content:center;"><span>📱</span> Share</button>
     </div>
-    <a href="/menu" class="yd-btn yd-btn-outline" style="display:flex;justify-content:center;color:var(--c-muted);">
+    <a href="/menu" class="kg-btn kg-btn-outline" style="display:flex;justify-content:center;color:var(--c-muted);">
       <i class="bi bi-arrow-left me-2"></i>Back to Menu
     </a>
   </div>

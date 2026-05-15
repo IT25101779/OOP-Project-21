@@ -7,6 +7,28 @@
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
 
 <style>
+/* ── CRITICAL: food card visibility + hero contrast ── */
+.yd-food-card{background:#FAF7F0!important;border:1px solid rgba(139,69,19,.12)!important;border-radius:16px!important;overflow:hidden!important;transition:transform .4s,box-shadow .4s!important;height:100%!important;position:relative!important;}
+.yd-food-card:hover{transform:translateY(-6px)!important;box-shadow:0 20px 50px rgba(61,43,31,.15)!important;}
+.yd-food-img-wrap{overflow:hidden!important;position:relative!important;height:185px!important;background:#EDE8DC!important;}
+.yd-food-img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .5s!important;display:block!important;}
+.yd-food-card:hover .yd-food-img{transform:scale(1.06)!important;}
+.yd-food-body{padding:13px 15px 16px!important;background:#FAF7F0!important;}
+.yd-food-name{font-family:'Playfair Display',serif!important;font-weight:600!important;font-size:.92rem!important;color:#3D2B1F!important;margin-bottom:2px!important;}
+.yd-food-price{color:#8B4513!important;font-weight:800!important;font-size:.92rem!important;}
+.yd-food-desc{font-size:.76rem!important;color:#6B4C3B!important;line-height:1.6!important;margin-bottom:10px!important;}
+.yd-stagger .yd-fade{opacity:0!important;transform:translateY(16px)!important;transition:opacity .5s,transform .5s!important;}
+.yd-stagger .yd-fade.yd-visible{opacity:1!important;transform:none!important;}
+.menu-hero{background:linear-gradient(135deg,#5C2D0A 0%,#8B4513 55%,#CD853F 100%)!important;background-size:200% 200%!important;animation:gradMove 7s ease infinite!important;}
+.yd-badge-pop{top:10px;left:10px;background:#8B4513;color:#FAF7F0;position:absolute;border-radius:99px;font-size:.58rem;font-weight:700;padding:3px 9px;}
+.yd-badge-cat{top:10px;right:10px;background:rgba(61,43,31,.65);color:#FAF7F0;backdrop-filter:blur(4px);position:absolute;border-radius:99px;font-size:.58rem;font-weight:700;padding:3px 9px;}
+.yd-fav-btn{position:absolute;bottom:10px;right:10px;background:rgba(245,240,232,.88);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .2s;z-index:3;}
+.yd-fav-btn:hover,.yd-fav-btn.active{background:#8B4513;color:#FAF7F0;}
+.yd-qty{display:flex;align-items:center;background:#EDE8DC;border-radius:8px;border:1px solid rgba(139,69,19,.15);overflow:hidden;}
+.yd-qty-btn{background:transparent;border:none;padding:5px 10px;font-size:.85rem;cursor:pointer;color:#6B4C3B;font-weight:700;}
+.yd-qty-btn:hover{background:rgba(139,69,19,.12);color:#8B4513;}
+.yd-qty-val{min-width:26px;text-align:center;font-weight:700;font-size:.82rem;color:#3D2B1F;}
+.cat-pill:hover,.cat-pill.active{background:#8B4513!important;color:white!important;border-color:#8B4513!important;}
 /* ── Hero section ─────────────────────────────────── */
 .menu-hero {
   background:linear-gradient(135deg,#FF6B35 0%,#f7971e 50%,#FF9A5C 100%);
@@ -45,7 +67,7 @@
   border-radius:12px; cursor:pointer; transition:all .2s; margin-bottom:4px;
   border:1px solid transparent;
 }
-.saved-loc-row:hover { background:var(--c-orange-l); border-color:rgba(255,107,53,.2); }
+.saved-loc-row:hover { background:var(--copper-l); border-color:rgba(255,107,53,.2); }
 /* ── Stat counters ────────────────────────────────── */
 .hero-stat {
   background:rgba(255,255,255,.15); backdrop-filter:blur(8px);
@@ -67,7 +89,7 @@
   text-decoration:none;
 }
 .cat-pill:hover, .cat-pill.active {
-  background:var(--c-orange); color:white; border-color:var(--c-orange);
+  background:var(--copper); color:white; border-color:var(--copper);
   transform:translateY(-2px); box-shadow:0 6px 18px rgba(255,107,53,.3);
 }
 /* ── Search bar ───────────────────────────────────── */
@@ -87,7 +109,7 @@
 .section-head {
   display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;
 }
-.section-title { font-family:var(--font-display); font-size:1.5rem; color:var(--c-text); }
+.section-title { font-family:var(--font-serif); font-size:1.5rem; color:var(--c-text); }
 /* ── Offer cards ──────────────────────────────────── */
 .offers-scroll { display:flex; gap:14px; overflow-x:auto; padding:4px 2px 8px; scrollbar-width:none; }
 .offers-scroll::-webkit-scrollbar { display:none; }
@@ -101,14 +123,14 @@
         <div class="col-lg-7">
           <div style="color:white;margin-bottom:20px;">
             <div style="font-size:.82rem;font-weight:600;opacity:.75;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">
-              <i class="bi bi-geo-alt-fill me-1"></i>YummyDish Kandy
+              <i class="bi bi-geo-alt-fill me-1"></i>කටගැස්ම · KATAGASMA
             </div>
-            <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);line-height:1.1;margin-bottom:8px;">
-              Hello, <span style="color:rgba(255,255,255,.9);">
+            <h1 style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);line-height:1.1;margin-bottom:8px;">
+              ආයුබෝවන්, <span style="color:rgba(255,255,255,.9);">
                 <c:out value="${fn:length(user.name)>0 ? fn:substringBefore(user.name,' ') : 'there'}"/>
               </span> 👋
             </h1>
-            <p style="opacity:.85;font-size:1.05rem;">What are you craving today?</p>
+            <p style="opacity:.85;font-size:1.05rem;">What authentic flavour are you craving today?</p>
           </div>
           <!-- Location widget -->
           <div class="loc-widget" onclick="toggleLocEdit()">
@@ -136,17 +158,17 @@
                 <input type="text" id="locInput" class="yd-input" placeholder="Search address in Kandy...">
               </div>
               <button onclick="useGPS()" class="yd-btn yd-btn-outline" style="width:auto;padding:10px 14px;" title="Use my location">
-                <i class="bi bi-crosshair" style="color:var(--c-orange);"></i>
+                <i class="bi bi-crosshair" style="color:var(--copper);"></i>
               </button>
               <button onclick="openPinDrop()" class="yd-btn yd-btn-outline" style="width:auto;padding:10px 14px;" title="Drop a pin">
-                <i class="bi bi-pin-map-fill" style="color:var(--c-orange);"></i>
+                <i class="bi bi-pin-map-fill" style="color:var(--copper);"></i>
               </button>
             </div>
             <!-- Pin map -->
             <div id="pinMapWrap" style="display:none;margin-bottom:12px;">
-              <div id="pinMap" style="height:200px;border-radius:14px;border:2px solid var(--c-orange);overflow:hidden;"></div>
-              <div id="pinResult" style="display:none;margin-top:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--c-orange-l);border-radius:10px;font-size:.82rem;">
-                <i class="bi bi-geo-alt-fill" style="color:var(--c-orange);flex-shrink:0;"></i>
+              <div id="pinMap" style="height:200px;border-radius:14px;border:2px solid var(--copper);overflow:hidden;"></div>
+              <div id="pinResult" style="display:none;margin-top:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--copper-l);border-radius:10px;font-size:.82rem;">
+                <i class="bi bi-geo-alt-fill" style="color:var(--copper);flex-shrink:0;"></i>
                 <span id="pinAddr" style="flex:1;color:var(--c-text2);"></span>
                 <button onclick="usePinAddr()" class="yd-btn yd-btn-primary yd-btn-sm" style="width:auto;padding:5px 12px;">Use</button>
               </div>
@@ -188,7 +210,7 @@
             <div class="yd-offer-code">${offer.code}</div>
             <div style="font-weight:700;margin-top:6px;color:var(--c-text);">${offer.title}</div>
             <div style="font-size:.78rem;color:var(--c-muted);margin-top:3px;">${offer.description}</div>
-            <div style="margin-top:8px;font-size:.75rem;font-weight:700;color:var(--c-orange);">${offer.discountPercent}% OFF</div>
+            <div style="margin-top:8px;font-size:.75rem;font-weight:700;color:var(--copper);">${offer.discountPercent}% OFF</div>
           </div>
         </c:forEach>
       </div>
@@ -311,12 +333,24 @@
   </div>
 </div>
 
-<!-- Floating cart -->
-<a href="/cart" id="cartFloat" class="yd-float-cart">
-  <span class="yd-float-badge" id="floatCount">0</span>
-  <span style="font-weight:700;">View Cart</span>
-  <span class="yd-float-total" id="floatTotal">LKR 0</span>
-  <i class="bi bi-arrow-right ms-auto"></i>
+<!-- Floating cart bar -->
+<a href="/cart" id="cartFloat" style="
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:linear-gradient(135deg,#6B3410,#8B4513,#CD853F);
+  color:#FAF7F0!important;text-decoration:none!important;
+  border-radius:99px;padding:14px 28px;
+  display:flex;align-items:center;gap:14px;
+  font-weight:700;font-size:.95rem;font-family:'Lato',sans-serif;
+  box-shadow:0 8px 40px rgba(61,43,31,.45);
+  z-index:400;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .4s;
+  opacity:0;min-width:240px;justify-content:center;
+  border:1px solid rgba(245,240,232,.15);
+">
+  <span style="background:rgba(0,0,0,.2);border-radius:99px;padding:2px 10px;font-size:.8rem;font-weight:800;" id="floatCount">0</span>
+  <span>View Cart</span>
+  <span style="opacity:.85;font-size:.88rem;" id="floatTotal">LKR 0</span>
+  <i class="bi bi-arrow-right" style="margin-left:auto;"></i>
 </a>
 
 <script>
@@ -356,7 +390,15 @@ function doAddToCart(btn) {
     var cf = document.getElementById('cartFloat');
     if (fc) fc.textContent = total;
     if (ft) ft.textContent = 'LKR ' + Math.round(items.reduce(function(s,i){return s+i.price*i.qty;},0)).toLocaleString();
-    if (cf) cf.classList.toggle('visible', total > 0);
+    if (cf) {
+      if (total > 0) {
+        cf.style.transform = 'translateX(-50%) translateY(0)';
+        cf.style.opacity = '1';
+      } else {
+        cf.style.transform = 'translateX(-50%) translateY(100px)';
+        cf.style.opacity = '0';
+      }
+    }
 
     // Also call Cart.add if available (keeps Cart in sync)
     if (typeof Cart !== 'undefined' && typeof Cart.add === 'function') {
@@ -511,7 +553,7 @@ function renderSavedLocs(){
   locs.forEach(function(loc,i){
     var icon=icons[loc.name]||'📍';
     html+='<div class="saved-loc-row" onclick="useSavedLoc('+i+')">'
-      +'<div style="width:34px;height:34px;border-radius:50%;background:var(--c-orange-l);color:var(--c-orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">'+icon+'</div>'
+      +'<div style="width:34px;height:34px;border-radius:50%;background:var(--copper-l);color:var(--copper);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">'+icon+'</div>'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.88rem;color:var(--c-text);">'+loc.name+'</div>'
       +'<div style="font-size:.72rem;color:var(--c-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+loc.address+'</div></div>'
       +'<button onclick="event.stopPropagation();deleteSavedLoc('+i+')" style="background:none;border:none;color:#f44336;padding:4px 8px;font-size:.85rem;cursor:pointer;">✕</button>'
@@ -639,7 +681,26 @@ document.querySelectorAll('[data-fav-id]').forEach(function(btn){
   if(Favs.has(btn.getAttribute('data-fav-id'))){btn.textContent='♥';btn.classList.add('active');}
 });
 
-// ── Offer countdown timers ────────────────────────────────────────
+// ── Restore floating cart on page load ───────────────────────────
+(function(){
+  try {
+    var items = JSON.parse(localStorage.getItem('ydCart') || '[]');
+    var total = items.reduce(function(s,i){ return s + i.qty; }, 0);
+    var lkr   = Math.round(items.reduce(function(s,i){ return s + i.price * i.qty; }, 0));
+    var fc = document.getElementById('floatCount');
+    var ft = document.getElementById('floatTotal');
+    var cf = document.getElementById('cartFloat');
+    if (fc) fc.textContent = total;
+    if (ft) ft.textContent = 'LKR ' + lkr.toLocaleString();
+    if (cf && total > 0) {
+      cf.style.transform = 'translateX(-50%) translateY(0)';
+      cf.style.opacity   = '1';
+    }
+    document.querySelectorAll('#cartCount').forEach(function(el){ el.textContent = total; });
+  } catch(e) {}
+})();
+
+
 document.querySelectorAll('.offer-countdown[data-created]').forEach(function(el) {
   var created = el.getAttribute('data-created');
   if (!created) return;

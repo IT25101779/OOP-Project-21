@@ -7,7 +7,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Driver &mdash; YummyDish</title>
+<title>Driver &mdash; Katagasma</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -33,10 +33,10 @@ body{overflow:hidden;background:#1a1a2e;}
 .map-btn{background:white;border:1px solid #ddd;border-radius:12px;padding:10px 16px;
   font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.15);
   display:flex;align-items:center;gap:8px;color:#333;white-space:nowrap;transition:all .2s;min-width:130px;}
-.map-btn:hover{background:var(--c-orange);color:white;border-color:var(--c-orange);}
+.map-btn:hover{background:var(--copper);color:white;border-color:var(--copper);}
 .map-btn.active{background:#1565C0;color:white;border-color:#1565C0;}
 .drv-hdr{background:linear-gradient(135deg,#0F0F0F 0%,#1e2a3a 100%);padding:16px;flex-shrink:0;}
-.driver-avatar{width:42px;height:42px;border-radius:50%;background:var(--c-orange);color:white;
+.driver-avatar{width:42px;height:42px;border-radius:50%;background:var(--copper);color:white;
   display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;
   flex-shrink:0;border:2px solid rgba(255,255,255,.3);}
 .gps-dot{width:9px;height:9px;border-radius:50%;background:#888;display:inline-block;transition:background .5s;}
@@ -50,7 +50,7 @@ body{overflow:hidden;background:#1a1a2e;}
 .order-tile{padding:14px 16px;border-bottom:1px solid var(--c-border);cursor:pointer;
   transition:background .18s;border-left:4px solid transparent;}
 .order-tile:hover{background:#FFF8F5;}
-.order-tile.selected{background:var(--c-orange-l);border-left-color:var(--c-orange);}
+.order-tile.selected{background:var(--copper-l);border-left-color:var(--copper);}
 .order-tile.navigating{background:#E3F2FD;border-left-color:#1565C0;}
 .priority-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:.7rem;font-weight:800;color:white;flex-shrink:0;}
@@ -97,7 +97,7 @@ body{overflow:hidden;background:#1a1a2e;}
 
 <div id="mapControls">
   <button class="map-btn" onclick="locateMe()">
-    <i class="bi bi-crosshair2" style="color:var(--c-orange);"></i> My Location
+    <i class="bi bi-crosshair2" style="color:var(--copper);"></i> My Location
   </button>
   <button class="map-btn" id="planBtn" onclick="planAllRoutes()">
     <i class="bi bi-map" style="color:#1565C0;"></i> Plan Route
@@ -135,7 +135,7 @@ body{overflow:hidden;background:#1a1a2e;}
 
   <div class="orders-hdr">
     <div style="font-weight:700;font-size:.82rem;color:var(--c-text);">
-      Active Orders <span style="color:var(--c-orange);">(${fn:length(orders)})</span>
+      Active Orders <span style="color:var(--copper);">(${fn:length(orders)})</span>
     </div>
     <button onclick="location.reload()" style="background:none;border:none;color:var(--c-muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:4px;">
       <i class="bi bi-arrow-clockwise"></i> Refresh
@@ -149,7 +149,7 @@ body{overflow:hidden;background:#1a1a2e;}
           <div style="font-size:3.5rem;margin-bottom:14px;">&#x1F4EB;</div>
           <div style="font-weight:700;font-size:.95rem;color:var(--c-text);margin-bottom:6px;">No active orders</div>
           <div style="font-size:.82rem;">Orders assigned to you appear here</div>
-          <button onclick="location.reload()" style="margin-top:16px;background:var(--c-orange);color:white;border:none;padding:9px 22px;border-radius:20px;font-weight:600;cursor:pointer;font-size:.82rem;">
+          <button onclick="location.reload()" style="margin-top:16px;background:var(--copper);color:white;border:none;padding:9px 22px;border-radius:20px;font-weight:600;cursor:pointer;font-size:.82rem;">
             <i class="bi bi-arrow-clockwise"></i> Check Again
           </button>
         </div>
@@ -158,7 +158,7 @@ body{overflow:hidden;background:#1a1a2e;}
         <c:forEach items="${orders}" var="o" varStatus="st">
         <div class="order-tile" id="tile_${o.orderId}" onclick="focusOrder('${o.orderId}')">
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">
-            <div class="priority-num" id="pnum_${o.orderId}" style="background:${st.index==0?'var(--c-orange)':'#aaa'};">${st.index+1}</div>
+            <div class="priority-num" id="pnum_${o.orderId}" style="background:${st.index==0?'var(--copper)':'#aaa'};">${st.index+1}</div>
             <span style="font-family:monospace;font-weight:800;font-size:.875rem;color:var(--c-text);">#${o.orderId}</span>
             <c:choose>
               <c:when test="${o.status=='READY'}"><span class="status-chip s-ready">&#x1F4E6; Ready</span></c:when>
@@ -167,12 +167,12 @@ body{overflow:hidden;background:#1a1a2e;}
             </c:choose>
           </div>
           <div style="font-size:.82rem;color:var(--c-text2);margin-bottom:3px;">
-            <i class="bi bi-person-fill" style="color:var(--c-orange);"></i> ${o.customerName}
+            <i class="bi bi-person-fill" style="color:var(--copper);"></i> ${o.customerName}
           </div>
           <div style="font-size:.78rem;color:var(--c-muted);margin-bottom:3px;line-height:1.4;">
-            <i class="bi bi-geo-alt-fill" style="color:var(--c-orange);"></i> ${o.deliveryAddress}
+            <i class="bi bi-geo-alt-fill" style="color:var(--copper);"></i> ${o.deliveryAddress}
           </div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--c-orange);">
+          <div style="font-size:.82rem;font-weight:700;color:var(--copper);">
             LKR <fmt:formatNumber value="${o.totalAmount}" pattern="#,##0"/>
           </div>
           <c:if test="${fn:length(o.chefNote) > 0}">
@@ -254,7 +254,7 @@ function initMap(){
     html:'<div style="width:44px;height:44px;background:#FF6B35;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(255,107,53,.5);"></div>',
     iconSize:[44,44],iconAnchor:[22,44]});
   L.marker([KITCHEN.lat,KITCHEN.lng],{icon:kitchenIcon}).addTo(map)
-   .bindPopup('<div style="padding:12px 16px;font-family:Inter,sans-serif;"><strong style="color:#FF6B35;">YummyDish Kitchen</strong><br><span style="font-size:12px;color:#666;">Queens Hotel Area, Kandy</span></div>');
+   .bindPopup('<div style="padding:12px 16px;font-family:Inter,sans-serif;"><strong style="color:#FF6B35;">Katagasma Kitchen</strong><br><span style="font-size:12px;color:#666;">Queens Hotel Area, Kandy</span></div>');
 
   // Driver marker
   var drvIcon = L.divIcon({className:'',
@@ -313,7 +313,7 @@ function geocodeAllOrders(){
 function geocodeOrder(o){
   var q=encodeURIComponent(o.address+', Kandy, Sri Lanka');
   fetch('https://nominatim.openstreetmap.org/search?q='+q+'&format=json&limit=1&countrycodes=lk',
-    {headers:{'Accept-Language':'en','User-Agent':'YummyDishApp/1.0'}})
+    {headers:{'Accept-Language':'en','User-Agent':'KatagasmaApp/1.0'}})
     .then(function(r){return r.json();})
     .then(function(data){
       var lat,lng;
@@ -377,7 +377,7 @@ function sortByDistance(){
   tiles.forEach(function(t,i){
     list.appendChild(t);
     var p=document.getElementById('pnum_'+t.id.replace('tile_',''));
-    if(p){p.textContent=i+1;p.style.background=i===0?'var(--c-orange)':'#aaa';}
+    if(p){p.textContent=i+1;p.style.background=i===0?'var(--copper)':'#aaa';}
   });
 }
 
