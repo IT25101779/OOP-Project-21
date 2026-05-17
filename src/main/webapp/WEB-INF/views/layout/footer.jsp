@@ -78,17 +78,17 @@
   </div>
 </footer>
 <style>
-.ft-hd{color:white;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;}
-.ft-ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
-.ft-lnk{color:rgba(255,255,255,.42);text-decoration:none;font-size:.82rem;transition:color .2s;}
-.ft-lnk:hover{color:var(--c-orange);}
-.ft-soc{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);text-decoration:none;font-size:1rem;transition:all .2s;}
-.ft-soc:hover{background:rgba(255,107,53,.2);border-color:rgba(255,107,53,.4);color:var(--c-orange);}
-.ft-trust{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:7px 15px;color:rgba(255,255,255,.48);font-size:.77rem;font-weight:600;}
-.ft-pay{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:6px;padding:4px 9px;color:rgba(255,255,255,.48);font-size:.7rem;font-weight:700;letter-spacing:.4px;}
-.ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:48px;}
-@media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr!important;gap:32px!important;}.ft-grid>div:first-child{grid-column:1/-1;}}
-@media(max-width:480px){.ft-grid{grid-template-columns:1fr!important;}}
+  .ft-hd{color:white;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;}
+  .ft-ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+  .ft-lnk{color:rgba(255,255,255,.42);text-decoration:none;font-size:.82rem;transition:color .2s;}
+  .ft-lnk:hover{color:var(--c-orange);}
+  .ft-soc{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.55);text-decoration:none;font-size:1rem;transition:all .2s;}
+  .ft-soc:hover{background:rgba(255,107,53,.2);border-color:rgba(255,107,53,.4);color:var(--c-orange);}
+  .ft-trust{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:7px 15px;color:rgba(255,255,255,.48);font-size:.77rem;font-weight:600;}
+  .ft-pay{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:6px;padding:4px 9px;color:rgba(255,255,255,.48);font-size:.7rem;font-weight:700;letter-spacing:.4px;}
+  .ft-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;gap:48px;}
+  @media(max-width:900px){.ft-grid{grid-template-columns:1fr 1fr!important;gap:32px!important;}.ft-grid>div:first-child{grid-column:1/-1;}}
+  @media(max-width:480px){.ft-grid{grid-template-columns:1fr!important;}}
 </style>
 
 <!-- Onboarding tour (first visit only) -->
@@ -109,131 +109,88 @@
 </div>
 
 <script>
-var Tour = (function() {
-  var steps = [
-    { icon:'🍽️', title:'Welcome to Katagasma!', text:'Kandy\'s tastiest food delivered to your door. Let us show you around!', anchor: null },
-    { icon:'🛒', title:'Browse the Menu', text:'Browse by category, search live, or explore popular dishes. Tap any item to see details and reviews.', anchor: '.yd-brand' },
-    { icon:'📍', title:'Set Your Location', text:'Click your address at the top of the menu page to set your delivery location. Use GPS or drop a pin on the map.', anchor: null },
-    { icon:'⭐', title:'Earn Loyalty Points', text:'Every LKR 10 you spend earns 1 loyalty point. Collect 100 points for a LKR 10 discount on your next order!', anchor: null },
-    { icon:'🔔', title:'Live Order Tracking', text:'Once you order, track your driver live on the map and get push notifications at every step. Enjoy your meal!', anchor: null }
-  ];
-  var cur = 0;
+  var Tour = (function() {
+    var steps = [
+      { icon:'🍽️', title:'Welcome to Katagasma!', text:'Kandy\'s tastiest food delivered to your door. Let us show you around!', anchor: null },
+      { icon:'🛒', title:'Browse the Menu', text:'Browse by category, search live, or explore popular dishes. Tap any item to see details and reviews.', anchor: '.yd-brand' },
+      { icon:'📍', title:'Set Your Location', text:'Click your address at the top of the menu page to set your delivery location. Use GPS or drop a pin on the map.', anchor: null },
+      { icon:'⭐', title:'Earn Loyalty Points', text:'Every LKR 10 you spend earns 1 loyalty point. Collect 100 points for a LKR 10 discount on your next order!', anchor: null },
+      { icon:'🔔', title:'Live Order Tracking', text:'Once you order, track your driver live on the map and get push notifications at every step. Enjoy your meal!', anchor: null }
+    ];
+    var cur = 0;
 
-  function show(i) {
-    cur = i;
-    var step = steps[i];
-    document.getElementById('tourOverlay').style.display = 'block';
-    var card = document.getElementById('tourCard');
-    card.style.display = 'block';
-    // Center the card
-    card.style.top  = '50%';
-    card.style.left = '50%';
-    card.style.transform = 'translate(-50%,-50%)';
-    document.getElementById('tourIcon').textContent  = step.icon;
-    document.getElementById('tourTitle').textContent = step.title;
-    document.getElementById('tourText').textContent  = step.text;
-    document.getElementById('tourBtn').textContent   = i < steps.length-1 ? 'Next →' : 'Get Started!';
-    // Dots
-    var dots = '';
-    for (var d=0; d<steps.length; d++) {
-      dots += '<div style="width:' + (d===i?'20':'7') + 'px;height:7px;border-radius:99px;background:' + (d===i?'var(--c-orange)':'var(--c-border)') + ';transition:all .3s;"></div>';
+    function show(i) {
+      cur = i;
+      var step = steps[i];
+      document.getElementById('tourOverlay').style.display = 'block';
+      var card = document.getElementById('tourCard');
+      card.style.display = 'block';
+      // Center the card
+      card.style.top  = '50%';
+      card.style.left = '50%';
+      card.style.transform = 'translate(-50%,-50%)';
+      document.getElementById('tourIcon').textContent  = step.icon;
+      document.getElementById('tourTitle').textContent = step.title;
+      document.getElementById('tourText').textContent  = step.text;
+      document.getElementById('tourBtn').textContent   = i < steps.length-1 ? 'Next →' : 'Get Started!';
+      // Dots
+      var dots = '';
+      for (var d=0; d<steps.length; d++) {
+        dots += '<div style="width:' + (d===i?'20':'7') + 'px;height:7px;border-radius:99px;background:' + (d===i?'var(--c-orange)':'var(--c-border)') + ';transition:all .3s;"></div>';
+      }
+      document.getElementById('tourDots').innerHTML = dots;
     }
-    document.getElementById('tourDots').innerHTML = dots;
-  }
 
-  function next() {
-    if (cur < steps.length - 1) { show(cur + 1); }
-    else { skip(); }
-  }
+    function next() {
+      if (cur < steps.length - 1) { show(cur + 1); }
+      else { skip(); }
+    }
 
-  function skip() {
-    document.getElementById('tourOverlay').style.display = 'none';
-    document.getElementById('tourCard').style.display    = 'none';
-    localStorage.setItem('ydTourDone', '1');
-  }
+    function skip() {
+      document.getElementById('tourOverlay').style.display = 'none';
+      document.getElementById('tourCard').style.display    = 'none';
+      localStorage.setItem('ydTourDone', '1');
+    }
 
-  function start() {
-    if (localStorage.getItem('ydTourDone')) return;
-    // Only show on menu page for logged-in users
-    
-    setTimeout(function() { show(0); }, 1200);
-  }
+    function start() {
+      if (localStorage.getItem('ydTourDone')) return;
+      // Only show on menu page for logged-in users
 
-  document.addEventListener('DOMContentLoaded', start);
-  return { next: next, skip: skip, show: show };
-})();
+      setTimeout(function() { show(0); }, 1200);
+    }
+
+    document.addEventListener('DOMContentLoaded', start);
+    return { next: next, skip: skip, show: show };
+  })();
 </script>
 
-<div id="yd-cursor"></div>
-<div id="yd-cursor-ring"></div>
 <div id="notif-container" style="position:fixed;top:80px;right:16px;z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:320px;pointer-events:none;"></div>
 
 <script>
-// ── In-app notification toasts ────────────────────────────────
-function showNotif(icon, title, body, color) {
-  var c = document.getElementById('notif-container');
-  if (!c) return;
-  var n = document.createElement('div');
-  n.className = 'yd-notif';
-  n.innerHTML =
-    '<div class="yd-notif-icon" style="background:' + (color || 'var(--c-orange-l)') + ';">' + (icon || '🔔') + '</div>'
-    + '<div style="flex:1;min-width:0;">'
-    + '<div style="font-weight:700;font-size:.85rem;color:var(--c-text);">' + title + '</div>'
-    + '<div style="font-size:.78rem;color:var(--c-muted);margin-top:2px;">' + body + '</div>'
-    + '</div>'
-    + '<button class="yd-notif-close" onclick="dismissNotif(this)">✕</button>';
-  c.appendChild(n);
-  setTimeout(function() { dismissNotif(n.querySelector('.yd-notif-close')); }, 7000);
-}
-function dismissNotif(btn) {
-  var n = btn.closest ? btn.closest('.yd-notif') : btn;
-  if (!n) return;
-  n.classList.add('out');
-  setTimeout(function() { if (n.parentNode) n.parentNode.removeChild(n); }, 320);
-}
+  // ── In-app notification toasts ────────────────────────────────
+  function showNotif(icon, title, body, color) {
+    var c = document.getElementById('notif-container');
+    if (!c) return;
+    var n = document.createElement('div');
+    n.className = 'yd-notif';
+    n.innerHTML =
+            '<div class="yd-notif-icon" style="background:' + (color || 'var(--c-orange-l)') + ';">' + (icon || '🔔') + '</div>'
+            + '<div style="flex:1;min-width:0;">'
+            + '<div style="font-weight:700;font-size:.85rem;color:var(--c-text);">' + title + '</div>'
+            + '<div style="font-size:.78rem;color:var(--c-muted);margin-top:2px;">' + body + '</div>'
+            + '</div>'
+            + '<button class="yd-notif-close" onclick="dismissNotif(this)">✕</button>';
+    c.appendChild(n);
+    setTimeout(function() { dismissNotif(n.querySelector('.yd-notif-close')); }, 7000);
+  }
+  function dismissNotif(btn) {
+    var n = btn.closest ? btn.closest('.yd-notif') : btn;
+    if (!n) return;
+    n.classList.add('out');
+    setTimeout(function() { if (n.parentNode) n.parentNode.removeChild(n); }, 320);
+  }
 
-// ── Custom cursor (desktop only) &mdash; deferred to avoid blocking render ──
-document.addEventListener('DOMContentLoaded', function() {
-  if (!window.matchMedia('(pointer:fine)').matches) return;
-  var cursor = document.getElementById('yd-cursor');
-  var ring   = document.getElementById('yd-cursor-ring');
-  if (!cursor || !ring) return;
-  var mx = -200, my = -200, rx = -200, ry = -200;
-  document.addEventListener('mousemove', function(e) {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top  = my + 'px';
-  });
-  (function anim() {
-    rx += (mx - rx) * 0.14;
-    ry += (my - ry) * 0.14;
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
-    requestAnimationFrame(anim);
-  })();
-  document.addEventListener('mousedown', function() { cursor.style.transform = 'translate(-50%,-50%) scale(.7)'; });
-  document.addEventListener('mouseup',   function() { cursor.style.transform = 'translate(-50%,-50%) scale(1)'; });
-  document.addEventListener('mouseleave', function() { cursor.style.left = ring.style.left = '-200px'; });
-  document.addEventListener('mouseover', function(e) {
-    if (e.target.closest && e.target.closest('a,button,[onclick],.yd-food-card,.yd-offer,.yd-quick-action')) {
-      ring.style.width = ring.style.height = '54px';
-      ring.style.borderColor = 'var(--c-orange)';
-    }
-  });
-  document.addEventListener('mouseout', function(e) {
-    if (e.target.closest && e.target.closest('a,button,[onclick],.yd-food-card,.yd-offer,.yd-quick-action')) {
-      ring.style.width = ring.style.height = '38px';
-      ring.style.borderColor = '';
-    }
-  });
-});
 </script>
-
-<style>
-#yd-cursor{position:fixed;width:12px;height:12px;background:var(--c-orange);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:transform .12s;mix-blend-mode:difference;}
-#yd-cursor-ring{position:fixed;width:38px;height:38px;border:2px solid var(--c-orange);border-radius:50%;pointer-events:none;z-index:99997;transform:translate(-50%,-50%);opacity:.55;transition:width .2s,height .2s,border-color .2s;}
-@media(pointer:coarse){#yd-cursor,#yd-cursor-ring{display:none;}}
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
