@@ -3,57 +3,87 @@ package com.yummydish.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Order — OOP: Encapsulation (private fields + getters/setters)
- * Contains CartItem as a static inner class.
- */
+// ============================================================
+// FILE: Order.java
+// COMPONENT: C3 — Cart & Checkout Processing
+// MEMBER: Member 3
+// ============================================================
+//
+// OOP CONCEPTS DEMONSTRATED:
+//   ✅ ENCAPSULATION    — All fields private with public getters/setters.
+//                         CartItem is a static inner class, grouping
+//                         related data together (encapsulation of cart logic).
+//   ✅ INFORMATION HIDING — calculateTotal() hides the formula for
+//                           computing subtotal, delivery fee, discounts.
+//                           getStatusBadge() hides status mapping logic.
+//
+// CRUD OPERATIONS COVERED (via CartController + ApiController):
+//   CREATE — POST /api/order: new order written to data/orders.txt
+//   READ   — GET  /api/order/{id}: reads order from orders.txt
+//   UPDATE — driver/admin updates status; written back to orders.txt
+//   DELETE — POST /api/order/{id}/cancel: marks order CANCELLED
+//
+// FILE HANDLING:
+//   toFileLine() — serializes order + all cart items to one line
+//                  Format: fields||I||item1;item2;item3
+//   fromLine()   — deserializes from orders.txt back to Order object
+// ============================================================
+
 public class Order {
 
-    public static final String PENDING   = "PENDING";
-    public static final String COOKING   = "COOKING";
-    public static final String READY     = "READY";
-    public static final String HANDOVER  = "HANDOVER";
-    public static final String ONWAY     = "ON_WAY";
-    public static final String DELIVERED = "DELIVERED";
-    public static final String CANCELLED = "CANCELLED";
+    // ── Order status constants ─────────────────────────────────────
+    // Used across the system to track delivery progress
+    public static final String PENDING   = "PENDING";    // just placed
+    public static final String COOKING   = "COOKING";    // kitchen working
+    public static final String READY     = "READY";      // ready for pickup
+    public static final String HANDOVER  = "HANDOVER";   // given to driver
+    public static final String ONWAY     = "ON_WAY";     // driver en route
+    public static final String DELIVERED = "DELIVERED";  // completed
+    public static final String CANCELLED = "CANCELLED";  // cancelled
 
+    // ── ENCAPSULATION: All fields private ─────────────────────────
     private String orderId;
     private String customerId;
     private String customerName;
     private String deliveryAddress;
-    private String chefNote;
-    private String driverNote;
-    private String paymentMethod;
+    private String chefNote;         // customer note for the chef
+    private String driverNote;       // customer note for the driver
+    private String paymentMethod;    // "CARD" | "COD"
     private String status;
     private String offerCode;
     private String driverId;
     private String driverName;
     private String driverContact;
-    private String orderType;
+    private String orderType;        // "STANDARD" | "GROUP" | "SCHEDULED"
     private String createdAt;
     private String updatedAt;
     private double subtotal;
     private double deliveryFee  = 250.0;
     private double discount;
     private double tip          = 0.0;
-    private double weatherFee   = 0.0;
+    private double weatherFee   = 0.0;   // bad weather surcharge
     private double totalAmount;
-    private int    loyaltyPoints = 0;   // points earned on this order
-    private String estimatedEta = "";   // e.g. "25 min"
-    private String scheduledFor = "";   // e.g. "2024-12-25 14:00"
+    private int    loyaltyPoints = 0;
+    private String estimatedEta = "";
+    private String scheduledFor = "";    // for scheduled orders
     private List<CartItem> items = new ArrayList<>();
 
+    // Default constructor — sets initial status and order type
     public Order() {
         this.status    = PENDING;
         this.orderType = "STANDARD";
     }
 
+    // ── INFORMATION HIDING: Business logic encapsulated in method ──
+    // Caller just calls calculateTotal() — doesn't need to know formula
+    // CRUD - UPDATE: total is recalculated when cart changes
     public void calculateTotal() {
-        subtotal    = items.stream().mapToDouble(CartItem::getLineTotal).sum();
-        totalAmount = subtotal + deliveryFee + tip + weatherFee - discount;
-        loyaltyPoints = (int)(subtotal / 10); // 1 point per LKR 10
+        subtotal      = items.stream().mapToDouble(CartItem::getLineTotal).sum();
+        totalAmount   = subtotal + deliveryFee + tip + weatherFee - discount;
+        loyaltyPoints = (int)(subtotal / 10); // 1 point per LKR 10 spent
     }
 
+    // INFORMATION HIDING: Status display logic hidden from JSP layer
     public String getStatusBadge() {
         if (status == null) return "Pending ⏳";
         switch (status) {
@@ -67,6 +97,7 @@ public class Order {
         }
     }
 
+    // INFORMATION HIDING: Progress percentage logic hidden from UI
     public int getStatusProgress() {
         if (status == null) return 5;
         switch (status) {
@@ -80,27 +111,31 @@ public class Order {
         }
     }
 
-    // Serialize — fields 0-19, then ||I|| then items
+    // ── FILE HANDLING: Serialize order → one line in orders.txt ───
+    // CRUD - CREATE: written when order is placed at checkout
+    // Format: field1|field2|...|fieldN||I||item1;item2;item3
     public String toFileLine() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.join("|",
-            safe(orderId), safe(customerId), safe(customerName),
-            String.valueOf(subtotal), String.valueOf(deliveryFee),
-            String.valueOf(discount), String.valueOf(totalAmount),
-            safe(deliveryAddress), safe(chefNote), safe(driverNote),
-            safe(paymentMethod), safe(status), safe(offerCode),
-            safe(driverId), safe(driverName), safe(driverContact),
-            safe(orderType), safe(createdAt), safe(updatedAt),
-            String.valueOf(tip), String.valueOf(weatherFee),
-            String.valueOf(loyaltyPoints), safe(estimatedEta), safe(scheduledFor)));
-        sb.append("||I||");
+                safe(orderId), safe(customerId), safe(customerName),
+                String.valueOf(subtotal), String.valueOf(deliveryFee),
+                String.valueOf(discount), String.valueOf(totalAmount),
+                safe(deliveryAddress), safe(chefNote), safe(driverNote),
+                safe(paymentMethod), safe(status), safe(offerCode),
+                safe(driverId), safe(driverName), safe(driverContact),
+                safe(orderType), safe(createdAt), safe(updatedAt),
+                String.valueOf(tip), String.valueOf(weatherFee),
+                String.valueOf(loyaltyPoints), safe(estimatedEta), safe(scheduledFor)));
+        sb.append("||I||");  // separator between order fields and cart items
         for (CartItem ci : items) { sb.append(ci.toMini()).append(";"); }
         return sb.toString();
     }
 
+    // ── FILE HANDLING: Deserialize one line from orders.txt → Order ─
+    // CRUD - READ: called when loading orders from file
     public static Order fromLine(String line) {
         if (line == null || line.isBlank()) return null;
-        String[] mp = line.split("\\|\\|I\\|\\|", 2);
+        String[] mp = line.split("\\|\\|I\\|\\|", 2); // split on item separator
         String[] p  = mp[0].split("\\|", -1);
         Order o = new Order();
         if (p.length >= 19) {
@@ -124,11 +159,13 @@ public class Order {
             o.createdAt       = p[17];
             o.updatedAt       = p[18];
         }
-        if (p.length > 19) o.tip          = parseDouble(p[19]);
-        if (p.length > 20) o.weatherFee   = parseDouble(p[20]);
-        if (p.length > 21) o.loyaltyPoints= (int)parseDouble(p[21]);
-        if (p.length > 22) o.estimatedEta = p[22];
-        if (p.length > 23) o.scheduledFor = p[23];
+        if (p.length > 19) o.tip           = parseDouble(p[19]);
+        if (p.length > 20) o.weatherFee    = parseDouble(p[20]);
+        if (p.length > 21) o.loyaltyPoints = (int)parseDouble(p[21]);
+        if (p.length > 22) o.estimatedEta  = p[22];
+        if (p.length > 23) o.scheduledFor  = p[23];
+
+        // Parse cart items from second half of line
         if (mp.length > 1 && !mp[1].isBlank()) {
             for (String s : mp[1].split(";")) {
                 if (!s.isBlank()) {
@@ -147,93 +184,115 @@ public class Order {
         try { return Double.parseDouble(s); } catch (Exception e) { return 0; }
     }
 
-    // ── CartItem ──────────────────────────────────────────────────
+    // ── ENCAPSULATION: CartItem inner class ───────────────────────
+    // Groups cart item data together — another form of encapsulation.
+    // Represents one food item line in the shopping cart.
     public static class CartItem {
         private String foodId, foodName, imageUrl;
         private double price;
         private int    quantity;
 
         public CartItem() {}
-        public CartItem(String foodId, String foodName, double price, int quantity, String imageUrl) {
-            this.foodId = foodId; this.foodName = foodName;
-            this.price  = price;  this.quantity  = quantity; this.imageUrl = imageUrl;
+
+        // Constructor for creating a cart item programmatically
+        public CartItem(String foodId, String foodName, double price,
+                        int quantity, String imageUrl) {
+            this.foodId   = foodId;
+            this.foodName = foodName;
+            this.price    = price;
+            this.quantity = quantity;
+            this.imageUrl = imageUrl;
         }
+
+        // INFORMATION HIDING: line total calculation encapsulated here
         public double getLineTotal() { return price * quantity; }
+
+        // FILE HANDLING: serialize cart item to compact CSV format
         public String toMini() {
-            return strip(foodId)+","+strip(foodName)+","+price+","+quantity+","+(imageUrl!=null?imageUrl:"");
+            return strip(foodId)+","+strip(foodName)+","+price+","+quantity
+                    +","+(imageUrl != null ? imageUrl : "");
         }
+
+        // FILE HANDLING: deserialize cart item from compact CSV format
         public static CartItem fromMini(String s) {
             String[] p = s.split(",", 5);
             if (p.length < 4) return null;
             CartItem ci = new CartItem();
-            ci.foodId=p[0]; ci.foodName=p[1];
-            try{ci.price=Double.parseDouble(p[2]);}catch(Exception e){}
-            try{ci.quantity=Integer.parseInt(p[3]);}catch(Exception e){}
-            if(p.length>4) ci.imageUrl=p[4];
+            ci.foodId   = p[0];
+            ci.foodName = p[1];
+            try { ci.price    = Double.parseDouble(p[2]); } catch (Exception e) {}
+            try { ci.quantity = Integer.parseInt(p[3]);   } catch (Exception e) {}
+            if (p.length > 4) ci.imageUrl = p[4];
             return ci;
         }
-        private static String strip(String v){return (v!=null)?v.replace(",",""):"";}
-        public String getFoodId()            { return foodId; }
-        public void   setFoodId(String v)    { this.foodId=v; }
-        public String getFoodName()          { return foodName; }
-        public void   setFoodName(String v)  { this.foodName=v; }
-        public double getPrice()             { return price; }
-        public void   setPrice(double v)     { this.price=v; }
-        public int    getQuantity()          { return quantity; }
-        public void   setQuantity(int v)     { this.quantity=v; }
-        public String getImageUrl()          { return imageUrl; }
-        public void   setImageUrl(String v)  { this.imageUrl=v; }
+
+        private static String strip(String v) {
+            return (v != null) ? v.replace(",", "") : "";
+        }
+
+        // Getters & Setters for CartItem
+        public String getFoodId()           { return foodId; }
+        public void   setFoodId(String v)   { this.foodId = v; }
+        public String getFoodName()         { return foodName; }
+        public void   setFoodName(String v) { this.foodName = v; }
+        public double getPrice()            { return price; }
+        public void   setPrice(double v)    { this.price = v; }
+        public int    getQuantity()         { return quantity; }
+        public void   setQuantity(int v)    { this.quantity = v; }
+        public String getImageUrl()         { return imageUrl; }
+        public void   setImageUrl(String v) { this.imageUrl = v; }
     }
 
-    // Getters & Setters
-    public String getOrderId()               { return orderId; }
-    public void   setOrderId(String v)       { this.orderId=v; }
-    public String getCustomerId()            { return customerId; }
-    public void   setCustomerId(String v)    { this.customerId=v; }
-    public String getCustomerName()          { return customerName; }
-    public void   setCustomerName(String v)  { this.customerName=v; }
-    public String getDeliveryAddress()       { return deliveryAddress; }
-    public void   setDeliveryAddress(String v){ this.deliveryAddress=v; }
-    public String getChefNote()              { return chefNote; }
-    public void   setChefNote(String v)      { this.chefNote=v; }
-    public String getDriverNote()            { return driverNote; }
-    public void   setDriverNote(String v)    { this.driverNote=v; }
-    public String getPaymentMethod()         { return paymentMethod; }
-    public void   setPaymentMethod(String v) { this.paymentMethod=v; }
-    public String getStatus()                { return status; }
-    public void   setStatus(String v)        { this.status=v; }
-    public String getOfferCode()             { return offerCode; }
-    public void   setOfferCode(String v)     { this.offerCode=v; }
-    public String getDriverId()              { return driverId; }
-    public void   setDriverId(String v)      { this.driverId=v; }
-    public String getDriverName()            { return driverName; }
-    public void   setDriverName(String v)    { this.driverName=v; }
-    public String getDriverContact()         { return driverContact; }
-    public void   setDriverContact(String v) { this.driverContact=v; }
-    public String getOrderType()             { return orderType; }
-    public void   setOrderType(String v)     { this.orderType=v; }
-    public String getCreatedAt()             { return createdAt; }
-    public void   setCreatedAt(String v)     { this.createdAt=v; }
-    public String getUpdatedAt()             { return updatedAt; }
-    public void   setUpdatedAt(String v)     { this.updatedAt=v; }
-    public double getSubtotal()              { return subtotal; }
-    public void   setSubtotal(double v)      { this.subtotal=v; }
-    public double getDeliveryFee()           { return deliveryFee; }
-    public void   setDeliveryFee(double v)   { this.deliveryFee=v; }
-    public double getDiscount()              { return discount; }
-    public void   setDiscount(double v)      { this.discount=v; }
-    public double getTip()                   { return tip; }
-    public void   setTip(double v)           { this.tip=v; }
-    public double getWeatherFee()            { return weatherFee; }
-    public String getScheduledFor()          { return scheduledFor != null ? scheduledFor : ""; }
-    public void   setScheduledFor(String v)  { this.scheduledFor = v; }
-    public void   setWeatherFee(double v)    { this.weatherFee=v; }
-    public double getTotalAmount()           { return totalAmount; }
-    public void   setTotalAmount(double v)   { this.totalAmount=v; }
-    public int    getLoyaltyPoints()         { return loyaltyPoints; }
-    public void   setLoyaltyPoints(int v)    { this.loyaltyPoints=v; }
-    public String getEstimatedEta()          { return estimatedEta; }
-    public void   setEstimatedEta(String v)  { this.estimatedEta=v; }
-    public List<CartItem> getItems()         { return items; }
-    public void   setItems(List<CartItem> v) { this.items=v; }
+    // ── ENCAPSULATION: Getters & Setters for Order ────────────────
+    public String getOrderId()                { return orderId; }
+    public void   setOrderId(String v)        { this.orderId = v; }
+    public String getCustomerId()             { return customerId; }
+    public void   setCustomerId(String v)     { this.customerId = v; }
+    public String getCustomerName()           { return customerName; }
+    public void   setCustomerName(String v)   { this.customerName = v; }
+    public String getDeliveryAddress()        { return deliveryAddress; }
+    public void   setDeliveryAddress(String v){ this.deliveryAddress = v; }
+    public String getChefNote()               { return chefNote; }
+    public void   setChefNote(String v)       { this.chefNote = v; }
+    public String getDriverNote()             { return driverNote; }
+    public void   setDriverNote(String v)     { this.driverNote = v; }
+    public String getPaymentMethod()          { return paymentMethod; }
+    public void   setPaymentMethod(String v)  { this.paymentMethod = v; }
+    public String getStatus()                 { return status; }
+    public void   setStatus(String v)         { this.status = v; }
+    public String getOfferCode()              { return offerCode; }
+    public void   setOfferCode(String v)      { this.offerCode = v; }
+    public String getDriverId()               { return driverId; }
+    public void   setDriverId(String v)       { this.driverId = v; }
+    public String getDriverName()             { return driverName; }
+    public void   setDriverName(String v)     { this.driverName = v; }
+    public String getDriverContact()          { return driverContact; }
+    public void   setDriverContact(String v)  { this.driverContact = v; }
+    public String getOrderType()              { return orderType; }
+    public void   setOrderType(String v)      { this.orderType = v; }
+    public String getCreatedAt()              { return createdAt; }
+    public void   setCreatedAt(String v)      { this.createdAt = v; }
+    public String getUpdatedAt()              { return updatedAt; }
+    public void   setUpdatedAt(String v)      { this.updatedAt = v; }
+    public double getSubtotal()               { return subtotal; }
+    public void   setSubtotal(double v)       { this.subtotal = v; }
+    public double getDeliveryFee()            { return deliveryFee; }
+    public void   setDeliveryFee(double v)    { this.deliveryFee = v; }
+    public double getDiscount()               { return discount; }
+    public void   setDiscount(double v)       { this.discount = v; }
+    public double getTip()                    { return tip; }
+    public void   setTip(double v)            { this.tip = v; }
+    public double getWeatherFee()             { return weatherFee; }
+    public void   setWeatherFee(double v)     { this.weatherFee = v; }
+    public double getTotalAmount()            { return totalAmount; }
+    public void   setTotalAmount(double v)    { this.totalAmount = v; }
+    public int    getLoyaltyPoints()          { return loyaltyPoints; }
+    public void   setLoyaltyPoints(int v)     { this.loyaltyPoints = v; }
+    public String getEstimatedEta()           { return estimatedEta; }
+    public void   setEstimatedEta(String v)   { this.estimatedEta = v; }
+    public String getScheduledFor()           { return scheduledFor != null ? scheduledFor : ""; }
+    public void   setScheduledFor(String v)   { this.scheduledFor = v; }
+    public List<CartItem> getItems()          { return items; }
+    public void   setItems(List<CartItem> v)  { this.items = v; }
 }
+
