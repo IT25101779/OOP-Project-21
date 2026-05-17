@@ -1,51 +1,88 @@
 package com.yummydish.model;
 
-/**
- * User — OOP: Encapsulation (private fields + getters/setters)
- * Demonstrates Polymorphism via getDashboardUrl()
- */
+// ============================================================
+// FILE: User.java
+// COMPONENT: C1 — User & Authentication Management
+// MEMBER: Member 1
+// ============================================================
+//
+// OOP CONCEPTS DEMONSTRATED:
+//   ✅ ENCAPSULATION  — All fields are private; accessed only via
+//                       public getters and setters.
+//   ✅ POLYMORPHISM   — getDashboardUrl() returns a different URL
+//                       depending on the user's role at runtime
+//                       (ADMIN → /admin/dashboard, DRIVER → /driver,
+//                        CUSTOMER → /menu).
+//   ✅ INFORMATION HIDING — passwordHash and cardNumber are never
+//                           exposed raw; getMaskedCard() hides digits.
+//
+// CRUD OPERATIONS COVERED (via UserService + AuthController):
+//   CREATE — registerUser() stores a new User to users.txt
+//   READ   — findByEmail() reads and verifies credentials on login
+//   UPDATE — updateProfile(), changePassword() rewrites the user line
+//   DELETE — deleteAccount() removes the user line from users.txt
+//
+// FILE HANDLING:
+//   toFileLine()  — serializes this object to a pipe-delimited string
+//                   written to data/users.txt
+//   fromLine()    — deserializes a pipe-delimited line back to a User
+// ============================================================
+
 public class User {
 
+    // ── ENCAPSULATION: All fields private ─────────────────────────
+    // They can only be read or changed through getters/setters below.
     private String id;
     private String name;
     private String email;
-    private String passwordHash;
+    private String passwordHash;   // never stored as plain text
     private String phone;
     private String address;
-    private String role;
+    private String role;           // "CUSTOMER" | "ADMIN" | "DRIVER"
     private String createdAt;
-    private String cardNumber;
+    private String cardNumber;     // stored encrypted/masked
     private String cardHolder;
     private String cardExpiry;
     private String profilePicUrl;
     private int    loyaltyPoints = 0;
 
+    // Default constructor required for object creation
     public User() {}
 
-    /** Polymorphism: each role redirects to a different dashboard URL */
+    // ── POLYMORPHISM: same method, different return value per role ─
+    // At runtime, Java calls this method on the actual object type and
+    // each role returns a different dashboard URL — this is runtime
+    // polymorphism (method overriding behaviour via role field).
     public String getDashboardUrl() {
         if ("ADMIN".equals(role))  return "/admin/dashboard";
         if ("DRIVER".equals(role)) return "/driver";
-        return "/menu";
+        return "/menu";   // default: CUSTOMER
     }
 
+    // ── INFORMATION HIDING: card details are never fully exposed ───
     public boolean hasCard() {
         return cardNumber != null && !cardNumber.isBlank();
     }
 
+    // Returns **** **** **** 1234 format — hides sensitive digits
     public String getMaskedCard() {
         if (!hasCard()) return "";
         String c = cardNumber.replaceAll("\\s", "");
         return "**** **** **** " + c.substring(Math.max(0, c.length() - 4));
     }
 
+    // ── FILE HANDLING: Serialize object → one line in users.txt ───
+    // CRUD - CREATE/UPDATE: this string is written to data/users.txt
     public String toFileLine() {
         return String.join("|",
-            safe(id), safe(name), safe(email), safe(passwordHash),
-            safe(phone), safe(address), safe(role), safe(createdAt),
-            safe(cardNumber), safe(cardHolder), safe(cardExpiry), safe(profilePicUrl), String.valueOf(loyaltyPoints));
+                safe(id), safe(name), safe(email), safe(passwordHash),
+                safe(phone), safe(address), safe(role), safe(createdAt),
+                safe(cardNumber), safe(cardHolder), safe(cardExpiry),
+                safe(profilePicUrl), String.valueOf(loyaltyPoints));
     }
 
+    // ── FILE HANDLING: Deserialize one line from users.txt → object ─
+    // CRUD - READ: called when reading users.txt to load user data
     public static User fromLine(String line) {
         if (line == null || line.isBlank()) return null;
         String[] p = line.split("\\|", -1);
@@ -62,15 +99,20 @@ public class User {
         if (p.length > 9)  u.cardHolder    = p[9];
         if (p.length > 10) u.cardExpiry    = p[10];
         if (p.length > 11) u.profilePicUrl = p[11];
-        if (p.length > 12) { try { u.loyaltyPoints = Integer.parseInt(p[12]); } catch(Exception e){} }
+        if (p.length > 12) {
+            try { u.loyaltyPoints = Integer.parseInt(p[12]); }
+            catch (Exception e) {}
+        }
         return u;
     }
 
+    // Helper: prevents pipe character from breaking file format
     private static String safe(String v) {
         return (v != null) ? v.replace("|", "").replace("\n", " ") : "";
     }
 
-    // Getters & Setters
+    // ── ENCAPSULATION: Public Getters & Setters ────────────────────
+    // Controlled access to private fields — core encapsulation principle
     public String getId()                    { return id; }
     public void   setId(String v)            { this.id = v; }
     public String getName()                  { return name; }
