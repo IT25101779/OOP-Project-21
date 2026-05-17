@@ -1,207 +1,141 @@
-<%@ page contentType="text/html;charset=UTF-8" buffer="128kb" autoFlush="true" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<c:set var="pageTitle" value="Sign In"/>
+<c:set var="pageTitle" value="Sign In" scope="request"/>
 <%@ include file="/WEB-INF/views/layout/header.jsp" %>
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer onload="window.onGsiLoad && window.onGsiLoad()"></script>
-<style>
-.auth-wrap{min-height:calc(100vh - 66px);display:grid;grid-template-columns:1fr 500px;}
-@media(max-width:900px){.auth-wrap{grid-template-columns:1fr}.auth-left-panel{display:none!important}}
-.auth-left-panel{
-  background:linear-gradient(155deg,#0F0F0F 0%,#1a1a1a 100%);
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;
-}
-.auth-left-panel::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at 18% 82%,rgba(255,107,53,.25) 0%,transparent 55%),
-             radial-gradient(circle at 82% 18%,rgba(255,107,53,.12) 0%,transparent 50%);
-}
-.particle-dot{position:absolute;border-radius:50%;background:var(--c-orange);pointer-events:none;}
-.auth-right-panel{
-  display:flex;flex-direction:column;justify-content:center;
-  padding:52px 56px;background:var(--c-bg);overflow-y:auto;
-}
-@media(max-width:540px){.auth-right-panel{padding:36px 24px;}}
-.social-btn{
-  width:100%;padding:12px 16px;border-radius:12px;border:1.5px solid var(--c-border);
-  background:var(--c-surface);font-family:'Inter',sans-serif;font-weight:600;font-size:.9rem;
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  cursor:pointer;transition:all .22s var(--ease);color:var(--c-text);
-}
-.social-btn:hover{border-color:var(--c-orange);background:var(--c-orange-l);transform:translateY(-2px);}
-.google-btn:hover{border-color:#4285F4;background:#F0F4FF;}
-.divider{display:flex;align-items:center;gap:12px;color:var(--c-muted);font-size:.78rem;margin:18px 0;}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--c-border);}
-/* Google One Tap override */
-#g_id_onload{position:absolute;top:0;left:0;}
-.g_id_signin{margin-bottom:4px;}
-</style>
 
-<div class="auth-wrap yd-page">
-  <!-- Brand left -->
-  <div class="auth-left-panel">
-    <div id="ptcls" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;"></div>
-    <div style="position:relative;z-index:1;text-align:center;color:white;max-width:360px;">
-      <div style="font-size:5rem;margin-bottom:14px;animation:float 3s ease-in-out infinite;">🍽️</div>
-      <h1 style="font-family:var(--font-display);font-size:3rem;color:white;margin-bottom:10px;">YummyDish</h1>
-      <p style="color:rgba(255,255,255,.6);margin-bottom:32px;">Sri Lanka's finest food, delivered fast.</p>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 18px;text-align:left;display:flex;align-items:center;gap:12px;">
-          <span style="font-size:1.3rem;">⚡</span>
-          <div><div style="font-weight:700;font-size:.9rem;">Lightning Fast</div><div style="font-size:.78rem;opacity:.65;">Avg delivery under 30 min</div></div>
-        </div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 18px;text-align:left;display:flex;align-items:center;gap:12px;">
-          <span style="font-size:1.3rem;">📍</span>
-          <div><div style="font-weight:700;font-size:.9rem;">Live Tracking</div><div style="font-size:.78rem;opacity:.65;">Watch your driver in real time</div></div>
-        </div>
-        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:13px 18px;text-align:left;display:flex;align-items:center;gap:12px;">
-          <span style="font-size:1.3rem;">⭐</span>
-          <div><div style="font-weight:700;font-size:.9rem;">Loyalty Rewards</div><div style="font-size:.78rem;opacity:.65;">Earn points on every order</div></div>
-        </div>
-      </div>
-    </div>
+<div class="kg-auth-wrap">
+  <!-- Background pattern -->
+  <div class="kg-auth-bg-pattern"></div>
+
+  <!-- Decorative logo watermark -->
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.03;pointer-events:none;z-index:0;">
+    <img src="/images/logo-round.png" alt="" style="width:500px;height:500px;object-fit:contain;"
+         onerror="this.style.display='none'">
   </div>
 
-  <!-- Form right -->
-  <div class="auth-right-panel">
-    <div style="max-width:400px;width:100%;margin:0 auto;">
-      <a href="/" style="display:inline-flex;align-items:center;gap:6px;color:var(--c-muted);font-size:.85rem;margin-bottom:28px;text-decoration:none;">
-        <i class="bi bi-arrow-left"></i> Back
-      </a>
-      <h2 style="font-family:var(--font-display);font-size:2.2rem;margin-bottom:4px;">Welcome back 👋</h2>
-      <p style="color:var(--c-muted);margin-bottom:24px;">Sign in to your YummyDish account</p>
-
-      <c:if test="${not empty param.error}">
-        <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.875rem;color:#C62828;">
-          <i class="bi bi-exclamation-circle me-2"></i>Invalid email or password.
-        </div>
-      </c:if>
-      <c:if test="${not empty error}">
-        <div style="background:#FFEBEE;border:1px solid #FFCDD2;border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.875rem;color:#C62828;">
-          <i class="bi bi-exclamation-circle me-2"></i><c:out value="${error}"/>
-        </div>
-      </c:if>
-
-      <!-- Google Sign-In Button -->
-      <button class="social-btn google-btn mb-2" onclick="startGoogleSignIn()">
-        <svg width="20" height="20" viewBox="0 0 48 48">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        Continue with Google
-      </button>
-
-      <div class="divider">or sign in with email</div>
-
-      <!-- Email form -->
-      <form action="/login" method="post" id="loginForm">
-        <div class="yd-form-group">
-          <label class="yd-label">Email Address</label>
-          <input type="email" name="email" class="yd-input" placeholder="you@example.com" required autofocus>
-        </div>
-        <div class="yd-form-group">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
-            <label class="yd-label" style="margin:0;">Password</label>
-            <a href="/forgot-password" style="font-size:.78rem;color:var(--c-orange);">Forgot password?</a>
-          </div>
-          <div style="position:relative;">
-            <input type="password" name="password" id="pwdField" class="yd-input" placeholder="••••••••" required>
-            <button type="button" onclick="var f=document.getElementById('pwdField');f.type=f.type==='password'?'text':'password';" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--c-muted);cursor:pointer;font-size:1rem;"><i class="bi bi-eye"></i></button>
-          </div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--c-muted);margin-bottom:18px;cursor:pointer;">
-          <input type="checkbox" name="stayLoggedIn" style="accent-color:var(--c-orange);"> Stay signed in
-        </label>
-        <button type="submit" class="yd-btn yd-btn-primary">
-          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-        </button>
-      </form>
-
-      <p style="text-align:center;color:var(--c-muted);font-size:.875rem;margin-top:20px;">
-        Don't have an account? <a href="/signup" style="color:var(--c-orange);font-weight:700;">Sign up free</a>
-      </p>
+  <div class="kg-auth-card" style="position:relative;z-index:1;">
+    <!-- Logo -->
+    <div class="kg-auth-logo">
+      <img src="/images/logo-main.png" alt="කටගැස්ම" onerror="this.style.display='none'">
+      <div class="kg-auth-logo-name" style="font-family:'UN-Gurulugomi','Noto Serif Sinhala',serif;font-size:2.8rem;font-weight:400;letter-spacing:.02em;">කටගැස්ම</div>
+      <div class="kg-auth-logo-sub">Authentic Sri Lankan Eats</div>
     </div>
+
+    <div class="text-center mb-4">
+      <h2 style="font-family:var(--font-serif);font-size:1.4rem;color:var(--c-text);margin-bottom:4px;">Welcome Back</h2>
+      <p style="font-size:.85rem;color:var(--c-text3);">Sign in to continue your culinary journey</p>
+    </div>
+
+    <!-- Error message -->
+    <c:if test="${not empty error}">
+      <div class="mb-4 p-3 rounded-3" style="background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.2);color:var(--spice-red);font-size:.85rem;display:flex;align-items:center;gap:8px;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span><c:out value="${error}"/></span>
+      </div>
+    </c:if>
+
+    <form method="post" action="/login">
+      <!-- Email -->
+      <div class="kg-form-group">
+        <label class="kg-label" for="email">Email Address</label>
+        <div class="kg-input-icon">
+          <i class="bi bi-envelope kg-icon"></i>
+          <input id="email" name="email" type="email" class="kg-input" placeholder="your@email.com" required autocomplete="email">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="kg-form-group">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label class="kg-label mb-0" for="password">Password</label>
+          <a href="/forgot-password" style="font-size:.75rem;color:var(--copper);">Forgot password?</a>
+        </div>
+        <div class="kg-input-icon" style="position:relative;">
+          <i class="bi bi-lock kg-icon"></i>
+          <input id="password" name="password" type="password" class="kg-input" placeholder="Enter your password" required autocomplete="current-password" style="padding-right:44px;">
+          <button type="button" id="pwToggle" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--c-text3);padding:0;" onclick="togglePw()">
+            <i class="bi bi-eye" id="pwIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stay logged in -->
+      <div class="d-flex align-items-center gap-2 mb-4">
+        <input type="checkbox" name="stayLoggedIn" id="stayLoggedIn" value="true"
+          style="width:16px;height:16px;accent-color:var(--copper);cursor:pointer;">
+        <label for="stayLoggedIn" style="font-size:.83rem;color:var(--c-text3);cursor:pointer;margin:0;">
+          Stay logged in for 30 days
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="kg-btn kg-btn-primary mb-4">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+      </button>
+    </form>
+
+    <div class="kg-divider">or continue with</div>
+
+    <!-- Google sign-in -->
+    <button type="button" class="kg-social-btn kg-social-google mb-4" id="googleSignInBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <p class="text-center" style="font-size:.85rem;color:var(--c-text3);">
+      Don't have an account?
+      <a href="/signup" style="color:var(--copper);font-weight:600;">Join Free</a>
+    </p>
   </div>
 </div>
 
-<div id="googleBtnContainer" style="display:none;"></div>
-<!-- Hidden social login form -->
-<form id="socialForm" action="/social-login" method="post" style="display:none;">
-  <input type="hidden" name="name"  id="sl_name">
-  <input type="hidden" name="email" id="sl_email">
-  <input type="hidden" name="pic"   id="sl_pic">
-</form>
-
 <script>
-// ── Google Sign-In via Identity Services ─────────────────────────
-var GOOGLE_CLIENT_ID = '${googleOAuthClientId}';
-
-// Called by Google Identity Services after user selects account
-function handleGoogleSignIn(response) {
-  if (!response || !response.credential) return;
-  try {
-    var parts = response.credential.split('.');
-    var payload = JSON.parse(atob(parts[1] + '=='.slice((parts[1].length * 3) & 3)));
-    document.getElementById('sl_name').value  = payload.name    || '';
-    document.getElementById('sl_email').value = payload.email   || '';
-    document.getElementById('sl_pic').value   = payload.picture || '';
-    document.getElementById('socialForm').submit();
-  } catch(e) {
-    showToast('Google sign-in error. Please use email login.');
-  }
-}
-
-function startGoogleSignIn() {
-  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
-  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) {
-    // Show a demo modal to simulate Google login for presentation
-    var email = prompt('Demo Mode: Enter your email to simulate Google Sign-In');
-    if (!email || email.indexOf('@') < 0) return;
-    var name  = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
-    document.getElementById('sl_name').value  = name;
-    document.getElementById('sl_email').value = email;
-    document.getElementById('sl_pic').value   = '';
-    document.getElementById('socialForm').submit();
-    return;
-  }
-  // Real Google Sign-In with configured client ID
-  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-    google.accounts.id.prompt();
+function togglePw() {
+  var inp = document.getElementById('password');
+  var icon = document.getElementById('pwIcon');
+  if(inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'bi bi-eye-slash';
   } else {
-    showToast('Loading Google Sign-In...');
-    setTimeout(startGoogleSignIn, 1200);
+    inp.type = 'password';
+    icon.className = 'bi bi-eye';
   }
 }
 
-function initGoogleSignIn() {
-  var clientId = GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.trim() : '';
-  if (!clientId || clientId === '' || clientId.indexOf('YOUR_') >= 0) return;
-  if (typeof google === 'undefined' || !google.accounts) return;
-  google.accounts.id.initialize({
-    client_id: clientId,
-    callback:  handleGoogleSignIn,
-    auto_select: false,
-    ux_mode: 'popup'
-  });
+// Google OAuth (if configured)
+var clientId = '${googleOAuthClientId}';
+if(clientId) {
+  var script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.async = true;
+  document.head.appendChild(script);
+  script.onload = function() {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: function(response) {
+        var token = response.credential;
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        var form = document.createElement('form');
+        form.method = 'POST'; form.action = '/social-login';
+        [['name', payload.name||''], ['email', payload.email||''], ['pic', payload.picture||'']].forEach(function(f){
+          var inp = document.createElement('input');
+          inp.type='hidden'; inp.name=f[0]; inp.value=f[1];
+          form.appendChild(inp);
+        });
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+    document.getElementById('googleSignInBtn').addEventListener('click', function(){
+      google.accounts.id.prompt();
+    });
+  };
 }
-document.addEventListener('DOMContentLoaded', function() {
-  if (typeof google !== 'undefined') initGoogleSignIn();
-});
-window.onGsiLoad = function() { initGoogleSignIn(); };
-
-// ── Particles ─────────────────────────────────────────────────────
-(function() {
-  var c = document.getElementById('ptcls'); if (!c) return;
-  for (var i = 0; i < 18; i++) {
-    var p = document.createElement('div');
-    p.className = 'particle-dot';
-    var s = 3 + Math.random() * 7;
-    p.style.cssText = 'width:'+s+'px;height:'+s+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;opacity:'+(0.1+Math.random()*0.3)+';animation:drift '+(8+Math.random()*12)+'s linear '+(Math.random()*-10)+'s infinite;';
-    c.appendChild(p);
-  }
-})();
 </script>
+
 <%@ include file="/WEB-INF/views/layout/footer.jsp" %>

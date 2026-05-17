@@ -4,7 +4,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Login &mdash; Katagasma</title>
+<title>Driver Login &mdash; Katagasma</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -15,27 +15,27 @@
 <body>
 <div id="yd-cursor"></div><div id="yd-cursor-ring"></div><div id="yd-toast"></div>
 <div class="yd-auth-split">
-  <div class="yd-auth-brand" style="background:linear-gradient(160deg,#0a0a1a,#1a1a2e);">
+  <div class="yd-auth-brand" style="background:linear-gradient(160deg,#0F0F0F,#1a2a1a);">
     <div class="yd-auth-particles" id="parts"></div>
     <div class="yd-auth-brand-content yd-splash">
-      <div style="font-size:5.5rem;margin-bottom:16px;animation:float 3s ease-in-out infinite;">⚙️</div>
-      <h1 class="mb-2">Admin Portal</h1>
-      <p style="opacity:.7;letter-spacing:3px;text-transform:uppercase;font-size:.85rem;margin-bottom:40px;">Katagasma Management</p>
-      <div class="yd-auth-badge"><i class="bi bi-speedometer2 me-2" style="color:var(--copper)"></i>Full dashboard control</div>
-      <div class="yd-auth-badge"><i class="bi bi-people me-2" style="color:var(--copper)"></i>Manage users & orders</div>
-      <div class="yd-auth-badge"><i class="bi bi-graph-up me-2" style="color:var(--copper)"></i>Revenue analytics</div>
+      <div style="font-size:5.5rem;margin-bottom:16px;animation:float 3s ease-in-out infinite;">🛵</div>
+      <h1 class="mb-2">Driver Portal</h1>
+      <p style="opacity:.7;letter-spacing:3px;text-transform:uppercase;font-size:.85rem;margin-bottom:40px;">Katagasma Delivery</p>
+      <div class="yd-auth-badge"><i class="bi bi-map me-2" style="color:#4CAF50"></i>Smart route optimisation</div>
+      <div class="yd-auth-badge"><i class="bi bi-geo-alt me-2" style="color:#4CAF50"></i>Live GPS navigation</div>
+      <div class="yd-auth-badge"><i class="bi bi-phone me-2" style="color:#4CAF50"></i>One-tap delivery updates</div>
     </div>
   </div>
   <div class="yd-auth-form">
-    <h2 class="mb-1">Admin Sign In</h2>
-    <p style="color:var(--c-muted);font-size:.9rem;margin-bottom:28px;">Restricted to administrators only</p>
+    <h2 class="mb-1">Driver Sign In</h2>
+    <p style="color:var(--c-muted);font-size:.9rem;margin-bottom:28px;">Use your driver credentials provided by admin</p>
     <c:if test="${error != null}">
       <div class="alert alert-danger rounded-3 mb-3" style="font-size:.85rem;"><i class="bi bi-exclamation-circle me-2"></i>${error}</div>
     </c:if>
-    <form action="/admin/login" method="post">
+    <form action="/driver/login" method="post">
       <div class="kg-form-group">
-        <label class="kg-label">Admin Email</label>
-        <input type="email" name="email" class="kg-input" placeholder="admin@katagasma.lk" required autocomplete="email">
+        <label class="kg-label">Driver Email</label>
+        <input type="email" name="email" class="kg-input" placeholder="driver@katagasma.lk" required autocomplete="email">
       </div>
       <div class="kg-form-group">
         <label class="kg-label">Password</label>
@@ -45,22 +45,22 @@
                   style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#aaa;"><i class="bi bi-eye"></i></button>
         </div>
       </div>
-      <button type="submit" class="kg-btn kg-btn-primary">
-        <i class="bi bi-shield-lock me-2"></i>Sign In as Admin
+      <button type="submit" class="kg-btn kg-btn-primary" style="background:linear-gradient(135deg,#2e7d32,#388e3c);">
+        <i class="bi bi-bicycle me-2"></i>Sign In as Driver
       </button>
     </form>
     <div class="mt-4 p-3 rounded-3" style="background:var(--c-bg);font-size:.78rem;color:var(--c-muted);border:1px solid var(--c-border);">
-      🔑 Default: <strong style="color:var(--c-text);">admin@katagasma.lk</strong> / <strong style="color:var(--c-text);">admin123</strong>
+      🔑 Default driver: <strong style="color:var(--c-text);">driver@katagasma.lk</strong> / <strong style="color:var(--c-text);">driver123</strong>
     </div>
     <div class="mt-3 text-center">
       <a href="/login" style="color:var(--copper);font-size:.875rem;font-weight:600;">← Customer Login</a>
       &nbsp;·&nbsp;
-      <a href="/driver/login" style="color:var(--c-muted);font-size:.875rem;">Driver Login</a>
+      <a href="/admin/login" style="color:var(--c-muted);font-size:.875rem;">Admin Login</a>
     </div>
   </div>
 </div>
 <script>
-(function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<15;i++){var d=document.createElement('div');d.className='yd-particle';var sz=Math.random()*6+3;d.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;opacity:'+(Math.random()*.4+.1)+';animation-duration:'+(Math.random()*8+6)+'s;animation-delay:'+(Math.random()*-10)+'s;';p.appendChild(d);}})();
+(function(){var p=document.getElementById('parts');if(!p)return;for(var i=0;i<15;i++){var d=document.createElement('div');d.className='yd-particle';var sz=Math.random()*6+3;d.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;background:#4CAF50;opacity:'+(Math.random()*.4+.1)+';animation-duration:'+(Math.random()*8+6)+'s;animation-delay:'+(Math.random()*-10)+'s;';p.appendChild(d);}})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body></html>

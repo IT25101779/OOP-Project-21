@@ -13,33 +13,41 @@ function onMapsReady(fn) {
     else document.addEventListener('mapsready', fn, { once: true });
 }
 
-// ── Theme ─────────────────────────────────────────────────────────
+// ── Theme (Katagasma — unified, no double-toggle) ──────────────
 const Theme = (() => {
+    const KEY = 'kgTheme'; // single source of truth
+
     function apply(dark) {
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-        const btn = document.getElementById('themeToggle');
-        if (btn) btn.textContent = dark ? '☀️' : '🌙';
+        localStorage.setItem(KEY, dark ? 'dark' : 'light');
+        // legacy key for any old code
         localStorage.setItem('ydTheme', dark ? 'dark' : 'light');
+        syncIcon();
     }
-    function toggle() { apply(document.documentElement.getAttribute('data-theme') !== 'dark'); }
-    // Apply on load — check system preference if no saved preference
-    const saved = localStorage.getItem('ydTheme');
-    if (saved) {
-        apply(saved === 'dark');
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        apply(true);
+
+    function syncIcon() {
+        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.querySelectorAll('#themeToggle').forEach(b => b.textContent = dark ? '☀️' : '🌙');
     }
+
+    function toggle() {
+        apply(document.documentElement.getAttribute('data-theme') !== 'dark');
+    }
+
+    // Apply on load — header.jsp already did this before paint, but double-check
+    const saved = localStorage.getItem(KEY) || localStorage.getItem('ydTheme');
+    if (saved) apply(saved === 'dark');
+
     document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('themeToggle');
-        if (btn) {
-            btn.addEventListener('click', toggle);
-            btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-        }
-        // Listen for system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            if (!localStorage.getItem('ydTheme')) apply(e.matches);
+        syncIcon();
+        // Remove ALL existing listeners from themeToggle by cloning, then add one clean listener
+        document.querySelectorAll('#themeToggle').forEach(btn => {
+            const fresh = btn.cloneNode(true);
+            btn.parentNode.replaceChild(fresh, btn);
+            fresh.addEventListener('click', toggle);
         });
     });
+
     return { toggle, apply };
 })();
 
