@@ -34,7 +34,7 @@ public class FoodItemService {
         this.fileStorage = fileStorage;
     }
 
-    // ── CREATE ────────────────────────────────────────────────────
+    //  CREATE 
     public FoodItem add(String name, String description, double price,
                         String category, String ingredients, String portionSize,
                         int calories, String imageUrl, String foodType) throws IOException {
@@ -56,7 +56,7 @@ public class FoodItemService {
         return item;
     }
 
-    // ── READ ──────────────────────────────────────────────────────
+    //  READ
     public List<FoodItem> getAll() {
         return fileStorage.readAll(fileStorage.getFoodItemsFile()).stream()
             .map(FoodItem::fromLine)
@@ -121,7 +121,7 @@ public class FoodItemService {
         return sorted(false);
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────
+    // UPDATE 
     public boolean update(String id, String name, String description, double price,
                           String category, String ingredients, String portionSize,
                           int calories, boolean available, String imageUrl) throws IOException {
@@ -146,7 +146,7 @@ public class FoodItemService {
         return fileStorage.update(fileStorage.getFoodItemsFile(), id, f.toFileLine());
     }
 
-    // ── DELETE ────────────────────────────────────────────────────
+    // DELETE 
     public boolean delete(String id) throws IOException {
         return fileStorage.delete(fileStorage.getFoodItemsFile(), id);
     }
