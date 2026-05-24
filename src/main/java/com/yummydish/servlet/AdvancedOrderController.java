@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// ── Global model attributes injected into every JSP ──────────────
+// ── Global model attributes injected into every JSP. ──────────────
 @org.springframework.web.bind.annotation.ControllerAdvice
 @Controller
 class AdvancedOrderController {
