@@ -1,11 +1,10 @@
 package com.yummydish.model;
 
-// ============================================================
+
 // FILE: Feedback.java
 // COMPONENT: C6 — Post-Order Feedback & Reporting
 // MEMBER: Member 6
-// ============================================================
-//
+
 // OOP CONCEPTS DEMONSTRATED:
 //   ✅ ABSTRACTION    — Feedback is abstract: defines getDisplayIcon()
 //                       and isPublicFeedback() as abstract methods.
@@ -28,11 +27,11 @@ package com.yummydish.model;
 // FILE HANDLING:
 //   toFileLine()    — serializes to pipe-delimited line for feedback.txt
 //   fromFileLine()  — factory: reads line, returns PublicReview/AdminReport
-// ============================================================
+
 
 public abstract class Feedback {
 
-    // ── ENCAPSULATION: All fields private ─────────────────────────
+  
     private String id;
     private String orderId;
     private String customerId;
