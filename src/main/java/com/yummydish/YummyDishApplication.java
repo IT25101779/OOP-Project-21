@@ -18,7 +18,7 @@ public class YummyDishApplication extends SpringBootServletInitializer {
         System.out.println("\n========================================");
         System.out.println("  🍽️  YummyDish is running!");
         System.out.println("  👉  http://localhost:8080");
-        System.out.println("  🔑  admin@yummydish.com / admin123");
+        System.out.println("  🔑  admin@yummydish.lk / admin123");
         System.out.println("========================================\n");
     }
 }
