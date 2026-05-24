@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // ============================================================
-// FILE: Order.java
+// FILE.: Order.java
 // COMPONENT: C3 — Cart & Checkout Processing
 // MEMBER: Member 3
 // ============================================================
