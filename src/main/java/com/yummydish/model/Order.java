@@ -3,36 +3,17 @@ package com.yummydish.model;
 import java.util.ArrayList;
 import java.util.List;
 
-// ============================================================
-// FILE.: Order.java
-// COMPONENT: C3 — Cart & Checkout Processing
-// MEMBER: Member 3
-// ============================================================
-//
-// OOP CONCEPTS DEMONSTRATED:
-//   ✅ ENCAPSULATION    — All fields private with public getters/setters.
-//                         CartItem is a static inner class, grouping
-//                         related data together (encapsulation of cart logic).
-//   ✅ INFORMATION HIDING — calculateTotal() hides the formula for
-//                           computing subtotal, delivery fee, discounts.
-//                           getStatusBadge() hides status mapping logic.
-//
-// CRUD OPERATIONS COVERED (via CartController + ApiController):
+
+// CRUD OPERATIONS (via CartController + ApiController):
 //   CREATE — POST /api/order: new order written to data/orders.txt
 //   READ   — GET  /api/order/{id}: reads order from orders.txt
 //   UPDATE — driver/admin updates status; written back to orders.txt
 //   DELETE — POST /api/order/{id}/cancel: marks order CANCELLED
-//
-// FILE HANDLING:
-//   toFileLine() — serializes order + all cart items to one line
-//                  Format: fields||I||item1;item2;item3
-//   fromLine()   — deserializes from orders.txt back to Order object
-// ============================================================
+
 
 public class Order {
 
-    // ── Order status constants ─────────────────────────────────────
-    // Used across the system to track delivery progress
+    //  Order status constants
     public static final String PENDING   = "PENDING";    // just placed
     public static final String COOKING   = "COOKING";    // kitchen working
     public static final String READY     = "READY";      // ready for pickup
@@ -41,7 +22,7 @@ public class Order {
     public static final String DELIVERED = "DELIVERED";  // completed
     public static final String CANCELLED = "CANCELLED";  // cancelled
 
-    // ── ENCAPSULATION: All fields private ─────────────────────────
+    // ENCAPSULATION: All fields private
     private String orderId;
     private String customerId;
     private String customerName;
@@ -74,7 +55,7 @@ public class Order {
         this.orderType = "STANDARD";
     }
 
-    // ── INFORMATION HIDING: Business logic encapsulated in method ──
+    //  INFORMATION HIDING: Business logic encapsulated in method
     // Caller just calls calculateTotal() — doesn't need to know formula
     // CRUD - UPDATE: total is recalculated when cart changes
     public void calculateTotal() {
@@ -111,9 +92,8 @@ public class Order {
         }
     }
 
-    // ── FILE HANDLING: Serialize order → one line in orders.txt ───
+    //  FILE HANDLING: Serialize order - one line in orders.txt
     // CRUD - CREATE: written when order is placed at checkout
-    // Format: field1|field2|...|fieldN||I||item1;item2;item3
     public String toFileLine() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.join("|",
@@ -131,7 +111,7 @@ public class Order {
         return sb.toString();
     }
 
-    // ── FILE HANDLING: Deserialize one line from orders.txt → Order ─
+    //  FILE HANDLING: Deserialize one line from orders.txt - Order
     // CRUD - READ: called when loading orders from file
     public static Order fromLine(String line) {
         if (line == null || line.isBlank()) return null;
@@ -184,9 +164,7 @@ public class Order {
         try { return Double.parseDouble(s); } catch (Exception e) { return 0; }
     }
 
-    // ── ENCAPSULATION: CartItem inner class ───────────────────────
-    // Groups cart item data together — another form of encapsulation.
-    // Represents one food item line in the shopping cart.
+    // ENCAPSULATION: CartItem inner class
     public static class CartItem {
         private String foodId, foodName, imageUrl;
         private double price;
@@ -243,7 +221,7 @@ public class Order {
         public void   setImageUrl(String v) { this.imageUrl = v; }
     }
 
-    // ── ENCAPSULATION: Getters & Setters for Order ────────────────
+    //  ENCAPSULATION: Getters & Setters for Order
     public String getOrderId()                { return orderId; }
     public void   setOrderId(String v)        { this.orderId = v; }
     public String getCustomerId()             { return customerId; }

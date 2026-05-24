@@ -11,16 +11,13 @@ import java.util.ArrayList;
 
 /**
  * OrderQueue — Data Structure: Queue (FIFO)
- *
- * Manages order processing in strict arrival sequence using Java's Queue interface
- * backed by an ArrayDeque (double-ended queue, O(1) enqueue/dequeue).
- *
+
  * FIFO guarantees:
  *   enqueue()  — new order joins the back of the queue  (O(1))
  *   dequeue()  — next order to process leaves the front (O(1))
  *   peek()     — inspect front order without removing   (O(1))
  *   size()     — current queue depth                    (O(1))
- *
+
  * Used by: placeOrder() → enqueues every new STANDARD order
  *          Admin dashboard → reads queue to display processing order
  *          Status updates  → dequeues when order moves to COOKING
@@ -28,17 +25,16 @@ import java.util.ArrayList;
 @Component
 public class OrderQueue {
 
-    // ── Core Queue backed by ArrayDeque for O(1) enqueue/dequeue ──
+    //  Core Queue backed by ArrayDeque for O(1) enqueue/dequeue
     private final Queue<Order> queue = new ArrayDeque<>();
 
-    // ── Singleton lock for thread-safe access ─────────────────────
+    // ─Singleton lock for thread-safe access
     private final Object lock = new Object();
 
     /**
      * Enqueue — add a new order to the back of the processing queue.
      * Called immediately after a new order is persisted to file.
-     *
-     * @param order the newly placed Order
+
      */
     public void enqueue(Order order) {
         if (order == null) return;
@@ -50,7 +46,6 @@ public class OrderQueue {
     /**
      * Dequeue — remove and return the front (oldest) order for processing.
      * Called when the kitchen starts cooking an order (status → COOKING).
-     *
      * @return the next Order to process, or null if queue is empty
      */
     public Order dequeue() {
@@ -62,8 +57,7 @@ public class OrderQueue {
     /**
      * Peek — inspect the next order without removing it.
      * Used to display which order the kitchen should handle next.
-     *
-     * @return the front Order, or null if queue is empty
+
      */
     public Order peek() {
         synchronized (lock) {
