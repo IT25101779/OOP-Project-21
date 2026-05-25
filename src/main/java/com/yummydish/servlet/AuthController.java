@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// ── Global model attributes injected into every JSP ──────────────
+//  Global model attributes injected into every JSP
 @org.springframework.web.bind.annotation.ControllerAdvice
 @Controller
 class AuthController {
@@ -273,7 +273,7 @@ class AdminAuthController {
         return "admin/dashboard";
     }
 
-    // ── Food management ───────────────────────────────────────────
+    //  Food management
     @PostMapping("/food/add")
     public String addFood(@RequestParam String name, @RequestParam String description,
                           @RequestParam double price, @RequestParam String category,
@@ -357,7 +357,7 @@ class AdminAuthController {
         return "redirect:/admin/dashboard?tab=" + tab;
     }
 
-    // ── Order status — MANUAL only, admin controls this ──────────
+    //  Order status — MANUAL only, admin controls this
     @PostMapping("/order/status")
     public String updateOrderStatus(@RequestParam String orderId,
                                     @RequestParam String status,
@@ -405,7 +405,7 @@ class AdminAuthController {
             .orElse(null);
     }
 
-    // ── User management ───────────────────────────────────────────
+    // User management
     @PostMapping("/user/delete")
     public String deleteUser(@RequestParam String id, HttpSession s) throws IOException {
         if (!isAdmin(s)) return "redirect:/admin/login";
@@ -413,7 +413,7 @@ class AdminAuthController {
         return "redirect:/admin/dashboard?tab=users";
     }
 
-    // ── Driver management ─────────────────────────────────────────
+    // Driver management
     @PostMapping("/driver/add")
     public String addDriver(@RequestParam String name,
                             @RequestParam String email,
@@ -429,7 +429,7 @@ class AdminAuthController {
         return "redirect:/admin/dashboard?tab=drivers";
     }
 
-    // ── Offer management ──────────────────────────────────────────
+    //  Offer management
     @PostMapping("/offer/add")
     public String addOffer(@RequestParam String code, @RequestParam String title,
                            @RequestParam String description,
@@ -452,7 +452,7 @@ class AdminAuthController {
         return "redirect:/admin/dashboard?tab=offers";
     }
 
-    // ── Feedback reply ────────────────────────────────────────────
+    // Feedback reply
     @PostMapping("/feedback/reply")
     public String replyFeedback(@RequestParam String feedbackId,
                                 @RequestParam String reply,

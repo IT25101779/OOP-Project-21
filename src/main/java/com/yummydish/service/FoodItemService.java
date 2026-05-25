@@ -17,10 +17,7 @@ import com.yummydish.util.QuickSort;
  * FoodItemService — CRUD operations for menu items.
  * CREATE: add()       READ: getAll(), getById(), getByCategory(), search(), sortedByPrice()
  * UPDATE: update(), toggleAvailability()    DELETE: delete()
- *
  * Sorting uses a custom QuickSort implementation (O(n log n) average)
- * instead of Java's built-in Collections.sort(), fulfilling the
- * QuickSort data-structures requirement.
  */
 @Service
 public class FoodItemService {
@@ -56,7 +53,7 @@ public class FoodItemService {
         return item;
     }
 
-    // ── READ ──────────────────────────────────────────────────────
+    // READ
     public List<FoodItem> getAll() {
         return fileStorage.readAll(fileStorage.getFoodItemsFile()).stream()
             .map(FoodItem::fromLine)
@@ -91,17 +88,14 @@ public class FoodItemService {
     /**
      * Sort available food items by price using QuickSort algorithm.
      * QuickSort average O(n log n) — see com.yummydish.util.QuickSort for full details.
-     *
-     * @param ascending true = cheapest first, false = most expensive first
      * @return new sorted list of available items
      */
     public List<FoodItem> sorted(boolean ascending) {
         List<FoodItem> items = getAvailable();
-        // ── QuickSort (custom implementation, not Java's built-in sort) ──
+        // QuickSort
         QuickSort.sortByPriceAscending(items);
         if (!ascending) {
             // Reverse the ascending result for descending order
-            // (avoids a second full sort pass)
             java.util.Collections.reverse(items);
         }
         return items;
@@ -121,7 +115,7 @@ public class FoodItemService {
         return sorted(false);
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────
+    //  UPDATE
     public boolean update(String id, String name, String description, double price,
                           String category, String ingredients, String portionSize,
                           int calories, boolean available, String imageUrl) throws IOException {
@@ -146,7 +140,7 @@ public class FoodItemService {
         return fileStorage.update(fileStorage.getFoodItemsFile(), id, f.toFileLine());
     }
 
-    // ── DELETE ────────────────────────────────────────────────────
+    //  DELETE
     public boolean delete(String id) throws IOException {
         return fileStorage.delete(fileStorage.getFoodItemsFile(), id);
     }

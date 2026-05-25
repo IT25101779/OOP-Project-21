@@ -47,7 +47,7 @@ public class FileStorageUtil {
     // BCrypt encoder for password hashing — security best practice
     private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
-    // ── ENCAPSULATION: File paths injected from application.properties ─
+    // ENCAPSULATION: File paths injected from application.properties
     // Other classes never hardcode file paths — only use getter methods
     @Value("${app.data.dir:data}")                   private String dataDir;
     @Value("${app.data.users:data/users.txt}")                   private String usersFile;
@@ -88,8 +88,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── FILE HANDLING: READ — reads all non-blank lines from a file ─
-    // synchronized = only one thread can read at a time (thread safety)
+    // FILE HANDLING: READ — reads all non-blank lines from a file
     public synchronized List<String> readAll(String file) {
         List<String> lines = new ArrayList<>();
         try (BufferedReader r = Files.newBufferedReader(Paths.get(file), StandardCharsets.UTF_8)) {
@@ -102,14 +101,14 @@ public class FileStorageUtil {
         return lines;
     }
 
-    // ── FILE HANDLING: READ — finds one record by its ID (first field) ─
+    //  FILE HANDLING: READ — finds one record by its ID (first field)
     public String findById(String file, String id) {
         for (String l : readAll(file))
             if (firstField(l).equals(id)) return l;
         return null;
     }
 
-    // ── FILE HANDLING: READ — full text search across all lines ───
+    //  FILE HANDLING: READ — full text search across all lines
     public List<String> search(String file, String term) {
         List<String> r = new ArrayList<>();
         String low = term.toLowerCase();
@@ -118,8 +117,7 @@ public class FileStorageUtil {
         return r;
     }
 
-    // ── FILE HANDLING: CREATE — appends one new record line to file ─
-    // synchronized = only one thread can write at a time (prevents data corruption)
+    //  FILE HANDLING: CREATE — appends one new record line to file
     public synchronized void appendLine(String file, String line) throws IOException {
         Path p = Paths.get(file);
         Files.createDirectories(p.getParent());
@@ -130,7 +128,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── FILE HANDLING: UPDATE — finds record by ID, replaces its line ─
+    //  FILE HANDLING: UPDATE — finds record by ID, replaces its line
     public synchronized boolean update(String file, String id, String newLine) throws IOException {
         List<String> lines = readAll(file);
         boolean found = false;
@@ -147,7 +145,7 @@ public class FileStorageUtil {
         return found;
     }
 
-    // ── FILE HANDLING: DELETE — finds record by ID, removes its line ─
+    // FILE HANDLING: DELETE — finds record by ID, removes its line
     public synchronized boolean delete(String file, String id) throws IOException {
         List<String> lines = readAll(file);
         int before = lines.size();
@@ -174,7 +172,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── ENCAPSULATION: Getters for file paths ─────────────────────
+    // ─ENCAPSULATION: Getters for file paths
     // Other classes access file paths only through these methods
     public String getUsersFile()           { return usersFile; }
     public String getFoodItemsFile()       { return foodItemsFile; }

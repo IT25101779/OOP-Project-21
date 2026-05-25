@@ -1,37 +1,20 @@
 package com.yummydish.model;
 
-// ============================================================
-// FILE: User.java
-// COMPONENT: C1 — User & Authentication Management
-// MEMBER: Member 1
-// ============================================================
-//
-// OOP CONCEPTS DEMONSTRATED:
-//   ✅ ENCAPSULATION  — All fields are private; accessed only via
-//                       public getters and setters.
-//   ✅ POLYMORPHISM   — getDashboardUrl() returns a different URL
-//                       depending on the user's role at runtime
-//                       (ADMIN → /admin/dashboard, DRIVER → /driver,
-//                        CUSTOMER → /menu).
-//   ✅ INFORMATION HIDING — passwordHash and cardNumber are never
-//                           exposed raw; getMaskedCard() hides digits.
-//
-// CRUD OPERATIONS COVERED (via UserService + AuthController):
+
+// CRUD OPERATIONS  (via UserService + AuthController):
 //   CREATE — registerUser() stores a new User to users.txt
 //   READ   — findByEmail() reads and verifies credentials on login
 //   UPDATE — updateProfile(), changePassword() rewrites the user line
 //   DELETE — deleteAccount() removes the user line from users.txt
-//
+
 // FILE HANDLING:
 //   toFileLine()  — serializes this object to a pipe-delimited string
 //                   written to data/users.txt
 //   fromLine()    — deserializes a pipe-delimited line back to a User
-// ============================================================
 
 public class User {
 
-    // ── ENCAPSULATION: All fields private ─────────────────────────
-    // They can only be read or changed through getters/setters below.
+    //  ENCAPSULATION: All fields private
     private String id;
     private String name;
     private String email;
@@ -49,17 +32,15 @@ public class User {
     // Default constructor required for object creation
     public User() {}
 
-    // ── POLYMORPHISM: same method, different return value per role ─
-    // At runtime, Java calls this method on the actual object type and
+    //  POLYMORPHISM: same method, different return value per role
     // each role returns a different dashboard URL — this is runtime
-    // polymorphism (method overriding behaviour via role field).
     public String getDashboardUrl() {
         if ("ADMIN".equals(role))  return "/admin/dashboard";
         if ("DRIVER".equals(role)) return "/driver";
         return "/menu";   // default: CUSTOMER
     }
 
-    // ── INFORMATION HIDING: card details are never fully exposed ───
+    // INFORMATION HIDING: card details are never fully exposed
     public boolean hasCard() {
         return cardNumber != null && !cardNumber.isBlank();
     }
@@ -71,7 +52,7 @@ public class User {
         return "**** **** **** " + c.substring(Math.max(0, c.length() - 4));
     }
 
-    // ── FILE HANDLING: Serialize object → one line in users.txt ───
+    // FILE HANDLING: Serialize object → one line in users.txt
     // CRUD - CREATE/UPDATE: this string is written to data/users.txt
     public String toFileLine() {
         return String.join("|",
@@ -81,7 +62,7 @@ public class User {
                 safe(profilePicUrl), String.valueOf(loyaltyPoints));
     }
 
-    // ── FILE HANDLING: Deserialize one line from users.txt → object ─
+    //  FILE HANDLING: Deserialize one line from users.txt - object
     // CRUD - READ: called when reading users.txt to load user data
     public static User fromLine(String line) {
         if (line == null || line.isBlank()) return null;
@@ -111,8 +92,7 @@ public class User {
         return (v != null) ? v.replace("|", "").replace("\n", " ") : "";
     }
 
-    // ── ENCAPSULATION: Public Getters & Setters ────────────────────
-    // Controlled access to private fields — core encapsulation principle
+    // ENCAPSULATION
     public String getId()                    { return id; }
     public void   setId(String v)            { this.id = v; }
     public String getName()                  { return name; }
