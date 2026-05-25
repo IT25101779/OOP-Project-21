@@ -45,12 +45,9 @@ class ApiController {
     private final OfferService offerService;
     private final UserService userService;
 
-    /**
-     * OrderQueue — Data Structure: Queue (FIFO)
-     * Manages order processing in arrival sequence.
-     * Injected as a Spring singleton so the same queue instance is shared
-     * across all requests in the application lifecycle.
-     */
+
+     // OrderQueue — Data Structure: Queue (FIFO)
+
     private final com.yummydish.util.OrderQueue orderQueue;
 
     @Autowired ApiController(FoodItemService f, FileStorageUtil fs, OfferService o,
@@ -123,10 +120,9 @@ class ApiController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * GET /api/queue/status — returns current OrderQueue state for admin dashboard.
-     * Shows queue depth, next order to process, and all waiting orders in FIFO order.
-     */
+
+      // GET /api/queue/status — returns current OrderQueue state for admin dashboard
+
     @GetMapping("/queue/status")
     public ResponseEntity<?> queueStatus(HttpSession s) {
         if (s.getAttribute("admin") == null) return ResponseEntity.status(403).build();
@@ -162,9 +158,8 @@ class ApiController {
             Order o = buildOrder(body, u);
             fsu.appendLine(fsu.getOrdersFile(), o.toFileLine());
 
-            // ── OrderQueue: enqueue new STANDARD orders for FIFO processing ──
+            //  OrderQueue: enqueue new STANDARD orders for FIFO processing
             // Scheduled orders are queued when their scheduled time arrives,
-            // not immediately at placement.
             if (!"SCHEDULED".equals(o.getOrderType())) {
                 orderQueue.enqueue(o);
                 System.out.println("[OrderQueue] Enqueued order " + o.getOrderId()
@@ -430,7 +425,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("success",true,"memberCount",cnt,"members",members));
     }
 
-    // ── New orders count for admin polling ──────────────────────────
+    //  New orders count for admin polling
     @GetMapping("/orders/new-count")
     public ResponseEntity<?> newOrdersCount(HttpSession s) {
         if (s.getAttribute("admin") == null && s.getAttribute("driver") == null)
@@ -462,7 +457,7 @@ class ApiController {
         return ResponseEntity.ok(r);
     }
 
-    // ── Driver location update (from browser GPS) ─────────────────
+    //  Driver location update (from browser GPS)
     @PostMapping("/driver/location")
     public ResponseEntity<?> updateDriverLocation(@RequestBody Map<String, Object> body,
                                                   HttpSession s) throws IOException {
@@ -479,7 +474,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    // ── Get driver location (for customer tracking) ───────────────
+    // Get driver location (for customer tracking)
     @GetMapping("/driver/location/{orderId}")
     public ResponseEntity<?> getDriverLocation(@PathVariable String orderId, HttpSession s) {
         if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
@@ -507,7 +502,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("lat", baseLat, "lng", baseLng, "available", true));
     }
 
-    // ── My orders (for account page quick view) ───────────────────
+    //  My orders (for account page quick view)
     @GetMapping("/my-orders")
     public ResponseEntity<?> myOrders(@RequestParam(defaultValue = "5") int limit, HttpSession s) {
         User u = (User) s.getAttribute("user");
@@ -541,7 +536,7 @@ class ApiController {
         return ResponseEntity.ok(result);
     }
 
-    // ── Poll for new orders (admin/driver use for auto-refresh) ─────
+    //  Poll for new orders (admin/driver use for auto-refresh)
     @GetMapping("/orders/poll")
     public ResponseEntity<?> pollOrders(@RequestParam(defaultValue = "0") long since, HttpSession s) {
         boolean isAdmin  = s.getAttribute("admin")  instanceof User;
@@ -577,7 +572,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("orders", orders, "timestamp", System.currentTimeMillis()));
     }
 
-    // ── Cancel order within 2 minutes of placing ────────────────
+    //  Cancel order within 2 minutes of placing
     @PostMapping("/order/{id}/cancel")
     public ResponseEntity<?> cancelOrder(@PathVariable String id, HttpSession s) throws IOException {
         User u = (User) s.getAttribute("user");
@@ -602,7 +597,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
-    // ── Loyalty points ────────────────────────────────────────────
+    //  Loyalty points
     @GetMapping("/loyalty")
     public ResponseEntity<?> loyalty(HttpSession s) {
         User u = (User) s.getAttribute("user");
@@ -615,7 +610,7 @@ class ApiController {
         return ResponseEntity.ok(Map.of("points", points, "discount", points >= 100 ? (points / 100) * 50 : 0, "nextReward", Math.max(0, 100 - (points % 100))));
     }
 
-    // ── Real driver location + nearby check ──────────────────────
+    //  Real driver location + nearby check
     @GetMapping("/order/{id}/driver-location")
     public ResponseEntity<?> orderDriverLocation(@PathVariable String id, HttpSession s) {
         if (s.getAttribute("user") == null) return ResponseEntity.status(401).build();
@@ -646,7 +641,7 @@ class ApiController {
         ));
     }
 
-    // ── Admin stats snapshot ──────────────────────────────────────
+    // Admin stats snapshot
     @GetMapping("/admin/stats")
     public ResponseEntity<?> adminStats(HttpSession s) {
         if (!(s.getAttribute("admin") instanceof User)) return ResponseEntity.status(401).build();
