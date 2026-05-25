@@ -128,7 +128,7 @@
             <h1 style="font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);line-height:1.1;margin-bottom:8px;">
               ආයුබෝවන්, <span style="color:rgba(255,255,255,.9);">
                 <c:out value="${fn:length(user.name)>0 ? fn:substringBefore(user.name,' ') : 'there'}"/>
-              </span> 👋
+              </span> 
             </h1>
             <p style="opacity:.85;font-size:1.05rem;">What authentic flavour are you craving today?</p>
           </div>
