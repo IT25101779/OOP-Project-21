@@ -1,11 +1,7 @@
 package com.yummydish.model;
 
 
-// CRUD OPERATIONS  (via UserService + AuthController):
-//   CREATE — registerUser() stores a new User to users.txt
-//   READ   — findByEmail() reads and verifies credentials on login
-//   UPDATE — updateProfile(), changePassword() rewrites the user line
-//   DELETE — deleteAccount() removes the user line from users.txt
+
 
 // FILE HANDLING:
 //   toFileLine()  — serializes this object to a pipe-delimited string
@@ -33,7 +29,7 @@ public class User {
     public User() {}
 
     //  POLYMORPHISM: same method, different return value per role
-    // each role returns a different dashboard URL — this is runtime
+    
     public String getDashboardUrl() {
         if ("ADMIN".equals(role))  return "/admin/dashboard";
         if ("DRIVER".equals(role)) return "/driver";
@@ -45,7 +41,7 @@ public class User {
         return cardNumber != null && !cardNumber.isBlank();
     }
 
-    // Returns **** **** **** 1234 format — hides sensitive digits
+    
     public String getMaskedCard() {
         if (!hasCard()) return "";
         String c = cardNumber.replaceAll("\\s", "");
