@@ -126,7 +126,7 @@ public abstract class FoodItem {
 class MainCourse extends FoodItem {
     public MainCourse() { super(); }
 
-    // POLYMORPHISM: overrides abstract method from FoodItem
+    
     @Override
     public String getFoodType() { return "MainCourse"; }
 
@@ -136,9 +136,9 @@ class MainCourse extends FoodItem {
         return String.format(
                 "Calories: %d kcal | Protein: ~%dg | Carbs: ~%dg | Fat: ~%dg",
                 getCalories(),
-                (int)(getCalories() * 0.25 / 4),   // 25% from protein
-                (int)(getCalories() * 0.50 / 4),   // 50% from carbs
-                (int)(getCalories() * 0.25 / 9)    // 25% from fat
+                (int)(getCalories() * 0.25 / 4),   
+                (int)(getCalories() * 0.50 / 4),   
+                (int)(getCalories() * 0.25 / 9)    
         );
     }
 }
@@ -150,11 +150,11 @@ class MainCourse extends FoodItem {
 class Beverage extends FoodItem {
     public Beverage() { super(); }
 
-    // POLYMORPHISM: overrides abstract method from FoodItem
+    
     @Override
     public String getFoodType() { return "Beverage"; }
 
-    // POLYMORPHISM: unique nutritional breakdown for beverages
+    
     @Override
     public String getNutritionalInfo() {
         String caffeine = (getCalories() > 150) ? "Moderate" : "Low";
@@ -175,18 +175,17 @@ class Beverage extends FoodItem {
 class Dessert extends FoodItem {
     public Dessert() { super(); }
 
-    // POLYMORPHISM: overrides abstract method from FoodItem
     @Override
     public String getFoodType() { return "Dessert"; }
 
-    // POLYMORPHISM: unique nutritional breakdown for desserts
+    
     @Override
     public String getNutritionalInfo() {
         return String.format(
                 "Calories: %d kcal | Sugar: ~%dg | Sat. Fat: ~%dg | Serving: %s",
                 getCalories(),
-                (int)(getCalories() * 0.40 / 4),   // 40% from sugar
-                (int)(getCalories() * 0.15 / 9),   // 15% from saturated fat
+                (int)(getCalories() * 0.40 / 4),   
+                (int)(getCalories() * 0.15 / 9),   
                 (getPortionSize() != null ? getPortionSize() : "—")
         );
     }
