@@ -1,39 +1,9 @@
 package com.yummydish.model;
 
-// ============================================================
-// FILE: FoodItem.java
-// COMPONENT: C2 — Food Catalog & Menu Management
-// MEMBER: Member 2
-// ============================================================
-//
-// OOP CONCEPTS DEMONSTRATED:
-//   ✅ ABSTRACTION    — FoodItem is an abstract class. It defines WHAT
-//                       a food item must do (getNutritionalInfo,
-//                       getFoodType) without specifying HOW. Each
-//                       subclass provides its own implementation.
-//   ✅ ENCAPSULATION  — All fields are private. Only accessible via
-//                       getters/setters.
-//   ✅ INHERITANCE    — MainCourse, Beverage, Dessert all extend
-//                       FoodItem and inherit all its fields and methods.
-//   ✅ POLYMORPHISM   — getNutritionalInfo() is overridden in each
-//                       subclass to return different nutritional data.
-//                       fromLine() uses a factory pattern to create
-//                       the correct subclass at runtime.
-//
-// CRUD OPERATIONS COVERED (via FoodItemService + MenuController):
-//   CREATE — Admin adds a new food item → written to food_items.txt
-//   READ   — Menu page reads food_items.txt, filters by category/search
-//   UPDATE — Admin edits food details → line is rewritten in file
-//   DELETE — Admin removes item → line deleted from food_items.txt
-//
-// FILE HANDLING:
-//   toFileLine()  — serializes to tilde-delimited string for file
-//   fromLine()    — factory method: reads file line, creates correct subclass
-// ============================================================
 
 public abstract class FoodItem {
 
-    // ── ENCAPSULATION: All fields private ─────────────────────────
+    
     private String id;
     private String name;
     private String description;
@@ -51,11 +21,11 @@ public abstract class FoodItem {
 
     public FoodItem() {}
 
-    // ── ABSTRACTION: Abstract methods define a contract ────────────
-    // Every subclass MUST implement these — but in their own way.
+   
+    // MUST implement these — but in their own way.
     // This is abstraction: hiding implementation, exposing only the interface.
-    public abstract String getNutritionalInfo(); // different per food type
-    public abstract String getFoodType();        // "MainCourse", "Beverage", "Dessert"
+    public abstract String getNutritionalInfo(); 
+    public abstract String getFoodType();       
 
     // ── FILE HANDLING: Serialize object → one tilde-delimited line ─
     // CRUD - CREATE/UPDATE: written to data/food_items.txt
@@ -70,10 +40,9 @@ public abstract class FoodItem {
                 clean(imageUrl), clean(createdAt), getFoodType());
     }
 
-    // ── FILE HANDLING + POLYMORPHISM: Factory method ───────────────
-    // CRUD - READ: reads a line from food_items.txt and returns the
-    // correct subclass (MainCourse / Beverage / Dessert) based on
-    // the type field — this is the Factory design pattern.
+    // ── FILE HANDLING + POLYMORPHISM: Factory method
+    // READ: reads a line from food_items.txt and returns the
+
     public static FoodItem fromLine(String line) {
         if (line == null || line.isBlank()) return null;
         String[] p = line.split("~", -1);
@@ -117,7 +86,7 @@ public abstract class FoodItem {
         try { return Integer.parseInt(s); } catch (Exception e) { return 0; }
     }
 
-    // ── ENCAPSULATION: Public Getters & Setters ────────────────────
+    // ENCAPSULATION
     public String  getId()               { return id; }
     public void    setId(String v)       { this.id = v; }
     public String  getName()             { return name; }
@@ -148,9 +117,7 @@ public abstract class FoodItem {
     public void    setPopular(boolean v) { this.popular = v; }
 }
 
-// ── INHERITANCE: Subclasses extend FoodItem ──────────────────────
-// Each subclass inherits all fields and methods from FoodItem,
-// and overrides the abstract methods with food-type specific behaviour.
+
 
 /**
  * MainCourse — INHERITANCE from FoodItem
