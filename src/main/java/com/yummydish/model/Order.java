@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-// CRUD OPERATIONS (via CartController + ApiController):
-//   CREATE — POST /api/order: new order written to data/orders.txt
-//   READ   — GET  /api/order/{id}: reads order from orders.txt
-//   UPDATE — driver/admin updates status; written back to orders.txt
-//   DELETE — POST /api/order/{id}/cancel: marks order CANCELLED
+
 
 
 public class Order {
