@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/driver")
 class DriverController {
     private final UserService userService;
-    private final FileStorageUtil fsu;
+    private final FileStorageUtil fsu; //abstraction
 
     @Autowired
     DriverController(UserService us, FileStorageUtil fsu) {
@@ -59,6 +59,7 @@ class DriverController {
         return "redirect:/driver/login";
     }
 
+    //driver read
     @GetMapping("/dashboard")
     public String dashboard(HttpSession s, Model m) {
         if (!isDriver(s)) return "redirect:/driver/login";
@@ -80,7 +81,7 @@ class DriverController {
         return "driver/dashboard";
     }
 
-    // Driver marks order as picked up (READY → HANDOVER)
+    // Driver marks order as picked up (READY → HANDOVER) driver update
     @PostMapping("/pickup/{orderId}")
     public String markPickedUp(@PathVariable String orderId, HttpSession s) throws IOException {
         if (!isDriver(s)) return "redirect:/driver/login";
@@ -88,7 +89,7 @@ class DriverController {
         if (line != null) {
             Order o = Order.fromLine(line);
             if (Order.READY.equals(o.getStatus())) {
-                updateOrderStatus(orderId, Order.HANDOVER);
+                updateOrderStatus(orderId, Order.HANDOVER); //hiding
             }
         }
         return "redirect:/driver/dashboard";
