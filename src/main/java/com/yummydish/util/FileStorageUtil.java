@@ -10,44 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 
-// ============================================================
-// FILE: FileStorageUtil.java
-// COMPONENT: C1 — User & Auth (shared utility used by ALL components)
-// MEMBER: Member 1
-// ============================================================
-//
-// PURPOSE:
-//   Central file I/O utility used by ALL 6 components instead of a
-//   database. Every read/write to .txt files goes through this class.
-//
-// OOP CONCEPTS DEMONSTRATED:
-//   ✅ ENCAPSULATION    — File paths are private fields, injected from
-//                         application.properties. No other class knows
-//                         the actual file paths directly.
-//   ✅ INFORMATION HIDING — All synchronization and file-locking logic
-//                           is hidden inside this utility. Other classes
-//                           just call readAll(), appendLine(), update(),
-//                           delete() — they don't know HOW it works.
-//
-// FILE HANDLING OPERATIONS (covers all CRUD):
-//   CREATE  → appendLine(file, line)    — adds new record to file
-//   READ    → readAll(file)             — returns all lines from file
-//             findById(file, id)        — finds one record by ID
-//             search(file, term)        — searches across all lines
-//   UPDATE  → update(file, id, newLine) — replaces matching line
-//   DELETE  → delete(file, id)          — removes matching line
-//
-// NOTE: synchronized keyword ensures thread-safe file access
-//       when multiple users submit orders or register simultaneously.
-// ============================================================
-
 @Component
 public class FileStorageUtil {
 
     // BCrypt encoder for password hashing — security best practice
     private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
-    // ── ENCAPSULATION: File paths injected from application.properties ─
+    // ENCAPSULATION: File paths injected from application.properties 
     // Other classes never hardcode file paths — only use getter methods
     @Value("${app.data.dir:data}")                   private String dataDir;
     @Value("${app.data.users:data/users.txt}")                   private String usersFile;
@@ -88,7 +57,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── FILE HANDLING: READ — reads all non-blank lines from a file ─
+    //  FILE HANDLING: READ — reads all non-blank lines from a file 
     // synchronized = only one thread can read at a time (thread safety)
     public synchronized List<String> readAll(String file) {
         List<String> lines = new ArrayList<>();
@@ -102,14 +71,14 @@ public class FileStorageUtil {
         return lines;
     }
 
-    // ── FILE HANDLING: READ — finds one record by its ID (first field) ─
+    // FILE HANDLING: READ — finds one record by its ID (first field) ─
     public String findById(String file, String id) {
         for (String l : readAll(file))
             if (firstField(l).equals(id)) return l;
         return null;
     }
 
-    // ── FILE HANDLING: READ — full text search across all lines ───
+    //  FILE HANDLING: READ — full text search across all lines 
     public List<String> search(String file, String term) {
         List<String> r = new ArrayList<>();
         String low = term.toLowerCase();
@@ -118,7 +87,7 @@ public class FileStorageUtil {
         return r;
     }
 
-    // ── FILE HANDLING: CREATE — appends one new record line to file ─
+    //  FILE HANDLING: CREATE — appends one new record line to file 
     // synchronized = only one thread can write at a time (prevents data corruption)
     public synchronized void appendLine(String file, String line) throws IOException {
         Path p = Paths.get(file);
@@ -130,7 +99,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── FILE HANDLING: UPDATE — finds record by ID, replaces its line ─
+    //  FILE HANDLING: UPDATE — finds record by ID, replaces its line 
     public synchronized boolean update(String file, String id, String newLine) throws IOException {
         List<String> lines = readAll(file);
         boolean found = false;
@@ -147,7 +116,7 @@ public class FileStorageUtil {
         return found;
     }
 
-    // ── FILE HANDLING: DELETE — finds record by ID, removes its line ─
+    //  FILE HANDLING: DELETE — finds record by ID, removes its line 
     public synchronized boolean delete(String file, String id) throws IOException {
         List<String> lines = readAll(file);
         int before = lines.size();
@@ -174,7 +143,7 @@ public class FileStorageUtil {
         }
     }
 
-    // ── ENCAPSULATION: Getters for file paths ─────────────────────
+    //  ENCAPSULATION: Getters for file paths
     // Other classes access file paths only through these methods
     public String getUsersFile()           { return usersFile; }
     public String getFoodItemsFile()       { return foodItemsFile; }
