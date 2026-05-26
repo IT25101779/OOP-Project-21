@@ -88,9 +88,7 @@ class ApiController {
                 : foodService.getByCategory(category);
         }
 
-        // ── QuickSort: sort by price when requested ────────────────────────
-        // Uses custom QuickSort implementation (O(n log n) average-case)
-        // instead of Java's built-in sort — see com.yummydish.util.QuickSort
+       
         if ("price_asc".equals(sort)) {
             com.yummydish.util.QuickSort.sortByPriceAscending(items);
         } else if ("price_desc".equals(sort)) {
@@ -121,7 +119,6 @@ class ApiController {
     }
 
 
-      // GET /api/queue/status — returns current OrderQueue state for admin dashboard
 
     @GetMapping("/queue/status")
     public ResponseEntity<?> queueStatus(HttpSession s) {
@@ -158,19 +155,16 @@ class ApiController {
             Order o = buildOrder(body, u);
             fsu.appendLine(fsu.getOrdersFile(), o.toFileLine());
 
-            //  OrderQueue: enqueue new STANDARD orders for FIFO processing
-            // Scheduled orders are queued when their scheduled time arrives,
+           
             if (!"SCHEDULED".equals(o.getOrderType())) {
                 orderQueue.enqueue(o);
                 System.out.println("[OrderQueue] Enqueued order " + o.getOrderId()
                     + " | Queue depth: " + orderQueue.size());
             }
 
-            // For scheduled orders, also write to scheduled_orders.txt
             if ("SCHEDULED".equals(o.getOrderType()) && o.getScheduledFor() != null && !o.getScheduledFor().isEmpty()) {
                 fsu.appendLine(fsu.getScheduledOrdersFile(), o.toFileLine());
             }
-            // Award loyalty points to user
             try {
                 User usr = userService.findById(u.getId());
                 if (usr != null) {
