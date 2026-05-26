@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * UserService — CRUD operations for User accounts.
- * OOP: Encapsulation (private fields, service layer hides storage details)
- * CREATE: register()   READ: findByEmail(), findById(), getAllCustomers()
- * UPDATE: update(), changePassword()   DELETE: delete()
- */
+
 @Service
 public class UserService {
 
