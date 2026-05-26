@@ -3,14 +3,6 @@ package com.yummydish.model;
 import java.util.ArrayList;
 import java.util.List;
 
-
-// CRUD OPERATIONS (via CartController + ApiController):
-//   CREATE — POST /api/order: new order written to data/orders.txt
-//   READ   — GET  /api/order/{id}: reads order from orders.txt
-//   UPDATE — driver/admin updates status; written back to orders.txt
-//   DELETE — POST /api/order/{id}/cancel: marks order CANCELLED
-
-
 public class Order {
 
     //  Order status constants
@@ -64,7 +56,7 @@ public class Order {
         loyaltyPoints = (int)(subtotal / 10); // 1 point per LKR 10 spent
     }
 
-    // INFORMATION HIDING: Status display logic hidden from JSP layer
+    // INFORMATION HIDING: Status display logic hidden from JSP layer - polymorphism
     public String getStatusBadge() {
         if (status == null) return "Pending ⏳";
         switch (status) {
