@@ -1,41 +1,11 @@
 package com.yummydish.model;
 
-// ============================================================
-// FILE: User.java
-// COMPONENT: C1 — User & Authentication Management
-// MEMBER: Member 1
-// ============================================================
-//
-// OOP CONCEPTS DEMONSTRATED:
-//   ✅ ENCAPSULATION  — All fields are private; accessed only via
-//                       public getters and setters.
-//   ✅ POLYMORPHISM   — getDashboardUrl() returns a different URL
-//                       depending on the user's role at runtime
-//                       (ADMIN → /admin/dashboard, DRIVER → /driver,
-//                        CUSTOMER → /menu).
-//   ✅ INFORMATION HIDING — passwordHash and cardNumber are never
-//                           exposed raw; getMaskedCard() hides digits.
-//
-// CRUD OPERATIONS COVERED (via UserService + AuthController):
-//   CREATE — registerUser() stores a new User to users.txt
-//   READ   — findByEmail() reads and verifies credentials on login
-//   UPDATE — updateProfile(), changePassword() rewrites the user line
-//   DELETE — deleteAccount() removes the user line from users.txt
-//
-// FILE HANDLING:
-//   toFileLine()  — serializes this object to a pipe-delimited string
-//                   written to data/users.txt
-//   fromLine()    — deserializes a pipe-delimited line back to a User
-// ============================================================
-
 public class User {
 
-    // ── ENCAPSULATION: All fields private ─────────────────────────
-    // They can only be read or changed through getters/setters below.
     private String id;
     private String name;
     private String email;
-    private String passwordHash;   // never stored as plain text
+    private String passwordHash;   
     private String phone;
     private String address;
     private String role;           // "CUSTOMER" | "ADMIN" | "DRIVER"
@@ -50,16 +20,14 @@ public class User {
     public User() {}
 
     // ── POLYMORPHISM: same method, different return value per role ─
-    // At runtime, Java calls this method on the actual object type and
-    // each role returns a different dashboard URL — this is runtime
-    // polymorphism (method overriding behaviour via role field).
+   
     public String getDashboardUrl() {
         if ("ADMIN".equals(role))  return "/admin/dashboard";
         if ("DRIVER".equals(role)) return "/driver";
         return "/menu";   // default: CUSTOMER
     }
 
-    // ── INFORMATION HIDING: card details are never fully exposed ───
+    
     public boolean hasCard() {
         return cardNumber != null && !cardNumber.isBlank();
     }
@@ -71,8 +39,6 @@ public class User {
         return "**** **** **** " + c.substring(Math.max(0, c.length() - 4));
     }
 
-    // ── FILE HANDLING: Serialize object → one line in users.txt ───
-    // CRUD - CREATE/UPDATE: this string is written to data/users.txt
     public String toFileLine() {
         return String.join("|",
                 safe(id), safe(name), safe(email), safe(passwordHash),
@@ -111,8 +77,7 @@ public class User {
         return (v != null) ? v.replace("|", "").replace("\n", " ") : "";
     }
 
-    // ── ENCAPSULATION: Public Getters & Setters ────────────────────
-    // Controlled access to private fields — core encapsulation principle
+   
     public String getId()                    { return id; }
     public void   setId(String v)            { this.id = v; }
     public String getName()                  { return name; }
