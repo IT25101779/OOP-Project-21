@@ -19,7 +19,7 @@ public class User {
     // Default constructor required for object creation
     public User() {}
 
-    // ── POLYMORPHISM: same method, different return value per role ─
+    // POLYMORPHISM: same method, different return value per role
    
     public String getDashboardUrl() {
         if ("ADMIN".equals(role))  return "/admin/dashboard";
@@ -47,7 +47,7 @@ public class User {
                 safe(profilePicUrl), String.valueOf(loyaltyPoints));
     }
 
-    // ── FILE HANDLING: Deserialize one line from users.txt → object ─
+    // FILE HANDLING: Deserialize one line from users.txt → object 
     // CRUD - READ: called when reading users.txt to load user data
     public static User fromLine(String line) {
         if (line == null || line.isBlank()) return null;
