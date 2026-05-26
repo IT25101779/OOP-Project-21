@@ -13,12 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * UserService — CRUD operations for User accounts.
- * OOP: Encapsulation (private fields, service layer hides storage details)
- * CREATE: register()   READ: findByEmail(), findById(), getAllCustomers()
- * UPDATE: update(), changePassword()   DELETE: delete()
- */
 @Service
 public class UserService {
 
@@ -32,7 +26,7 @@ public class UserService {
         this.fileStorage = fileStorage;
     }
 
-    // ── CREATE ─────────────────────────────────────────────────────
+    //  CREATE 
     public User register(String name, String email, String rawPassword,
                          String phone, String address,
                          String cardNumber, String cardHolder, String cardExpiry)
@@ -56,7 +50,7 @@ public class UserService {
         return u;
     }
 
-    // ── READ ───────────────────────────────────────────────────────
+    // READ
     public User findByEmail(String email) {
         if (email == null || email.isBlank()) return null;
         for (String line : fileStorage.readAll(fileStorage.getUsersFile())) {
@@ -107,7 +101,7 @@ public class UserService {
         return u;
     }
 
-    // ── UPDATE ─────────────────────────────────────────────────────
+    //  UPDATE
     public boolean update(String userId, String name, String phone, String address,
                           String cardNumber, String cardHolder, String cardExpiry)
             throws IOException {
@@ -129,7 +123,7 @@ public class UserService {
         return fileStorage.update(fileStorage.getUsersFile(), userId, u.toFileLine());
     }
 
-    /** Polymorphism: overloaded update — changes only password after verification */
+    
     public boolean changePassword(String userId, String currentRaw, String newRaw) throws IOException {
         User u = findById(userId);
         if (u == null) return false;
@@ -138,12 +132,12 @@ public class UserService {
         return fileStorage.update(fileStorage.getUsersFile(), userId, u.toFileLine());
     }
 
-    // ── DELETE ─────────────────────────────────────────────────────
+    //  DELETE 
     public boolean delete(String userId) throws IOException {
         return fileStorage.delete(fileStorage.getUsersFile(), userId);
     }
 
-    // ── AUTH ───────────────────────────────────────────────────────
+    // AUTH 
     public User authenticate(String email, String rawPassword) {
         User u = findByEmail(email);
         if (u == null) return null;
